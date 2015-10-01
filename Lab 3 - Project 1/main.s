@@ -169,17 +169,23 @@ Clock
 		SUB R0, R0, #1					; Reduce the LED count by 0
 		
 LED
+		PUSH R0
+		
 		; Write the data to GPIO_PORTA
-		LDR R5, =GPIO_PORTA
-		MOV R6, R0, LSL #2				; Shift left 2x so 6 LSB aligns with pins A2-7
-		STR R6, [R5, #0x03FC]
+		LDR R0, =GPIO_PORTA
+		MOVN R8, R7, LSL #2				; Shift left 2x so 6 LSB aligns with pins A2-7
+		STR R8, [R0, #0x03FC]
 		
 		; Write the data to GPIO_PORTB
-		LDR R5, =GPIO_PORTB
-		MOV R6, R0, LSR #6				; Shift right 6x so 4 MSB aligns with pins B0-3
-		STR R6, [R5, #0x03FC]
+		LDR R0, =GPIO_PORTB
+		MOVN R8, R7, LSR #6				; Shift right 6x so 4 MSB aligns with pins B0-3
+		STR R8, [R0, #0x03FC]
 		
-		B Program
+		POP R0
+		BX LR
+		
+		
+GAME_OVER
 		
 	ALIGN
 	END
