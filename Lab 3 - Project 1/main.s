@@ -97,76 +97,8 @@ Start
 	; R7+ stores temporary values and calculations
 		
 Program
-		; Check state of buttons
-		LDR R5, =GPIO_PORTF
-		LDR R6, [R5, #0x03FC]			; Fetch the data from port F
-		AND R6, #0x15					; Ignore LED state in decisions with buttons
-		CMP R3, R6						; Compare it with the button state we have stored
-		BNE Buttons						; Set the timer and update R3 if they are different
 		
-		; If the timer is not yet to zero, jump to the clock, otherwise act on button input
-		CMP R2, #0
-		SUBNE R2, R2, #1
-		BNE Clock
 		
-		; Check valid button states
-		CMP R3, #0x05
-		BEQ ClkStart
-		
-		CMP R3, #0x14
-		BEQ ClkStop
-		
-		CMP R3, #0x11
-		BNE Clock
-		
-ClkReset
-		MOV R0, #0x400
-		B LED
-ClkStop
-		MOV R4, #0
-		
-		LDR R5, =BAND_DATAF
-		
-		; Turn Green Light Off - Pin 3
-		MOV R6, #0
-		STR R6, [R5, #12]				; Band Address + 4*3 (bit accessed)
-		
-		; Turn Red Light On - Pin 1
-		MOV R6, #1
-		STR R6, [R5, #4]				; Band Address + 4*1 (bit accessed)
-		
-		B Program
-ClkStart
-		MOV R4, #1
-		
-		LDR R5, =BAND_DATAF
-		
-		; Turn Green Light On - Pin 3
-		MOV R6, #1
-		STR R6, [R5, #12]				; Band Address + 4*3 (bit accessed)
-		
-		; Turn Red Light Off - Pin 1
-		MOV R6, #0
-		STR R6, [R5, #4]				; Band Address + 4*1 (bit accessed)
-		
-		B Clock
-	
-Buttons
-		MOV R3, R6
-		LDR R2, =PCMS_001
-		
-Clock
-		CMP R4, #1						; Exit out if clock is disabled
-		BNE Program
-		
-		SUBS R1, R1, #1					; Reduce the LED timer
-		BNE Program
-		
-		CMP R0, #0						; Check for overflow
-		MOVEQ R0, #0x400				; Reset the LED Clock
-		LDR R1, =PCMS_500				; Reset the LED Timer
-		
-		SUB R0, R0, #1					; Reduce the LED count by 0
 		
 LED
 		; Write the data to GPIO_PORTA
