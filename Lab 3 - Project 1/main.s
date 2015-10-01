@@ -22,16 +22,12 @@ BAND_DATAF		EQU 0x424A7F80			; 0x4200000 + 0x253FC * 32
 ;LOCK_R_OFF		EQU 0x0520
 ;CR_R_OFF		EQU 0x0524
 
-;LED_MAX		EQU 0x03FF				; 10 bits of 1's is the max value you can store on the LED
-PCMS_500		EQU 0x00053FD4			; Program cycles for 1/2 second (used to time our LED clock)
-PCMS_001		EQU 0x0000FFFF			; Program cycles for approx. 1ms (used to time our button presses)
-
 Start
 	; Enable ports A, B, and F
 	; A[2-7] and B[0-3] correspond to the 10 LEDS
-	; F0 is SW2 (right) -> Stop counter
-	; F2 is external 	-> Reset counter (disable alternate functionality)
-	; F4 is SW1 (left)	-> Start counter
+	; B[4-7] corresponds to the speed DIP switch
+	; F0 is SW2 (right) -> Player 2
+	; F4 is SW1 (left)	-> Player 2
 	
 		; Turn on the clock
 		LDR R0, =GPIO_CLOCK
@@ -46,39 +42,24 @@ Start
 		LDR R0, =GPIO_PORTF
 		STR R2, [R0, #0x520]			; Unlock Port F
 		
-		;MOV R1, #0x15					; Configure pins 0, 2, and 4
-		;STR R1, [R0, #0x524]			; Set CR to limit which bits are modified on write
-		;STR R1, [R0, #0x510]			; Set Pull-Up Select
-		;STR R1, [R0, #0x51C]			; Set Digital Enable
-		
-		;MOV R1, #0
-		;STR R1, [R0, #0x400]			; Configure pins as input
-		
-		;MOV R1, #0x15					; We only want to disable pin 2's alternate functionality
-		;STR R1, [R0, #0x420]			; Disable Alternate Functionality
-		
-		
 		MOV R1, #0x1F					; Configure pins 0-4
 		STR R1, [R0, #0x524]			; Set CR to limit which bits are modified on write
 		STR R1, [R0, #0x510]			; Set Pull-Up Select
 		STR R1, [R0, #0x51C]			; Set Digital Enable
-		
-		MOV R1, #0x0A
-		STR R1, [R0, #0x400]			; Configure pins as input/output
-		
-		;MOV R1, #0x15					; We only want to disable pin 2's alternate functionality
-		;STR R1, [R0, #0x420]			; Disable Alternate Functionality
+		STR R1, [R0, #0x400]			; Configure pins as input
 		
 		
 		; Port B
 		LDR R0, =GPIO_PORTB				; Unlock Port B
 		STR R2, [R0, #0x520]
 		
-		MOV R1, #0x0F					; We are configuring only the last 4 bits of Port B
+		MOV R1, #0xFF					; We are configuring only the last 4 bits of Port B
 		STR R1, [R0, #0x524]			; Set CR to limit which bits are modified on write
-		STR R1, [R0,#0x400]				; Configure pins as output
-		STR R1, [R0, #0x510]			; Set Pull-Up Select
 		STR R1, [R0,#0x51C]				; Set Digital Enable
+		
+		MOV R1, #0x0F					; Configure the output pins
+		STR R1, [R0,#0x400]				; Configure pins as input/output
+		STR R1, [R0, #0x510]			; Set Pull-Up Select
 		
 		MOV R1, #0						; Configure features we want diabled
 		STR R1, [R0,#0x420]				; Disable Alternate Functionality
@@ -98,19 +79,22 @@ Start
 		STR R1, [R0,#0x420]				; Disable Alternate Functionality
 		
 		
-	; Use R0 as the binary value for the counter
-	; Use R1 as a 2Hz counter
-	; Use R2 as a 1ms counter for buttons
-	; Use R3 to track the state of the LED clock
-	; Use R4 to store which button is being pressed (GPIO F)
-	; Use R5 to load the address of a port we are writing to or reading from
-	; Use R6 for calculations or as a temporary register
-		
-		MOV R0, #0						; Reset the clock
-		LDR R1, =PCMS_500				; Reset the clock timer
-		LDR R2, =PCMS_001				; Reset the button timer
-		MOV R3, #0x15					; Program starts with buttons off and green light on
-		B ClkStart						; Conveniently set the R3 and the LED to start with the clock on
+	; R0 stores a port address
+	; R1 tracks player 1
+	; R2 tracks player 2
+	; R3 stores player 1's speed
+	; R4 stores player 2's speed
+	; R5 stores the button state
+	; R6 stores state as enum {
+	;	0 => Inactive,
+	;	1 => Player 1 Ready,
+	;	2 => Player 2 Ready,
+	;	3 => Stand off
+	;	4 => Player 1 Advance,
+	;	5 => Player 2 Advance,
+	;	6 => Finish
+	;}
+	; R7+ stores temporary values and calculations
 		
 Program
 		; Check state of buttons
