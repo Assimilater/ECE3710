@@ -162,8 +162,11 @@ DELAY
 		
 GAME_OVER
 		
+		
 LED
+	; LED - Output a 10-bit value in R7 to LED on GPIO Ports A and B
 		PUSH {R0}
+		PUSH {R8}
 		
 		; Write the data to GPIO_PORTA
 		LDR R0, =GPIO_PORTA
@@ -175,6 +178,7 @@ LED
 		MVN R8, R7, LSR #6				; Shift right 6x so 4 MSB aligns with pins B0-3
 		STR R8, [R0, #0x03FC]
 		
+		POP {R8}
 		POP {R0}
 		BX LR
 		
