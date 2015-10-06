@@ -97,12 +97,11 @@ Start
 	; R7+ stores temporary values and calculations
 		
 Program
-	; Init Player Position and State
+		; Init Player Position and State
 		MOV R1, #0x20					;Binary 0010 0000 - Player 1 start place
 		MOV R2, #0x10					;Binary 0001 0000 - Player 2 start place
 		MOV R6, #0
 
-; Get Ready to Start
 Ready
 		; Sets R7 for "on" half of blinking
 		ORR R7, R1, R2
@@ -113,13 +112,10 @@ Ready
 		
 		; Sets R7 for the "off" half of the blinking
 		CMP R6, #0
-		IT EQ
 		MOVEQ R7, #0
 		CMP R6, #1
-		IT EQ
 		MOVEQ R7, R1
 		CMP R6, #2
-		IT EQ
 		MOVEQ R7, R2
 		BL LED
 		
@@ -131,48 +127,31 @@ Ready
 		
 GetSpeed
 		LDR R0, =GPIO_PORTB
-		LDR R4, [R0]					;Get speed values
+		LDR R4, [R0]					; Get speed values
 		
-		MOV R7, #0b11
-		AND R3, R7, R4, LSR #6			;put PB6 and 7 as Player 1 speed
-		AND R4, R7, R4, LSR #4			;put PB4 and 5 as Player 2 speed
+		MOV R7, #3						; Select 2 bits
+		AND R3, R7, R4, LSR #6			; put PB6 and 7 as Player 1 speed
+		AND R4, R7, R4, LSR #4			; put PB4 and 5 as Player 2 speed
 		
 		
 PushBack
 		; wait Random Time
 		
-		LSL R1
-		LSR R2
+		LSL R1, #1
+		LSR R2, #1
 		ORR R7, R1, R2
 		BL LED
 		
 Winner
 		ORR R7, R1, R2
 		BL LED
-		BL Delay.5
+		BL Delay5
 		MOV R7, #0
 		BL LED
-		BL Delay.5
+		BL Delay5
 		B Winner
 		
-LED
-		PUSH R0
-		
-		; Write the data to GPIO_PORTA
-		LDR R0, =GPIO_PORTA
-		MOVN R8, R7, LSL #2				; Shift left 2x so 6 LSB aligns with pins A2-7
-		STR R8, [R0, #0x03FC]
-		
-		; Write the data to GPIO_PORTB
-		LDR R0, =GPIO_PORTB
-		MOVN R8, R7, LSR #6				; Shift right 6x so 4 MSB aligns with pins B0-3
-		STR R8, [R0, #0x03FC]
-		
-		POP R0
-		BX LR
-		
-		
-Delay.5
+Delay5
 		MOV32 R12, #0X225510
 		B DELAY
 		
@@ -182,6 +161,22 @@ DELAY
 		BX  LR
 		
 GAME_OVER
+		
+LED
+		PUSH {R0}
+		
+		; Write the data to GPIO_PORTA
+		LDR R0, =GPIO_PORTA
+		MVN R8, R7, LSL #2				; Shift left 2x so 6 LSB aligns with pins A2-7
+		STR R8, [R0, #0x03FC]
+		
+		; Write the data to GPIO_PORTB
+		LDR R0, =GPIO_PORTB
+		MVN R8, R7, LSR #6				; Shift right 6x so 4 MSB aligns with pins B0-3
+		STR R8, [R0, #0x03FC]
+		
+		POP {R0}
+		BX LR
 		
 	ALIGN
 	END
