@@ -97,9 +97,34 @@ Start
 	; R7+ stores temporary values and calculations
 		
 Program
-		
-		
+;Init
+		MOV R1, #0x20	;Binary 0010 0000
+		MOV R2, #0x10	;Binary 0001 0000
+		MOV R6, #0
 
+;Ready to Start
+Ready
+		ORR R7, R1, R2
+		BL  LED
+		
+		;TIMER is needed to be used here
+		;Check for switch press
+		
+		;This sets R7 to 
+		CMP R6, #0
+		IT EQ
+		MOVEQ R7, #0
+		CMP R6, #1
+		IT EQ
+		MOVEQ R7, R1
+		CMP R6, #2
+		IT EQ
+		MOVEQ R7, R2
+		BL LED
+		
+		;Wait for TIMER again
+		B Ready
+		
 Winner
 		ORR R7, R1, R2
 		BL  LED
