@@ -99,6 +99,15 @@ Start
 Program
 		
 		
+
+Winner
+		ORR R7, R1, R2
+		BL LED
+		BL Delay.5
+		MOV R7, #0
+		BL LED
+		BL Delay.5
+		B Winner
 		
 LED
 		PUSH R0
