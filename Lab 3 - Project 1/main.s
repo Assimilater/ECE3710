@@ -125,6 +125,20 @@ Ready
 		;Wait for TIMER again
 		B Ready
 		
+GetSpeed
+		;Get PB
+		LDR R0, =GPIO_PORTB
+		LDR R3, [R0]			;Get speed values
+		
+		MOV R12, #3
+		AND R4, R12, R3, LSR #4	;put PB4 and 5 as Player 2 speed
+		AND R3, R12, R3, LSR #6	;put PB6 and 7 as Player 1 speed
+		
+
+		
+		
+		
+		
 Winner
 		ORR R7, R1, R2
 		BL  LED
