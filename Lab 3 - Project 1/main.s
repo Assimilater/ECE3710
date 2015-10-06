@@ -110,7 +110,7 @@ Ready
 		;TIMER is needed to be used here
 		;Check for switch press
 		
-		;This sets R7 to 
+		;This section sets R7 for the "off" part of the blinking
 		CMP R6, #0
 		IT EQ
 		MOVEQ R7, #0
