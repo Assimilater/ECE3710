@@ -98,8 +98,8 @@ Start
 		
 Program
 ;Init
-		MOV R1, #0x20	;Binary 0010 0000
-		MOV R2, #0x10	;Binary 0001 0000
+		MOV R1, #0x20	;Binary 0010 0000 - Player 1 start place
+		MOV R2, #0x10	;Binary 0001 0000 - Player 2 start place
 		MOV R6, #0
 
 ;Ready to Start
