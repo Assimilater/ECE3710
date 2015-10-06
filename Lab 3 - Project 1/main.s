@@ -146,6 +146,23 @@ PushBack
 		ORR R7, R1, R2
 		BL LED
 		
+		
+		LDR R0, =GPIO_PORTF
+SpeedDuel
+		LDR R7, [R0]
+		CMP R7, #0
+		BEQ SpeedDuel
+		
+		; Check if SW1 is pressed
+		CMP R7, #0x8
+		MOVEQ R6, #4
+		LSREQ R1, #1
+		
+		; Check if SW2 is pressed
+		CMP R7, #0x1
+		MOVEQ R6, #5
+		LSLEQ R2, #1
+
 Winner
 		ORR R7, R1, R2
 		BL LED
