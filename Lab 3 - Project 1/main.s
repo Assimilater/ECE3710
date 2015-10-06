@@ -97,20 +97,21 @@ Start
 	; R7+ stores temporary values and calculations
 		
 Program
-;Init
+;Init Player Position and State
 		MOV R1, #0x20	;Binary 0010 0000 - Player 1 start place
 		MOV R2, #0x10	;Binary 0001 0000 - Player 2 start place
 		MOV R6, #0
 
-;Ready to Start
+;Get Ready to Start
 Ready
+		;Sets R7 for "on" half of blinking
 		ORR R7, R1, R2
-		BL  LED
+		BL LED
 		
 		;TIMER is needed to be used here
 		;Check for switch press
 		
-		;This section sets R7 for the "off" part of the blinking
+		;Sets R7 for the "off" half of the blinking
 		CMP R6, #0
 		IT EQ
 		MOVEQ R7, #0
@@ -123,30 +124,38 @@ Ready
 		BL LED
 		
 		;Wait for TIMER again
-		B Ready
+		;Still check for switch presses
+		
+		CMP R6, #3
+		BNE Ready
 		
 GetSpeed
-		;Get PB
 		LDR R0, =GPIO_PORTB
 		LDR R3, [R0]			;Get speed values
 		
-		MOV R12, #3
+		MOV R12, #0b11
 		AND R4, R12, R3, LSR #4	;put PB4 and 5 as Player 2 speed
 		AND R3, R12, R3, LSR #6	;put PB6 and 7 as Player 1 speed
 		
-
 		
+PushBack
+		;wait Random Time
+		
+		LSL R1
+		LSR R2
+		ORR R7, R1, R2
+		BL LED
 		
 		
 		
 Winner
 		ORR R7, R1, R2
-		BL  LED
-		BL  Delay.5
+		BL LED
+		BL Delay.5
 		MOV R7, #0
-		BL  LED
-		BL  Delay.5
-		B   Winner
+		BL LED
+		BL Delay.5
+		B Winner
 		
 LED
 		PUSH R0
