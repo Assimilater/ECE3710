@@ -102,12 +102,12 @@ Program
 
 Winner
 		ORR R7, R1, R2
-		BL LED
-		BL Delay.5
+		BL  LED
+		BL  Delay.5
 		MOV R7, #0
-		BL LED
-		BL Delay.5
-		B Winner
+		BL  LED
+		BL  Delay.5
+		B   Winner
 		
 LED
 		PUSH R0
@@ -124,6 +124,15 @@ LED
 		
 		POP R0
 		BX LR
+		
+		
+Delay.5		
+		MOV32 R12, #0X225510
+		B DELAY
+		
+DELAY	SUBS R12, #1			;1 MACHINE CYCLE
+		BNE DELAY			;1 MC + 2 if the branch is taken
+		BX  LR
 		
 		
 GAME_OVER
