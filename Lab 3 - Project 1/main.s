@@ -89,6 +89,7 @@ Start
 	;	0 => No Advantage
 	;	1 => Player 1 Advantage,
 	;	2 => Player 2 Advantage,
+	;	3 => No Advancing
 	;}
 	; R6 is also used for blinking {
 	;	0 => Blink on
@@ -140,7 +141,7 @@ GetSpeed
 		MOV R7, #3						; Select 2 bits
 		AND R3, R7, R4, LSR #6			; put PB6 and 7 as Player 1 speed
 		AND R4, R7, R4, LSR #4			; put PB4 and 5 as Player 2 speed
-		
+		B PushBack
 		
 Player1
 		CMP R6, #1
@@ -148,18 +149,22 @@ Player1
 		LSR R1, #1						; Advance Player 1
 		
 		CMP R6, #2
-		BEQ Draw						; It's a draw if Player 2 had the advantage
+		BEQ Draw						; It's a draw if player 2 had the advantage
 		
-		MOV R6, #1
-		B LEDFlash
+		MOV R6, #1						; Flag player 1 with the advantage
+		B LEDUpdate
 		
 Player2
+		CMP R6, #2
+		BXEQ LR							; Exit out if player 2 already has advantage
+		LSL R2, #1						; Advance Player 2
 		
+		CMP R6, #1
+		BEQ Draw						; It's a draw if player 2 had the advantage
 		
-		B LEDFlash
+		MOV R6, #2						; Flag player 2 with the advantage
+		B LEDUpdate
 		
-Draw
-		ADD R8, #1
 		
 SpeedWin
 		CMP R6, #1						; It is assumed if R6 is not 1, it is 2
@@ -167,7 +172,10 @@ SpeedWin
 		LSREQ R1, #1
 		LSLNE R2, #1
 		
-		B LEDFlash
+		B LEDUpdate
+		
+Draw
+		ADD R8, #1
 		
 PushBack
 		; wait Random Time
@@ -176,7 +184,7 @@ PushBack
 		LSL R1, #1
 		LSR R2, #1
 		
-LEDFlash
+LEDUpdate
 		ORR R7, R1, R2
 		
 		PUSH {LR}
@@ -187,34 +195,26 @@ LEDFlash
 		
 Idle
 	; Idle - Where the majority of the program will be spent
-		
-		; Check expiration on 5ms button timer
-		CMP R0, R0
-		BNE IdleBtn
-		
 		; Sample buttons
+		LDR R0, =GPIO_PORTF
 		LDR R8, [R0]					; Get current state
 		
 		MVN R5, R5
 		AND R5, R8						; R5 = ~R5 * R8 (1 on rising edge in button state)
 		
-		LSRS R5, #1						; Check if player 1 pressed based on carry bit
+		LSRS R5, #1						; Check if player 2 pressed based on carry bit
 		BLHS Player2					; Branch if carry bit
 		
-		LSRS R5, #5						; Check if player 1 pressed based on carry bit
+		LSRS R5, #4						; Check if player 1 pressed based on carry bit
 		BLHS Player1					; Branch if carry bit
 		
 		MOV R5, R8						; Store current state for next cycle
-IdleBtn
+		
 		; Check expiration on speed timer
-		BNE Idle
-		BL SpeedWin
+		BEQ SpeedWin
 		B Idle
 		
 		
-		
-		
-		LDR R0, =GPIO_PORTF
 SpeedDuel
 		LDR R7, [R0]
 		CMP R7, #0
