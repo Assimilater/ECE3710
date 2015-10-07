@@ -85,7 +85,7 @@ Start
 		MOV R1, #0
 		STR R1, [R10, #0x10]			; Disable Systick while doing init
 		
-		LDR R1, =0xFFFFF				; Arbitrary value
+		LDR R1, =0x7A1200				; counts every 62.5us, .5 sec adds up to 0x7A1200
 		STR R1, [R10, #0x14]			; Set Reload register
 		STR R1, [R10, #0x18]			; Clear the Current register
 		
