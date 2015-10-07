@@ -44,7 +44,7 @@ Start
 		LDR R0, =GPIO_PORTF
 		STR R2, [R0, #0x520]			; Unlock Port F
 		
-		MOV R1, #0x1F					; Configure pins 0-4
+		MOV R1, #0x11					; Configure pins 0-4
 		STR R1, [R0, #0x524]			; Set CR to limit which bits are modified on write
 		STR R1, [R0, #0x510]			; Set Pull-Up Select
 		STR R1, [R0, #0x51C]			; Set Digital Enable
@@ -124,12 +124,12 @@ Program
 Begin
 		; Check buttons
 		LDR R7, [R0]					; Load from GPIO_PORTF
-		AND R10, R7, #0x10				; Get button for player 1
-		AND R11, R7, #0x01				; Get button for player 2
 		
-		CMP R10, #0
+		AND R11, R7, #0x10				; Get button for player 1
+		CMP R11, #0
 		ORRNE R9, R1
 		
+		AND R11, R7, #0x01				; Get button for player 2
 		CMP R11, #0
 		ORRNE R9, R2
 		
@@ -141,7 +141,9 @@ Begin
 		BL LED
 		
 		; If timer expiration
-		MVN R6, R6						; Alternate betwen blink on and off
+		LDR R12, [R10, #0x10]
+		ANDS R12, #0x10000
+		MVNEQ R6, R6					; Alternate betwen blink on and off
 		
 		; Loop until both players are ready (both are solid)
 		CMP R8, R9
