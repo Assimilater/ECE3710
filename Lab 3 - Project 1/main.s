@@ -81,16 +81,16 @@ Start
 		STR R1, [R0,#0x420]				; Disable Alternate Functionality
 		
 		;  SysTick
-		LDR R0, =SYSTICK
+		LDR R10, =SYSTICK
 		MOV R1, #0
-		STR R1, [R0, #0x10]				; Disable Systick while doing init
+		STR R1, [R10, #0x10]			; Disable Systick while doing init
 		
 		LDR R1, =0xFFFFF				; Arbitrary value
-		STR R1, [R0, #0x14]				; Set Reload register
-		STR R1, [R0, #0x18]				; Clear the Current register
+		STR R1, [R10, #0x14]			; Set Reload register
+		STR R1, [R10, #0x18]			; Clear the Current register
 		
 		MOV R1, #0x5
-		STR R1, [R0, #0x10]				; Enable SysTick and use core clock
+		STR R1, [R10, #0x10]			; Enable SysTick and use core clock
 		
 	; R0 stores a port address
 	; R1 tracks player 1
