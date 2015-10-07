@@ -90,6 +90,10 @@ Start
 	;	1 => Player 1 Advantage,
 	;	2 => Player 2 Advantage,
 	;}
+	; R6 is also used for blinking {
+	;	0 => Blink on
+	;	1 => Blink off
+	;}
 	; R7+ stores temporary values and calculations
 		
 Program
