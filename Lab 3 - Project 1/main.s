@@ -148,9 +148,11 @@ SpeedDuel
 		LDR R7, [R0]
 		CMP R7, #0
 		BEQ SpeedDuel
+		CMP R7, #0x11
+		BEQ SpeedDuel
 		
 		; Check if SW1 is pressed
-		CMP R7, #0x8
+		CMP R7, #0x10
 		MOVEQ R6, #4
 		LSREQ R1, #1
 		
