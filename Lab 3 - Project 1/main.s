@@ -13,7 +13,7 @@ GPIO_PORTA		EQU 0x40004000
 GPIO_PORTB		EQU 0x40005000
 GPIO_PORTF		EQU 0x40025000
 BAND_DATAF		EQU 0x424A7F80			; 0x4200000 + 0x253FC * 32
-	
+
 SYSTICK			EQU 0xE000E000
 
 ;DATA_R_OFF		EQU 0x03FC
@@ -84,9 +84,11 @@ Start
 		LDR R0, =SYSTICK
 		MOV R1, #0
 		STR R1, [R0, #0x10]				; Disable Systick while doing init
-		LDR R1, =0x7A1200				; counts every 62.5us, .5 sec adds up to 0x7A1200
+		
+		LDR R1, =0xFFFFF				; Arbitrary value
 		STR R1, [R0, #0x14]				; Set Reload register
 		STR R1, [R0, #0x18]				; Clear the Current register
+		
 		MOV R1, #0x5
 		STR R1, [R0, #0x10]				; Enable SysTick and use core clock
 		
@@ -194,7 +196,7 @@ PushBack
 		LSR R2, #1
 		
 		;
-		LDR R0 =SYSTYC
+		LDR R0, =SYSTICK
 		; Read value from SYSTYC
 		; Set RELOAD value on GPTimer
 		; Loop to wait for expiration on GPTimer
