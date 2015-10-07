@@ -13,6 +13,8 @@ GPIO_PORTA		EQU 0x40004000
 GPIO_PORTB		EQU 0x40005000
 GPIO_PORTF		EQU 0x40025000
 BAND_DATAF		EQU 0x424A7F80			; 0x4200000 + 0x253FC * 32
+	
+SYSTICK			EQU 0xE000E000
 
 ;DATA_R_OFF		EQU 0x03FC
 ;DIR_R_OFF		EQU 0x0400
@@ -78,6 +80,15 @@ Start
 		MOV R1, #0						; Configure features we want diabled
 		STR R1, [R0,#0x420]				; Disable Alternate Functionality
 		
+		;  SysTick
+		LDR R0, =SYSTICK
+		MOV R1, #0
+		STR R1, [R0, #0x10]				; Disable Systick while doing init
+		LDR R1, =0xFFFFF				; Arbitrary value
+		STR R1, [R0, #0x14]				; Set Reload register
+		STR R1, [R0, #0x18]				; Clear the Current register
+		MOV R1, #0x5
+		STR R1, [R0, #0x10]				; Enable SysTick and use core clock
 		
 	; R0 stores a port address
 	; R1 tracks player 1
