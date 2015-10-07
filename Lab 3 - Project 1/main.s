@@ -108,7 +108,7 @@ Program
 		
 		LDR R0, =GPIO_PORTF
 		
-ReadyWait
+Begin
 		; Check buttons
 		LDR R7, [R0]					; Load from GPIO_PORTF
 		AND R10, R7, #0x10				; Get button for player 1
@@ -132,7 +132,7 @@ ReadyWait
 		
 		; Loop until both players are ready (both are solid)
 		CMP R8, R9
-		BNE ReadyWait
+		BNE Begin
 		
 GetSpeed
 		LDR R0, =GPIO_PORTB
@@ -178,11 +178,16 @@ Draw
 		ADD R8, #1
 		
 PushBack
-		; wait Random Time
-		
 		; Retreat both players
 		LSL R1, #1
 		LSR R2, #1
+		
+		;
+		LDR R0 =SYSTYC
+		; Read value from SYSTYC
+		; Set RELOAD value on GPTimer
+		; Loop to wait for expiration on GPTimer
+		
 		
 LEDUpdate
 		ORR R7, R1, R2
