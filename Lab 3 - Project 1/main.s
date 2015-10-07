@@ -26,8 +26,8 @@ Start
 	; Enable ports A, B, and F
 	; A[2-7] and B[0-3] correspond to the 10 LEDS
 	; B[4-7] corresponds to the speed DIP switch
-	; F0 is SW2 (right) -> Player 2
-	; F4 is SW1 (left)	-> Player 2
+	; F0 is SW2 (right)	-> Player 2
+	; F4 is SW1 (left)	-> Player 1
 	
 		; Turn on the clock
 		LDR R0, =GPIO_CLOCK
@@ -85,30 +85,24 @@ Start
 	; R3 stores player 1's speed
 	; R4 stores player 2's speed
 	; R5 stores the button state
-	
-	; R6 stores state as enum {
-	;	0 => Inactive,
-	;	1 => Player 1 Ready,
-	;	2 => Player 2 Ready,
-	;	3 => Stand off
-	;	4 => Player 1 Advance,
-	;	5 => Player 2 Advance,
-	;	6 => Finish
+	; R6 stores the game state {
+	;	0 => No Advantage
+	;	1 => Player 1 Advantage,
+	;	2 => Player 2 Advantage,
 	;}
-	
 	; R7+ stores temporary values and calculations
 		
 Program
 		; Init Player Position and State
-		MOV R1, #0x20					;Binary 0010 0000 - Player 1 start place
-		MOV R2, #0x10					;Binary 0001 0000 - Player 2 start place
+		MOV R1, #0x20					;Binary 00 0010 0000 - Player 1 start place
+		MOV R2, #0x10					;Binary 00 0001 0000 - Player 2 start place
 		MOV R6, #0
 		
 		ORR R8, R1, R2					; R8 => On blink
 		MOV R9, #0						; R9 => Off blink
 		
 		LDR R0, =GPIO_PORTF
-
+		
 ReadyWait
 		; Check buttons
 		LDR R7, [R0]					; Load from GPIO_PORTF
@@ -144,13 +138,76 @@ GetSpeed
 		AND R4, R7, R4, LSR #4			; put PB4 and 5 as Player 2 speed
 		
 		
+Player1
+		CMP R6, #1
+		BXEQ LR							; Exit out if player 1 already has advantage
+		LSR R1, #1						; Advance Player 1
+		
+		CMP R6, #2
+		BEQ Draw						; It's a draw if Player 2 had the advantage
+		
+		MOV R6, #1
+		B LEDFlash
+		
+Player2
+		
+		
+		B LEDFlash
+		
+Draw
+		ADD R8, #1
+		
+SpeedWin
+		CMP R6, #1						; It is assumed if R6 is not 1, it is 2
+		ITE EQ
+		LSREQ R1, #1
+		LSLNE R2, #1
+		
+		B LEDFlash
+		
 PushBack
 		; wait Random Time
 		
+		; Retreat both players
 		LSL R1, #1
 		LSR R2, #1
+		
+LEDFlash
 		ORR R7, R1, R2
+		
+		PUSH {LR}
 		BL LED
+		POP {LR}
+		
+		BX LR
+		
+Idle
+	; Idle - Where the majority of the program will be spent
+		
+		; Check expiration on 5ms button timer
+		CMP R0, R0
+		BNE IdleBtn
+		
+		; Sample buttons
+		LDR R8, [R0]					; Get current state
+		
+		MVN R5, R5
+		AND R5, R8						; R5 = ~R5 * R8 (1 on rising edge in button state)
+		
+		LSRS R5, #1						; Check if player 1 pressed based on carry bit
+		BLHS Player2					; Branch if carry bit
+		
+		LSRS R5, #5						; Check if player 1 pressed based on carry bit
+		BLHS Player1					; Branch if carry bit
+		
+		MOV R5, R8						; Store current state for next cycle
+IdleBtn
+		; Check expiration on speed timer
+		BNE Idle
+		BL SpeedWin
+		B Idle
+		
+		
 		
 		
 		LDR R0, =GPIO_PORTF
@@ -170,7 +227,7 @@ SpeedDuel
 		CMP R7, #0x1
 		MOVEQ R6, #5
 		LSLEQ R2, #1
-
+		
 Winner
 		ORR R7, R1, R2
 		BL LED
