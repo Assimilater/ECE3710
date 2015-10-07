@@ -85,6 +85,7 @@ Start
 	; R3 stores player 1's speed
 	; R4 stores player 2's speed
 	; R5 stores the button state
+	
 	; R6 stores state as enum {
 	;	0 => Inactive,
 	;	1 => Player 1 Ready,
@@ -94,6 +95,7 @@ Start
 	;	5 => Player 2 Advance,
 	;	6 => Finish
 	;}
+	
 	; R7+ stores temporary values and calculations
 		
 Program
@@ -101,29 +103,37 @@ Program
 		MOV R1, #0x20					;Binary 0010 0000 - Player 1 start place
 		MOV R2, #0x10					;Binary 0001 0000 - Player 2 start place
 		MOV R6, #0
+		
+		ORR R8, R1, R2					; R8 => On blink
+		MOV R9, #0						; R9 => Off blink
+		
+		LDR R0, =GPIO_PORTF
 
-Ready
-		; Sets R7 for "on" half of blinking
-		ORR R7, R1, R2
-		BL LED
+ReadyWait
+		; Check buttons
+		LDR R7, [R0]					; Load from GPIO_PORTF
+		AND R10, R7, #0x10				; Get button for player 1
+		AND R11, R7, #0x01				; Get button for player 2
 		
-		; TIMER is needed to be used here
-		; Check for switch press
+		CMP R10, #0
+		ORRNE R9, R1
 		
-		; Sets R7 for the "off" half of the blinking
+		CMP R11, #0
+		ORRNE R9, R2
+		
+		; Select which blink we want
 		CMP R6, #0
-		MOVEQ R7, #0
-		CMP R6, #1
-		MOVEQ R7, R1
-		CMP R6, #2
-		MOVEQ R7, R2
+		ITE EQ
+		MOVEQ R7, R8
+		MOVNE R7, R9
 		BL LED
 		
-		; Wait for TIMER again
-		; Still check for switch presses
+		; If timer expiration
+		MVN R6, R6						; Alternate betwen blink on and off
 		
-		CMP R6, #3
-		BNE Ready
+		; Loop until both players are ready (both are solid)
+		CMP R8, R9
+		BNE ReadyWait
 		
 GetSpeed
 		LDR R0, =GPIO_PORTB
