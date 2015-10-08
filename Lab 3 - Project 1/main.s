@@ -128,6 +128,8 @@ Start
 	;	1 => Blink off
 	;}
 	; R7+ stores temporary values and calculations
+	; R7 is usually a pass/return value for linked branches (similar to %eax)
+	; R12 usually stores the draw count
 		
 Program
 		; Init Player Position and State
@@ -143,13 +145,13 @@ Program
 		
 Begin
 		; Check buttons
-		LDR R7, [R0, #0x03FC]			; Load from GPIO_PORTF
+		LDR R3, [R0, #0x03FC]			; Load from GPIO_PORTF
 		
-		AND R11, R7, #0x08				; Get button for player 1
+		AND R11, R3, #0x08				; Get button for player 1
 		CMP R11, #0
 		ORRNE R9, R1
 		
-		AND R11, R7, #0x04				; Get button for player 2
+		AND R11, R3, #0x04				; Get button for player 2
 		CMP R11, #0
 		ORRNE R9, R2
 		
@@ -176,6 +178,22 @@ GetSpeed
 		MOV R7, #3						; Select 2 bits
 		AND R3, R7, R4, LSR #6			; put PB6 and 7 as Player 1 speed
 		AND R4, R7, R4, LSR #4			; put PB4 and 5 as Player 2 speed
+		
+		; Caclulate 320 - 80Sn up front
+		MOV R7, #80
+		MUL R3, R7
+		MUL R4, R7
+		
+		MOV R7, #320
+		SUB R3, R7, R3
+		SUB R4, R7, R4
+		
+		; Convert to ms
+		MOV R7, #0x3E80
+		MUL R3, R7
+		MUL R4, R7
+		
+		; Start the battle
 		BL PushBack
 		
 Idle
@@ -187,10 +205,10 @@ Idle
 		MVN R5, R5
 		AND R5, R8						; R5 = ~R5 * R8 (1 on rising edge in button state)
 		
-		LSRS R5, #2						; Check if player 2 pressed based on carry bit
+		LSRS R5, #3						; Check if player 2 pressed based on carry bit
 		BLHS Player2					; Branch if carry bit
 		
-		LSRS R5, #2						; Check if player 1 pressed based on carry bit
+		LSRS R5, #1						; Check if player 1 pressed based on carry bit
 		BLHS Player1					; Branch if carry bit
 		
 		MOV R5, R8						; Store current state for next cycle
@@ -211,6 +229,10 @@ Player1
 		BEQ Draw						; It's a draw if player 2 had the advantage
 		
 		; Set Timer A to speed based countdown and start
+		MOV R7, R3, LSR R12
+		PUSH {LR}
+		BL VariableTimer
+		POP {LR}
 		
 		MOV R6, #1						; Flag player 1 with the advantage
 		B LEDUpdate
@@ -224,12 +246,23 @@ Player2
 		BEQ Draw						; It's a draw if player 2 had the advantage
 		
 		; Set Timer A to speed based countdown and start
+		MOV R7, R4, LSR R12
+		PUSH {LR}
+		BL VariableTimer
+		POP {LR}
 		
 		MOV R6, #2						; Flag player 2 with the advantage
 		B LEDUpdate
 		
-		
 SpeedWin
+		; Clear timer expiration flag
+		MOV R10, #1
+		STR R10, [R0, #0x24]
+		
+		; Clear the draw counter
+		MOV R12, #0
+		
+		; Advance the winner again
 		CMP R6, #1						; It is assumed if R6 is not 1, it is 2
 		ITE EQ
 		LSREQ R1, #1
@@ -248,33 +281,37 @@ SpeedWin
 		
 Draw
 		POP {LR}
-		ADD R8, #1
-		BL PushBack
+		MOV R6, #3						; Flag that neither player can advance right now
+		BL LEDUpdate
+		
+		CMP R12, #4
+		ADDNE R12, #1					; Increment the draw counter if not maxed
+		BL PushBack						; Start the next fight
 		B Idle
 		
 PushBack
-		PUSH {R0}						; Preserver R0
+		PUSH {LR, R0}					; Preserved values
 		LDR R0, =SYSTICK
-		LDR R11, =0x7A12000				; 1 Second
-		LDR R12, [R0, #0x18]			; Read value from SYSTYC (0-0.5s)
-		ADD R11, R12, LSL #1			; x2 to get a random number between 0-1 s and add 1s
+		LDR R7, =0XF42400				; 1 Second
+		LDR R10, [R0, #0x18]			; Read value from SYSTYC (0-0.5s)
+		ADD R7, R10, LSL #1				; x2 to get a random number between 0-1 s and add 1s
+		BL VariableTimer
 		
 		LDR R0, =GPTM0
-		STR R11, [R0, #0x28]			; Set RELOAD value on GPTimer
-		MOV R12, #1
-		STR R12, [R0, #0xC]
-		
 PushWait
 		; Loop to wait for expiration on GPTimer
-		LDR R12, [R0, #0x1C]
-		ANDS R12, #0x1
+		LDR R10, [R0, #0x1C]
+		ANDS R10, #0x1
 		BEQ PushWait
 		
 		; Clear timer expiration flag
-		MOV R12, #1
-		STR R12, [R0, #0x24]
+		MOV R10, #1
+		STR R10, [R0, #0x24]
 		
-		POP {R0}						; Restore R0
+		POP {LR, R0}					; Restore preserved values
+		
+		MOV R5, #0xC					; Prevent player from cheating by holding down button
+		MOV R6, #0
 		
 		; Retreat both players
 		LSL R1, #1
@@ -289,41 +326,16 @@ LEDUpdate
 		
 		BX LR
 		
-GAME_OVER
-		ORR R7, R1, R2
-		BL LED
-		BL Delay5
-		MOV R7, #0
-		BL LED
-		BL Delay5
-		B GAME_OVER
+VariableTimer
+	; Set GPTM0's reload to R7's value and start the timer
+		PUSH {R0, R8}
+		LDR R0, =GPTM0
+		STR R7, [R0, #0x28]			; Set RELOAD value on GPTimer
 		
-;SpeedDuel
-		;LDR R7, [R0, #0x03FC]
-		;CMP R7, #0
-		;BEQ SpeedDuel
-		;CMP R7, #0x11
-		;BEQ SpeedDuel
-		
-		;; Check if SW1 is pressed
-		;CMP R7, #0x10
-		;MOVEQ R6, #4
-		;LSREQ R1, #1
-		
-		;; Check if SW2 is pressed
-		;CMP R7, #0x1
-		;MOVEQ R6, #5
-		;LSLEQ R2, #1
-		
-Delay5
-		MOV32 R12, #0X225510
-		B DELAY
-		
-DELAY
-		SUBS R12, #1				; 1 MACHINE CYCLE
-		BNE DELAY					; 1 MC + 2 if the branch is taken
-		BX  LR
-		
+		MOV R8, #1
+		STR R8, [R0, #0xC]			; Start the timer
+		POP {R0, R8}
+		BX LR
 		
 LED
 	; LED - Output a 10-bit value in R7 to LED on GPIO Ports A and B
@@ -343,6 +355,21 @@ LED
 		POP {R8}
 		POP {R0}
 		BX LR
+		
+GAME_OVER
+		LDR R0, =SYSTICK
+		ORR R8, R1, R2
+		MOV R7, #0
+Final
+		; If timer expiration
+		LDR R9, [R0, #0x10]
+		ANDS R9, #0x10000
+		BEQ Final
+		
+		EOR R7, R8
+		BL LED
+		
+		B Final
 		
 	ALIGN
 	END
