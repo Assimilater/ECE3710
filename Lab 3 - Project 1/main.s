@@ -182,7 +182,7 @@ GetSpeed
 Player1
 		CMP R6, #1
 		BXEQ LR							; Exit out if player 1 already has advantage
-		LSL R1, #1						; Advance Player 1
+		LSR R1, #1						; Advance Player 1
 		
 		CMP R6, #2
 		BEQ Draw						; It's a draw if player 2 had the advantage
@@ -195,7 +195,7 @@ Player1
 Player2
 		CMP R6, #2
 		BXEQ LR							; Exit out if player 2 already has advantage
-		LSR R2, #1						; Advance Player 2
+		LSL R2, #1						; Advance Player 2
 		
 		CMP R6, #1
 		BEQ Draw						; It's a draw if player 2 had the advantage
@@ -247,8 +247,8 @@ PushWait
 		POP {R0}						; Restore R0
 		
 		; Retreat both players
-		LSR R1, #1
-		LSL R2, #1
+		LSL R1, #1
+		LSR R2, #1
 		
 LEDUpdate
 		ORR R7, R1, R2
@@ -284,31 +284,31 @@ Idle
 		B Idle
 		
 		
-SpeedDuel
-		LDR R7, [R0, #0x03FC]
-		CMP R7, #0
-		BEQ SpeedDuel
-		CMP R7, #0x11
-		BEQ SpeedDuel
+;SpeedDuel
+		;LDR R7, [R0, #0x03FC]
+		;CMP R7, #0
+		;BEQ SpeedDuel
+		;CMP R7, #0x11
+		;BEQ SpeedDuel
 		
-		; Check if SW1 is pressed
-		CMP R7, #0x10
-		MOVEQ R6, #4
-		LSREQ R1, #1
+		;; Check if SW1 is pressed
+		;CMP R7, #0x10
+		;MOVEQ R6, #4
+		;LSREQ R1, #1
 		
-		; Check if SW2 is pressed
-		CMP R7, #0x1
-		MOVEQ R6, #5
-		LSLEQ R2, #1
+		;; Check if SW2 is pressed
+		;CMP R7, #0x1
+		;MOVEQ R6, #5
+		;LSLEQ R2, #1
 		
-Winner
+GAME_OVER
 		ORR R7, R1, R2
 		BL LED
 		BL Delay5
 		MOV R7, #0
 		BL LED
 		BL Delay5
-		B Winner
+		B GAME_OVER
 		
 Delay5
 		MOV32 R12, #0X225510
@@ -318,8 +318,6 @@ DELAY
 		SUBS R12, #1				; 1 MACHINE CYCLE
 		BNE DELAY					; 1 MC + 2 if the branch is taken
 		BX  LR
-		
-GAME_OVER
 		
 		
 LED
