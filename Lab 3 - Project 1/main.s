@@ -237,7 +237,7 @@ SpeedWin
 		
 		BL LEDUpdate
 		
-		; Chack if game is over
+		; Check if game is over
 		CMP R7, #0x3
 		BEQ GAME_OVER
 		CMP R7, #0x300
