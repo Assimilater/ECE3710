@@ -177,6 +177,29 @@ GetSpeed
 		AND R3, R7, R4, LSR #6			; put PB6 and 7 as Player 1 speed
 		AND R4, R7, R4, LSR #4			; put PB4 and 5 as Player 2 speed
 		BL PushBack
+		
+Idle
+	; Idle - Where the majority of the program will be spent
+		; Sample buttons
+		LDR R0, =GPIO_PORTF
+		LDR R8, [R0, #0x03FC]			; Get current state
+		
+		MVN R5, R5
+		AND R5, R8						; R5 = ~R5 * R8 (1 on rising edge in button state)
+		
+		LSRS R5, #2						; Check if player 2 pressed based on carry bit
+		BLHS Player2					; Branch if carry bit
+		
+		LSRS R5, #2						; Check if player 1 pressed based on carry bit
+		BLHS Player1					; Branch if carry bit
+		
+		MOV R5, R8						; Store current state for next cycle
+		
+		; Check expiration on speed timer
+		LDR R0, =GPTM0
+		LDR R8, [R0, #0x1C]
+		ANDS R8, #0x1
+		BNE SpeedWin
 		B Idle
 		
 Player1
@@ -259,30 +282,14 @@ LEDUpdate
 		
 		BX LR
 		
-Idle
-	; Idle - Where the majority of the program will be spent
-		; Sample buttons
-		LDR R0, =GPIO_PORTF
-		LDR R8, [R0, #0x03FC]			; Get current state
-		
-		MVN R5, R5
-		AND R5, R8						; R5 = ~R5 * R8 (1 on rising edge in button state)
-		
-		LSRS R5, #2						; Check if player 2 pressed based on carry bit
-		BLHS Player2					; Branch if carry bit
-		
-		LSRS R5, #2						; Check if player 1 pressed based on carry bit
-		BLHS Player1					; Branch if carry bit
-		
-		MOV R5, R8						; Store current state for next cycle
-		
-		; Check expiration on speed timer
-		LDR R0, =GPTM0
-		LDR R8, [R0, #0x1C]
-		ANDS R8, #0x1
-		BNE SpeedWin
-		B Idle
-		
+GAME_OVER
+		ORR R7, R1, R2
+		BL LED
+		BL Delay5
+		MOV R7, #0
+		BL LED
+		BL Delay5
+		B GAME_OVER
 		
 ;SpeedDuel
 		;LDR R7, [R0, #0x03FC]
@@ -300,15 +307,6 @@ Idle
 		;CMP R7, #0x1
 		;MOVEQ R6, #5
 		;LSLEQ R2, #1
-		
-GAME_OVER
-		ORR R7, R1, R2
-		BL LED
-		BL Delay5
-		MOV R7, #0
-		BL LED
-		BL Delay5
-		B GAME_OVER
 		
 Delay5
 		MOV32 R12, #0X225510
