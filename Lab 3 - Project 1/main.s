@@ -15,6 +15,8 @@ GPIO_PORTF		EQU 0x40025000
 BAND_DATAF		EQU 0x424A7F80			; 0x4200000 + 0x253FC * 32
 
 SYSTICK			EQU 0xE000E000
+GPTM0			EQU	0x40030000
+RCGC1			EQU 0x400FE000
 
 ;DATA_R_OFF		EQU 0x03FC
 ;DIR_R_OFF		EQU 0x0400
@@ -28,8 +30,8 @@ Start
 	; Enable ports A, B, and F
 	; A[2-7] and B[0-3] correspond to the 10 LEDS
 	; B[4-7] corresponds to the speed DIP switch
-	; F0 is SW2 (right)	-> Player 2
-	; F4 is SW1 (left)	-> Player 1
+	; F2 is SW2 (right)	-> Player 2
+	; F3 is SW1 (left)	-> Player 1
 	
 		; Turn on the clock
 		LDR R0, =GPIO_CLOCK
@@ -44,11 +46,14 @@ Start
 		LDR R0, =GPIO_PORTF
 		STR R2, [R0, #0x520]			; Unlock Port F
 		
-		MOV R1, #0x11					; Configure pins 0-4
+		MOV R1, #0x0C					; Configure pins 2 and 3
 		STR R1, [R0, #0x524]			; Set CR to limit which bits are modified on write
-		STR R1, [R0, #0x510]			; Set Pull-Up Select
 		STR R1, [R0, #0x51C]			; Set Digital Enable
+		
+		MOV R1, #0
+		STR R1, [R0, #0x510]			; Set Pull-Up Select
 		STR R1, [R0, #0x400]			; Configure pins as input
+		STR R1, [R0, #0x420]			; Disable Alternate Functionality
 		
 		
 		; Port B
@@ -80,17 +85,31 @@ Start
 		MOV R1, #0						; Configure features we want diabled
 		STR R1, [R0,#0x420]				; Disable Alternate Functionality
 		
-		;  SysTick
-		LDR R10, =SYSTICK
+		; SysTick
+		LDR R0, =SYSTICK
 		MOV R1, #0
-		STR R1, [R10, #0x10]			; Disable Systick while doing init
+		STR R1, [R0, #0x10]				; Disable Systick while doing init
 		
 		LDR R1, =0x7A1200				; counts every 62.5us, .5 sec adds up to 0x7A1200
-		STR R1, [R10, #0x14]			; Set Reload register
-		STR R1, [R10, #0x18]			; Clear the Current register
+		STR R1, [R0, #0x14]				; Set Reload register
+		STR R1, [R0, #0x18]				; Clear the Current register
 		
 		MOV R1, #0x5
-		STR R1, [R10, #0x10]			; Enable SysTick and use core clock
+		STR R1, [R0, #0x10]				; Enable SysTick and use core clock
+		
+		; General Purpose Timer
+		LDR R0, =RCGC1
+		MOV R1, #0x10000				; bit 16
+		STR R1, [R0, #0x104]
+		
+		LDR R0, =GPTM0
+		MOV R1, #0
+		STR R1, [R0, #0xC]				; Disable GPTM
+		STR R1, [R0]					; Configure it as a 32 bit timer
+		
+		MOV R1, #1
+		STR R1, [R0, #0x4]				; One-shot mode
+		
 		
 	; R0 stores a port address
 	; R1 tracks player 1
@@ -120,16 +139,17 @@ Program
 		MOV R9, #0						; R9 => Off blink
 		
 		LDR R0, =GPIO_PORTF
+		LDR R10, =SYSTICK
 		
 Begin
 		; Check buttons
-		LDR R7, [R0]					; Load from GPIO_PORTF
+		LDR R7, [R0, #0x03FC]			; Load from GPIO_PORTF
 		
-		AND R11, R7, #0x10				; Get button for player 1
+		AND R11, R7, #0x08				; Get button for player 1
 		CMP R11, #0
 		ORRNE R9, R1
 		
-		AND R11, R7, #0x01				; Get button for player 2
+		AND R11, R7, #0x04				; Get button for player 2
 		CMP R11, #0
 		ORRNE R9, R2
 		
@@ -143,7 +163,7 @@ Begin
 		; If timer expiration
 		LDR R12, [R10, #0x10]
 		ANDS R12, #0x10000
-		MVNEQ R6, R6					; Alternate betwen blink on and off
+		MVNNE R6, R6					; Alternate betwen blink on and off
 		
 		; Loop until both players are ready (both are solid)
 		CMP R8, R9
@@ -151,20 +171,23 @@ Begin
 		
 GetSpeed
 		LDR R0, =GPIO_PORTB
-		LDR R4, [R0]					; Get speed values
+		LDR R4, [R0, #0x03FC]			; Get speed values
 		
 		MOV R7, #3						; Select 2 bits
 		AND R3, R7, R4, LSR #6			; put PB6 and 7 as Player 1 speed
 		AND R4, R7, R4, LSR #4			; put PB4 and 5 as Player 2 speed
-		B PushBack
+		BL PushBack
+		B Idle
 		
 Player1
 		CMP R6, #1
 		BXEQ LR							; Exit out if player 1 already has advantage
-		LSR R1, #1						; Advance Player 1
+		LSL R1, #1						; Advance Player 1
 		
 		CMP R6, #2
 		BEQ Draw						; It's a draw if player 2 had the advantage
+		
+		; Set Timer A to speed based countdown and start
 		
 		MOV R6, #1						; Flag player 1 with the advantage
 		B LEDUpdate
@@ -172,10 +195,12 @@ Player1
 Player2
 		CMP R6, #2
 		BXEQ LR							; Exit out if player 2 already has advantage
-		LSL R2, #1						; Advance Player 2
+		LSR R2, #1						; Advance Player 2
 		
 		CMP R6, #1
 		BEQ Draw						; It's a draw if player 2 had the advantage
+		
+		; Set Timer A to speed based countdown and start
 		
 		MOV R6, #2						; Flag player 2 with the advantage
 		B LEDUpdate
@@ -187,22 +212,43 @@ SpeedWin
 		LSREQ R1, #1
 		LSLNE R2, #1
 		
-		B LEDUpdate
+		BL LEDUpdate
+		BL PushBack
+		B Idle
 		
 Draw
+		POP {LR}
 		ADD R8, #1
+		BL PushBack
+		B Idle
 		
 PushBack
-		; Retreat both players
-		LSL R1, #1
-		LSR R2, #1
-		
-		;
+		PUSH {R0}						; Preserver R0
 		LDR R0, =SYSTICK
-		; Read value from SYSTYC
-		; Set RELOAD value on GPTimer
-		; Loop to wait for expiration on GPTimer
+		LDR R11, =0x7A12000				; 1 Second
+		LDR R12, [R0, #0x18]			; Read value from SYSTYC (0-0.5s)
+		ADD R11, R12, LSL #1			; x2 to get a random number between 0-1 s and add 1s
 		
+		LDR R0, =GPTM0
+		STR R11, [R0, #0x28]			; Set RELOAD value on GPTimer
+		MOV R12, #1
+		STR R12, [R0, #0xC]
+		
+PushWait
+		; Loop to wait for expiration on GPTimer
+		LDR R12, [R0, #0x1C]
+		ANDS R12, #0x1
+		BEQ PushWait
+		
+		; Clear timer expiration flag
+		MOV R12, #1
+		STR R12, [R0, #0x24]
+		
+		POP {R0}						; Restore R0
+		
+		; Retreat both players
+		LSR R1, #1
+		LSL R2, #1
 		
 LEDUpdate
 		ORR R7, R1, R2
@@ -217,26 +263,29 @@ Idle
 	; Idle - Where the majority of the program will be spent
 		; Sample buttons
 		LDR R0, =GPIO_PORTF
-		LDR R8, [R0]					; Get current state
+		LDR R8, [R0, #0x03FC]			; Get current state
 		
 		MVN R5, R5
 		AND R5, R8						; R5 = ~R5 * R8 (1 on rising edge in button state)
 		
-		LSRS R5, #1						; Check if player 2 pressed based on carry bit
+		LSRS R5, #2						; Check if player 2 pressed based on carry bit
 		BLHS Player2					; Branch if carry bit
 		
-		LSRS R5, #4						; Check if player 1 pressed based on carry bit
+		LSRS R5, #2						; Check if player 1 pressed based on carry bit
 		BLHS Player1					; Branch if carry bit
 		
 		MOV R5, R8						; Store current state for next cycle
 		
 		; Check expiration on speed timer
-		BEQ SpeedWin
+		LDR R0, =GPTM0
+		LDR R8, [R0, #0x1C]
+		ANDS R8, #0x1
+		BNE SpeedWin
 		B Idle
 		
 		
 SpeedDuel
-		LDR R7, [R0]
+		LDR R7, [R0, #0x03FC]
 		CMP R7, #0
 		BEQ SpeedDuel
 		CMP R7, #0x11
