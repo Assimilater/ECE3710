@@ -11,20 +11,22 @@ GPIO_UNLOCK		EQU 0x4C4F434B			; See users manual p. 685
 
 GPIO_PORTA		EQU 0x40004000
 GPIO_PORTB		EQU 0x40005000
+GPIO_PORTC		EQU 0x40006000
+GPIO_PORTD		EQU 0x40007000
+GPIO_PORTE		EQU 0x40024000
 GPIO_PORTF		EQU 0x40025000
-BAND_DATAF		EQU 0x424A7F80			; 0x4200000 + 0x253FC * 32
 
 SYSTICK			EQU 0xE000E000
 GPTM0			EQU	0x40030000
 RCGC1			EQU 0x400FE000
 
-;DATA_R_OFF		EQU 0x03FC
-;DIR_R_OFF		EQU 0x0400
-;AFSEL_R_OFF	EQU 0x0420
-;PUR_R_OFF		EQU 0x0510
-;DEN_R_OFF		EQU 0x051C
-;LOCK_R_OFF		EQU 0x0520
-;CR_R_OFF		EQU 0x0524
+GPIO_DATA		EQU 0x03FC
+GPIO_DIR		EQU 0x0400
+GPIO_AFSEL		EQU 0x0420
+GPIO_PUR		EQU 0x0510
+GPIO_DEN		EQU 0x051C
+GPIO_LOCK		EQU 0x0520
+GPIO_CR			EQU 0x0524
 
 Start
 	; Enable ports A, B, and F
@@ -44,46 +46,46 @@ Start
 		
 		; Port F
 		LDR R0, =GPIO_PORTF
-		STR R2, [R0, #0x520]			; Unlock Port F
+		STR R2, [R0, #GPIO_LOCK]		; Unlock Port F
 		
 		MOV R1, #0x0C					; Configure pins 2 and 3
-		STR R1, [R0, #0x524]			; Set CR to limit which bits are modified on write
-		STR R1, [R0, #0x51C]			; Set Digital Enable
+		STR R1, [R0, #GPIO_CR]			; Set CR to limit which bits are modified on write
+		STR R1, [R0, #GPIO_DEN]			; Set Digital Enable
 		
 		MOV R1, #0
-		STR R1, [R0, #0x510]			; Set Pull-Up Select
-		STR R1, [R0, #0x400]			; Configure pins as input
-		STR R1, [R0, #0x420]			; Disable Alternate Functionality
+		STR R1, [R0, #GPIO_PUR]			; Set Pull-Up Select
+		STR R1, [R0, #GPIO_DIR]			; Configure pins as input
+		STR R1, [R0, #GPIO_AFSEL]		; Disable Alternate Functionality
 		
 		
 		; Port B
 		LDR R0, =GPIO_PORTB				; Unlock Port B
-		STR R2, [R0, #0x520]
+		STR R2, [R0, #GPIO_LOCK]
 		
 		MOV R1, #0xFF					; We are configuring only the last 4 bits of Port B
-		STR R1, [R0, #0x524]			; Set CR to limit which bits are modified on write
-		STR R1, [R0,#0x51C]				; Set Digital Enable
+		STR R1, [R0, #GPIO_CR]			; Set CR to limit which bits are modified on write
+		STR R1, [R0, #GPIO_DEN]			; Set Digital Enable
 		
 		MOV R1, #0x0F					; Configure the output pins
-		STR R1, [R0,#0x400]				; Configure pins as input/output
-		STR R1, [R0, #0x510]			; Set Pull-Up Select
+		STR R1, [R0, #GPIO_DIR]			; Configure pins as input/output
+		STR R1, [R0, #GPIO_PUR]			; Set Pull-Up Select
 		
 		MOV R1, #0						; Configure features we want diabled
-		STR R1, [R0,#0x420]				; Disable Alternate Functionality
+		STR R1, [R0, #GPIO_AFSEL]		; Disable Alternate Functionality
 		
 		
 		; Port A
 		LDR R0, =GPIO_PORTA				; Unlock Port A
-		STR R2, [R0, #0x520]
+		STR R2, [R0, #GPIO_LOCK]
 		
 		MOV R1, #0xFC					; We are configuring only the first 6 bits of Port A
-		STR R1, [R0, #0x524]			; Set CR to limit which bits are modified on write
-		STR R1, [R0,#0x400]				; Configure pins as output
-		STR R1, [R0, #0x510]			; Set Pull-Up Select
-		STR R1, [R0,#0x51C]				; Set Digital Enable
+		STR R1, [R0, #GPIO_CR]			; Set CR to limit which bits are modified on write
+		STR R1, [R0, #GPIO_DIR]			; Configure pins as output
+		STR R1, [R0, #GPIO_PUR]			; Set Pull-Up Select
+		STR R1, [R0, #GPIO_DEN]			; Set Digital Enable
 		
 		MOV R1, #0						; Configure features we want diabled
-		STR R1, [R0,#0x420]				; Disable Alternate Functionality
+		STR R1, [R0, #GPIO_AFSEL]		; Disable Alternate Functionality
 		
 		; SysTick
 		LDR R0, =SYSTICK
@@ -145,7 +147,7 @@ Program
 		
 Begin
 		; Check buttons
-		LDR R3, [R0, #0x03FC]			; Load from GPIO_PORTF
+		LDR R3, [R0, #GPIO_DATA]		; Load from GPIO_PORTF
 		
 		AND R11, R3, #0x08				; Get button for player 1
 		CMP R11, #0
@@ -173,7 +175,7 @@ Begin
 		
 GetSpeed
 		LDR R0, =GPIO_PORTB
-		LDR R4, [R0, #0x03FC]			; Get speed values
+		LDR R4, [R0, #GPIO_DATA]		; Get speed values
 		
 		MOV R7, #3						; Select 2 bits
 		AND R3, R7, R4, LSR #6			; put PB6 and 7 as Player 1 speed
@@ -200,7 +202,7 @@ Idle
 	; Idle - Where the majority of the program will be spent
 		; Sample buttons
 		LDR R0, =GPIO_PORTF
-		LDR R8, [R0, #0x03FC]			; Get current state
+		LDR R8, [R0, #GPIO_DATA]		; Get current state
 		
 		MVN R5, R5
 		AND R5, R8						; R5 = ~R5 * R8 (1 on rising edge in button state)
@@ -330,10 +332,10 @@ VariableTimer
 	; Set GPTM0's reload to R7's value and start the timer
 		PUSH {R0, R8}
 		LDR R0, =GPTM0
-		STR R7, [R0, #0x28]			; Set RELOAD value on GPTimer
+		STR R7, [R0, #0x28]				; Set RELOAD value on GPTimer
 		
 		MOV R8, #1
-		STR R8, [R0, #0xC]			; Start the timer
+		STR R8, [R0, #0xC]				; Start the timer
 		POP {R0, R8}
 		BX LR
 		
@@ -345,12 +347,12 @@ LED
 		; Write the data to GPIO_PORTA
 		LDR R0, =GPIO_PORTA
 		MVN R8, R7, LSL #2				; Shift left 2x so 6 LSB aligns with pins A2-7
-		STR R8, [R0, #0x03FC]
+		STR R8, [R0, #GPIO_DATA]
 		
 		; Write the data to GPIO_PORTB
 		LDR R0, =GPIO_PORTB
 		MVN R8, R7, LSR #6				; Shift right 6x so 4 MSB aligns with pins B0-3
-		STR R8, [R0, #0x03FC]
+		STR R8, [R0, #GPIO_DATA]
 		
 		POP {R8}
 		POP {R0}
