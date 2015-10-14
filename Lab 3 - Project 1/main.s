@@ -190,7 +190,7 @@ GetSpeed
 		SUB R3, R7, R3
 		SUB R4, R7, R4
 		
-		; Convert to ms
+		; Multiply by CC/ms
 		MOV R7, #0x3E80
 		MUL R3, R7
 		MUL R4, R7
