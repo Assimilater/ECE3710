@@ -20,6 +20,12 @@ SYS_RIS			EQU 0x0050
 SYS_RCC			EQU 0x0060
 SYS_RCGC1		EQU 0x0104
 SYS_RCGCUART	EQU 0x0618
+	
+UART1			EQU 0x4000D000
+UART_CTL		EQU 0x030
+UART_IBRD		EQU 0x024
+UART_FBRD		EQU 0x028
+UART_LCRH		EQU 0x02C
 
 GPIO_DATA		EQU 0x03FC
 GPIO_DIR		EQU 0x0400
@@ -72,6 +78,21 @@ Start
 		
 		MOV R1, #0x11					; See user's manual p.1344
 		STR R1, [R0, #GPIO_PCTL]		; Configure which alternate functionality is used
+		
+		; Configure UART 1
+		LDR R0, =UART1
+		
+		MOV R1, #0
+		STR R1, [R0, #UART_CTL]			; Disable UART
+		
+										; BRD = 16e6/(16*9600) = 104.1667
+		MOV R1, #104					; int(104.1667) = 104
+		STR R1, [R0, #UART_IBRD]
+		MOV R1, #0xB					; int(.1667*64+.5)=11=0xB
+		STR R1, [R0, #UART_FBRD]
+		
+		MOV R1, #0x60					; 8 bit word length
+		STR R1, [R0, #UART_LCRH]
 		
 		; SysTick
 		LDR R0, =SYSCLK
