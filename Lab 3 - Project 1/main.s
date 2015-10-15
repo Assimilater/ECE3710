@@ -70,7 +70,7 @@ Start
 		STR R1, [R0, #GPIO_DIR]			; Configure pins as input/output
 		STR R1, [R0, #GPIO_PUR]			; Set Pull-Up Select
 		
-		MOV R1, #0						; Configure features we want diabled
+		MOV R1, #0						; Configure features we want disabled
 		STR R1, [R0, #GPIO_AFSEL]		; Disable Alternate Functionality
 		
 		
@@ -84,7 +84,7 @@ Start
 		STR R1, [R0, #GPIO_PUR]			; Set Pull-Up Select
 		STR R1, [R0, #GPIO_DEN]			; Set Digital Enable
 		
-		MOV R1, #0						; Configure features we want diabled
+		MOV R1, #0						; Configure features we want disabled
 		STR R1, [R0, #GPIO_AFSEL]		; Disable Alternate Functionality
 		
 		; SysTick
@@ -181,7 +181,7 @@ GetSpeed
 		AND R3, R7, R4, LSR #6			; put PB6 and 7 as Player 1 speed
 		AND R4, R7, R4, LSR #4			; put PB4 and 5 as Player 2 speed
 		
-		; Caclulate 320 - 80Sn up front
+		; Calculate 320 - 80Sn up front
 		MOV R7, #80
 		MUL R3, R7
 		MUL R4, R7
@@ -190,7 +190,7 @@ GetSpeed
 		SUB R3, R7, R3
 		SUB R4, R7, R4
 		
-		; Convert to ms
+		; Multiply by CC/ms
 		MOV R7, #0x3E80
 		MUL R3, R7
 		MUL R4, R7
