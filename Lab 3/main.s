@@ -26,6 +26,7 @@ UART_CTL		EQU 0x030
 UART_IBRD		EQU 0x024
 UART_FBRD		EQU 0x028
 UART_LCRH		EQU 0x02C
+UART_CC			EQU 0xFC8
 
 GPIO_DATA		EQU 0x03FC
 GPIO_DIR		EQU 0x0400
@@ -93,6 +94,12 @@ Start
 		
 		MOV R1, #0x60					; 8 bit word length
 		STR R1, [R0, #UART_LCRH]
+		
+		MOV R1, #0						; Use the system clock
+		STR R1, [R0, #UART_CC]
+		
+		MOV R1, #0x301					; Enable Tx and Rx and UART
+		STR R1, [R0, #UART_CTL]
 		
 		; SysTick
 		LDR R0, =SYSCLK
