@@ -20,7 +20,7 @@ SYS_RIS			EQU 0x0050
 SYS_RCC			EQU 0x0060
 SYS_RCGC1		EQU 0x0104
 SYS_RCGCUART	EQU 0x0618
-	
+
 UART1			EQU 0x4000D000
 UART_CTL		EQU 0x030
 UART_IBRD		EQU 0x024
@@ -157,9 +157,26 @@ GenJump
 		BX LR
 		
 SendStr
-	; Given the address for one of our messages, copy the string to the UART module
+	; Send a random string to the UART module
+		PUSH {R4, R5, R6}
 		
+		LDR R4, [R1, #0x18]				; Read random value from SysClk between 0-9 inclusive
+		LSL R4, #2						; x4 to get word-aligned offset in jump table
+		LDR R4, [R0, R4]				; Get the address of the string to send
 		
+		MOV R5, #0						; Offset counter for loop
+StrLoop
+		LDR R6, [R4, R5]				; Load word from message
+		ADD R5, #4						; Increment offset counter
+		
+		; Maybe wait for UART buffer to have room
+		; Write to UART buffer
+		; Check for null terminator
+		
+		BEQ StrLoop						; Repeat if not found
+		
+		POP {R4, R5}
+		BX LR
 Final
 		
 		B Final
