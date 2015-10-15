@@ -30,17 +30,18 @@ GPIO_LOCK		EQU 0x0520
 GPIO_PCTL		EQU 0x052C
 GPIO_CR			EQU 0x0524
 
-; 13 => CR, 10 => NL
-MESSAGE_0		DCB "Nope", 13, 10, 0
-MESSAGE_1		DCB "You are doomed", 13, 10, 0
-MESSAGE_2		DCB "Concentrate you fool", 13, 10, 0
-MESSAGE_3		DCB "What a rubbish question", 13, 10, 0
-MESSAGE_4		DCB "Only in your dreams", 13, 10, 0
-MESSAGE_5		DCB "Yes now leave me alone", 13, 10, 0
-MESSAGE_6		DCB "Heh you wish", 13, 10, 0
-MESSAGE_7		DCB "Oh yeah that will happen", 13, 10, 0
-MESSAGE_8		DCB "Stop bothering me", 13, 10, 0
-MESSAGE_9		DCB "Not if you were the last person on earth", 13, 10, 0
+; 13 => CR, 10 => NL, 0 => NULL
+MJUMPTABLE		EQU 0x0
+MESSAGE0		DCB "Nope", 13, 10, 0
+MESSAGE1		DCB "You are doomed", 13, 10, 0
+MESSAGE2		DCB "Concentrate you fool", 13, 10, 0
+MESSAGE3		DCB "What a rubbish question", 13, 10, 0
+MESSAGE4		DCB "Only in your dreams", 13, 10, 0
+MESSAGE5		DCB "Yes now leave me alone", 13, 10, 0
+MESSAGE6		DCB "Heh you wish", 13, 10, 0
+MESSAGE7		DCB "Oh yeah that will happen", 13, 10, 0
+MESSAGE8		DCB "Stop bothering me", 13, 10, 0
+MESSAGE9		DCB "Not if you were the last person on earth", 13, 10, 0
 
 ALIGN ; p. 149
 
@@ -84,10 +85,58 @@ Start
 		MOV R1, #0x5
 		STR R1, [R0, #0x10]				; Enable SysTick and use core clock
 		
-	; R0 stores SYSCLK
-	; R1 stores GPIO_PORTB
+	; R0 stores MJUMPTABLE
+	; R1 stores SYSCLK
+	; R2 stores GPIO_PORTB
+	; R3+ stores temporary/calculated values
+	; R3 often used for passed and returned arguments of function calls (similar to %eax)
 		
 Program
+		LDR R0, =MJUMPTABLE
+		LDR R1, =SYSCLK
+		LDR R2, =GPIO_PORTB
+		
+		BL GenJump
+		
+GenJump
+	; Create a jump table in RAM (analogous to setting up a switch statement in C)
+		PUSH {R1}
+		
+		LDR R1, =MESSAGE0
+		STR R1, [R0, #0x00]
+		
+		LDR R1, =MESSAGE1
+		STR R1, [R0, #0x04]
+		
+		LDR R1, =MESSAGE2
+		STR R1, [R0, #0x08]
+		
+		LDR R1, =MESSAGE3
+		STR R1, [R0, #0x0C]
+		
+		LDR R1, =MESSAGE4
+		STR R1, [R0, #0x10]
+		
+		LDR R1, =MESSAGE5
+		STR R1, [R0, #0x14]
+		
+		LDR R1, =MESSAGE6
+		STR R1, [R0, #0x18]
+		
+		LDR R1, =MESSAGE7
+		STR R1, [R0, #0x1C]
+		
+		LDR R1, =MESSAGE8
+		STR R1, [R0, #0x20]
+		
+		LDR R1, =MESSAGE9
+		STR R1, [R0, #0x24]
+		
+		POP {R1}
+		BX LR
+		
+SendStr
+	; Given the address for one of our messages, copy the string to the UART module
 		
 		
 Final
