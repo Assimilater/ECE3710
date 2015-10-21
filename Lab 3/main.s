@@ -22,10 +22,11 @@ SYS_RCGC1		EQU 0x0104
 SYS_RCGCUART	EQU 0x0618
 
 UART1			EQU 0x4000D000
-UART_CTL		EQU 0x030
+UART_FLAG		EQU 0x018
 UART_IBRD		EQU 0x024
 UART_FBRD		EQU 0x028
 UART_LCRH		EQU 0x02C
+UART_CTL		EQU 0x030
 UART_CC			EQU 0xFC8
 
 GPIO_DATA		EQU 0x03FC
@@ -37,7 +38,7 @@ GPIO_LOCK		EQU 0x0520
 GPIO_PCTL		EQU 0x052C
 GPIO_CR			EQU 0x0524
 
-; 13 => CR, 10 => NL, 0 => NULL
+; 13 => CR, 10 => LF, 0 => NULL
 MJUMPTABLE		EQU 0x0
 MESSAGE0		DCB "Nope", 13, 10, 0
 MESSAGE1		DCB "You are doomed", 13, 10, 0
@@ -116,15 +117,29 @@ Start
 	; R0 stores MJUMPTABLE
 	; R1 stores SYSCLK
 	; R2 stores GPIO_PORTB
-	; R3+ stores temporary/calculated values
-	; R3 often used for passed and returned arguments of function calls (similar to %eax)
+	; R3 Stores UART1
+	; R4+ stores temporary/calculated values
+	; R4 often used for passed and returned arguments of function calls (similar to %eax)
 		
-Program
 		LDR R0, =MJUMPTABLE
 		LDR R1, =SYSCLK
 		LDR R2, =GPIO_PORTB
-		
+		LDR R3, =UART1
 		BL GenJump
+		
+		; Send CRLF
+		MOV R4, #13
+		STRB R4, [R3]
+		MOV R4, #10
+		STRB R4, [R3]
+		
+Program
+		; Wait for button press or any character being received
+		;BEQ Program
+		
+		BL SendStr
+		B Program
+		
 		
 GenJump
 	; Create a jump table in RAM (analogous to setting up a switch statement in C)
@@ -163,29 +178,35 @@ GenJump
 		POP {R1}
 		BX LR
 		
+		
 SendStr
 	; Send a random string to the UART module
-		PUSH {R4, R5, R6}
+		PUSH {R5, R6, R7}
 		
-		LDR R4, [R1, #0x18]				; Read random value from SysClk between 0-9 inclusive
-		LSL R4, #2						; x4 to get word-aligned offset in jump table
-		LDR R4, [R0, R4]				; Get the address of the string to send
+		LDR R5, [R1, #0x18]				; Read random value from SysClk between 0-9 inclusive
+		LSL R5, #2						; x4 to get word-aligned offset in jump table
+		LDR R5, [R0, R5]				; Get the address of the string to send
 		
-		MOV R5, #0						; Offset counter for loop
+		MOV R6, #0						; Offset counter for loop
 StrLoop
-		LDR R6, [R4, R5]				; Load word from message
-		ADD R5, #4						; Increment offset counter
+		LDRB R7, [R5, R6]				; Load byte from message
+		ADD R6, #1						; Increment offset counter
+		CMP R7, #0						; Check for null terminator
+		BEQ StrSent
 		
-		; Maybe wait for UART buffer to have room
-		; Write to UART buffer
-		; Check for null terminator
+UARTLoop
+		LDR R8, [R3, #UART_FLAG]
+		ANDS R8, #0x20					; Check full flag
+		BNE UARTLoop					; Wait until buffer is not full
+		STRB R7, [R3]					; Write to UART buffer
+		B StrLoop
 		
-		BEQ StrLoop						; Repeat if not found
-		
-		POP {R4, R5}
+StrSent
+		POP {R5, R6, R7}
 		BX LR
-Final
 		
+		
+Final
 		B Final
 		
 	ALIGN
