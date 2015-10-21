@@ -39,7 +39,7 @@ GPIO_PCTL		EQU 0x052C
 GPIO_CR			EQU 0x0524
 
 ; 13 => CR, 10 => LF, 0 => NULL
-MJUMPTABLE		EQU 0x0
+MJUMPTABLE		EQU 0x20000000
 MESSAGE0		DCB "Nope", 13, 10, 0
 MESSAGE1		DCB "You are doomed", 13, 10, 0
 MESSAGE2		DCB "Concentrate you fool", 13, 10, 0
@@ -139,21 +139,53 @@ Start
 		LDR R1, =SYSCLK
 		LDR R2, =GPIO_PORTB
 		LDR R3, =UART1
+		LDR R4, =GPIO_PORTF
 		BL GenJump
 		
 		; Send CRLF
-		MOV R4, #13
-		STRB R4, [R3]
-		MOV R4, #10
-		STRB R4, [R3]
+		MOV R5, #13
+		STRB R5, [R3]
+		MOV R5, #10
+		STRB R5, [R3]
 		
 Program
-		; Wait for button press or any character being received
-		;BEQ Program
+		; Wait for button press
+		LDR R5, [R4, #GPIO_DATA]
+		EORS R5, #0x11
+		BNE Button
 		
+		; Wait for LF
+		LDR R8, [R3, #UART_FLAG]
+		ANDS R8, #0x10					; Check receive empty flag
+		BEQ UARTRead					; Branch if recieve buffer is not empty
+		
+		B Program
+		
+UARTRead
+		LDRB R5, [R3]
+		
+		; Check for LF to send string
+		CMP R5, #10
+		BEQ UARTLF
+		
+		; If not receiving restart program loop
+		LDR R8, [R3, #UART_FLAG]
+		ANDS R8, #0x10					; Check receive empty flag
+		BNE Program
+		
+		; Continue reading if there is still data
+		B UARTRead
+		
+UARTLF
 		BL SendStr
 		B Program
 		
+Button
+		LDR R5, [R4, #GPIO_DATA]
+		EORS R5, #0x11
+		BNE Button
+		BL SendStr
+		B Program
 		
 GenJump
 	; Create a jump table in RAM (analogous to setting up a switch statement in C)
@@ -208,10 +240,10 @@ StrLoop
 		CMP R7, #0						; Check for null terminator
 		BEQ StrSent
 		
-UARTLoop
+UARTWrite
 		LDR R8, [R3, #UART_FLAG]
-		ANDS R8, #0x20					; Check full flag
-		BNE UARTLoop					; Wait until buffer is not full
+		ANDS R8, #0x20					; Check transmit full flag
+		BNE UARTWrite					; Wait until buffer is not full
 		STRB R7, [R3]					; Write to UART buffer
 		B StrLoop
 		
