@@ -64,7 +64,7 @@ Start
 		
 		; Enable UART 1
 		MOV R1, #0x2
-		STR R1, [R0, #SYS_RCGCUART]
+		STR R1, [R0, #SYS_RCGC1]
 		
 		; Configure Port B
 		LDR R0, =GPIO_PORTB				; Unlock Port B
