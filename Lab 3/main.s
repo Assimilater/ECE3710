@@ -107,7 +107,7 @@ Start
 		MOV R1, #0xB					; int(.1667*64+.5)=11=0xB
 		STR R1, [R0, #UART_FBRD]
 		
-		MOV R1, #0x60					; 8 bit word length
+		MOV R1, #0x70					; 8 bit word length, and enable FIFO
 		STR R1, [R0, #UART_LCRH]
 		
 		MOV R1, #0						; Use the system clock
@@ -164,8 +164,10 @@ Program
 UARTRead
 		LDRB R5, [R3]
 		
-		; Check for LF to send string
+		; Check for CRLF to send string
 		CMP R5, #10
+		BEQ UARTLF
+		CMP R5, #13
 		BEQ UARTLF
 		
 		; If not receiving restart program loop
