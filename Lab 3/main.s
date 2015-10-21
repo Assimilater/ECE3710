@@ -54,12 +54,13 @@ MESSAGE9		DCB "Not if you were the last person on earth", 13, 10, 0
 ALIGN ; p. 149
 
 Start
-		; Turn on the clock for port B
+		; Turn on the clock for ports B and F
 		LDR R0, =GPIO_CLOCK
-		MOV R1, #0x2
+		MOV R1, #0x22
 		STR R1, [R0]
 		
 		LDR R0, =SYSCTL
+		LDR R2, =GPIO_UNLOCK
 		
 		; Enable UART 1
 		MOV R1, #0x2
@@ -80,6 +81,19 @@ Start
 		
 		MOV R1, #0x11					; See user's manual p.1344
 		STR R1, [R0, #GPIO_PCTL]		; Configure which alternate functionality is used
+		
+		; Configure Port F
+		LDR R0, =GPIO_PORTF				; Unlock Port F
+		STR R2, [R0, #GPIO_LOCK]
+		
+		MOV R1, #0x11					; We are configuring only the last 2 bits of Port B
+		STR R1, [R0, #GPIO_CR]			; Set CR to limit which bits are modified on write
+		STR R1, [R0, #GPIO_DEN]			; Set Digital Enable
+		STR R1, [R0, #GPIO_PUR]			; Set Pull-Up Select
+		
+		MOV R1, #0x0
+		STR R1, [R0, #GPIO_DIR]			; Configure pins as input
+		STR R1, [R0, #GPIO_AFSEL]		; Disable Alternate Functionality
 		
 		; Configure UART 1
 		LDR R0, =UART1
