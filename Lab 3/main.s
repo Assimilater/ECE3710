@@ -86,7 +86,7 @@ Start
 		LDR R0, =GPIO_PORTF				; Unlock Port F
 		STR R2, [R0, #GPIO_LOCK]
 		
-		MOV R1, #0x11					; We are configuring only the last 2 bits of Port B
+		MOV R1, #0x11					; We are configuring Pins 0 and 4
 		STR R1, [R0, #GPIO_CR]			; Set CR to limit which bits are modified on write
 		STR R1, [R0, #GPIO_DEN]			; Set Digital Enable
 		STR R1, [R0, #GPIO_PUR]			; Set Pull-Up Select
