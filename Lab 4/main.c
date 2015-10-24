@@ -33,21 +33,28 @@ volatile unsigned int UART0_STAT __attribute__((at(0x4000C018)));
 #define UART_CTL		0x030
 #define UART_CC			0xFC8
 
+#define GPIO_UNLOCK		0x4C4F434B
+
 void Init() {
 	// enable clock: uart then ports
 	SYSCTL_RCGC1_R = 0x1; //uart0
-	SYSCTL_RCGC2_R = 0x1; //portA
+	SYSCTL_RCGC2_R = 0x21; //portA and F
+	
+	GPIO_PORTB_LOCK_R = GPIO_UNLOCK; //unlock portF
 
-	// PB1,0: enable alt. func. and pin
+	// configure port A
 	GPIO_PORTA_CR_R = 0x3;
 	GPIO_PORTA_AFSEL_R = 0x3;
 	GPIO_PORTA_DEN_R = 0x3;
-
-	// PB0: set as output
 	GPIO_PORTA_DIR_R = 0x1;
 	GPIO_PORTA_PUR_R = 0x1;
-
-	//GPIO_PORTA_PCTL_R = 0x11; // configure alternate functionality see p.1344
+	
+	// configure port F
+	GPIO_PORTF_CR_R = 0x1;
+	GPIO_PORTF_DEN_R = 0x1; // Set Digital Enable
+	GPIO_PORTF_PUR_R = 0x1; // Set Pull-Up Select
+	GPIO_PORTF_DIR_R = 0x0; // configure pins as input
+	GPIO_PORTF_AFSEL_R = 0x0; // Disable AF
 
 	// disable uart0
 	UART1_CTL_R = 0x0;
