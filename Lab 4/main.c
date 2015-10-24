@@ -17,13 +17,13 @@ volatile int RCGC2_R __attribute__((at(0x400FE108)));
 #define GPIO_CR			0x0524
 
 // system control base addr
-unsigned int *SYSCTL = (unsigned int *)0x400FE000;
+unsigned int* SYSCTL = (unsigned int*)0x400FE000;
 
 //UART0 shares pins with Port A (RX: PA0, TX: PA1)
-unsigned char *PA = (unsigned char *)0x40004000;
+unsigned char* PA = (unsigned char*)0x40004000;
 
 // UART0 base
-unsigned char *UART0 = (unsigned char *)0x4000C000;
+unsigned char* UART0 = (unsigned char*)0x4000C000;
 unsigned char UART0_D __attribute__((at(0x4000C000)));
 volatile unsigned int UART0_STAT __attribute__((at(0x4000C018)));
 #define UART_FLAG		0x018
