@@ -1,3 +1,4 @@
+#include "../Shared/Register_Defs_C.h"
 
 volatile int PD_DATA_R __attribute__((at(0x400073FC)));       
 volatile int PD_DIR_R __attribute__((at(0x40007400)));
@@ -36,7 +37,7 @@ void UART0Init()
 {
 	// 0. set sysclk to main osc (8MHz crystal)
 	// final value should be 0x078E3B82 (remember little endian)
-	SYSCTL[0x60] = 0x82;
+	SYSCTL[0x60] = 0x078E3B82;
 	SYSCTL[0x61] = 0x3B;
 	SYSCTL[0x62] = 0x8E;
 	SYSCTL[0x63] = 0x07;
@@ -50,15 +51,15 @@ void UART0Init()
 	PA[GPIO_DEN] = 0x2;
   
 	// 3. disable uart0
-	UART0[UART_CTL] = 0x0;
+	UART0_CTL_R = 0x0;
   
 	// 4. set baudrate divisor
 	// BRD = 16e6/(16*9600)= 104.1667
-	UART0[UART_IBRD] = 104;	// integer portion: int(104.1667)=104
-	UART0[UART_FBRD] = 0xB;	// fractional portion: int(.1667*2^6+0.5)=11
+	UART0_IBRD_R = 104;	// integer portion: int(104.1667)=104
+	UART0_FBRD_R = 0xB;	// fractional portion: int(.1667*2^6+0.5)=11
 
 	// 5. set serial parameters: FIFO enabled, 8-bit word, start/stop/parity bits
-	UART0[UART_LCRH] = 0x72;
+	UART0_LCRH_R = 0x72;
   
 	// 6. enable tx rx and uart
 	UART0[UART_CTL+1] = 0x3;
