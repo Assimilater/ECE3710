@@ -35,27 +35,31 @@ volatile int RCGC2_R __attribute__((at(0x400FE108)));
 	
 void Init()
 {
-
-
 	// enable clock: uart then ports
 	SYSCTL_RCGC1_R = 0x1; //uart0
 	SYSCTL_RCGC2_R = 0x1; //portA
 	
-	// PA1: enable alt. func. and pin
-	GPIO_PORTA_AFSEL_R = 0x2;
-	GPIO_PORTA_DEN_R = 0x2;
+	// PB1,0: enable alt. func. and pin
+	GPIO_PORTA_CR_R = 0x3;
+	GPIO_PORTA_AFSEL_R = 0x3;
+	GPIO_PORTA_DEN_R = 0x3;
+	
+	// PB0: set as output
+	GPIO_PORTA_DIR_R = 0x1;
+	GPIO_PORTA_PUR_R = 0x1;
+	
+	//GPIO_PORTA_PCTL_R = 0x11; // configure alternate functionality see p.1344
   
-	// 3. disable uart0
-	UART0_CTL_R = 0x0;
+	// disable uart0
+	UART1_CTL_R = 0x0;
   
-	// 4. set baudrate divisor
 	// BRD = 16e6/(16*9600)= 104.1667
 	UART0_IBRD_R = 104;	// integer portion: int(104.1667)=104
 	UART0_FBRD_R = 0xB;	// fractional portion: int(.1667*2^6+0.5)=11
 
-	// 5. set serial parameters
-	UART0_LCRH_R = 0x72; //FIFO enabled, 8-bit word, start/stop/parity bits
-  
+	// set serial parameters
+	UART0_LCRH_R = 0x70; //FIFO enabled, 8-bit word
+	
 	// 6. enable tx rx and uart
 	//UART0[UART_CTL+1] = 0x3;
 	UART0_CTL_R = 0x301;
