@@ -17,7 +17,7 @@ volatile int RCGC2_R __attribute__((at(0x400FE108)));
 	#define GPIO_CR			0x0524
 
 	// system control base addr
-	unsigned char *SYSCTL = (unsigned char *) 0x400FE000;
+	unsigned int *SYSCTL = (unsigned int *) 0x400FE000;
 	
 	//UART0 shares pins with Port A (RX: PA0, TX: PA1)
 	unsigned char *PA = (unsigned char *) 0x40004000;
@@ -33,22 +33,17 @@ volatile int RCGC2_R __attribute__((at(0x400FE108)));
 	#define UART_CTL		0x030
 	#define UART_CC			0xFC8
 	
-void UART0Init()
+void Init()
 {
-	// 0. set sysclk to main osc (8MHz crystal)
-	// final value should be 0x078E3B82 (remember little endian)
-	SYSCTL[0x60] = 0x078E3B82;
-	SYSCTL[0x61] = 0x3B;
-	SYSCTL[0x62] = 0x8E;
-	SYSCTL[0x63] = 0x07;
 
-	// 1. enable clock: uart then port
-	SYSCTL[0x104] = 0x1; //uart0
-	SYSCTL[0x108] = 0x1; //portA
 
-	// 2. PA1: enable alt. func. and pin
-	PA[GPIO_AFSEL] = 0x2;
-	PA[GPIO_DEN] = 0x2;
+	// enable clock: uart then ports
+	SYSCTL_RCGC1_R = 0x1; //uart0
+	SYSCTL_RCGC2_R = 0x1; //portA
+	
+	// PA1: enable alt. func. and pin
+	GPIO_PORTA_AFSEL_R = 0x2;
+	GPIO_PORTA_DEN_R = 0x2;
   
 	// 3. disable uart0
 	UART0_CTL_R = 0x0;
@@ -58,29 +53,23 @@ void UART0Init()
 	UART0_IBRD_R = 104;	// integer portion: int(104.1667)=104
 	UART0_FBRD_R = 0xB;	// fractional portion: int(.1667*2^6+0.5)=11
 
-	// 5. set serial parameters: FIFO enabled, 8-bit word, start/stop/parity bits
-	UART0_LCRH_R = 0x72;
+	// 5. set serial parameters
+	UART0_LCRH_R = 0x72; //FIFO enabled, 8-bit word, start/stop/parity bits
   
 	// 6. enable tx rx and uart
-	UART0[UART_CTL+1] = 0x3;
-	UART0[UART_CTL] = 0x01;
+	//UART0[UART_CTL+1] = 0x3;
+	UART0_CTL_R = 0x301;
 }
 
 int main(void)
 {
-	UART0Init();
-	
 	unsigned char z;
 	
-	// initialize port: RMW-cycle so much better in C...
-	RCGC2_R |= RCGC2_PD; //activate port D: RCGC2 = RCGC2 | RCGC2_PD
-	PD_DIR_R |= 0x0F;    //make PD3-0 output
-	PD_AF_R &= 0x00;    //disable alt. func. 
-	PD_DEN_R |= 0x0F; //enable digital I/O on PD3-0
+	Init();
 	
 
 	
-	while(1)
+	while(z!=50)
 	{
 		for(z=0;z<16;z++)
 			PD_DATA_R = z;
