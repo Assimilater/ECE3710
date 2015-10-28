@@ -36,17 +36,18 @@ volatile unsigned int UART0_STAT __attribute__((at(0x4000C018)));
 
 #define GPIO_UNLOCK		0x4C4F434B
 
-void GenTable() {
-
-}
-
-char keyToAscii(char in) {
-
-	return 0;
-}
+// This is a look up table for basic key strokes. 
+// This translates from ps/2 to ascii.
+// The table starts at 0x15, and ends at 0x4D (meaning last index is 0x38)
+unsigned char ps2_to_ascii[] = {
+	'q','1',0x00,0x00,0x00,'z','s','a','w','2',0x00,
+	0x00,'c','x','d','e','4','3',0x00,0x00,' ','v','f','t','r','5',0x00,0x00,
+	'n','b','h','g','y','6',0x00,0x00,0x00,'m','j','u','7','8',0x00,
+	0x00,',','k','i','o','0','9',0x00,0x00,'.',0x00,'l','p'};
+unsigned char ascii(unsigned char in) { return in > 0x38 ? 0 : ps2_to_ascii[in-0x25]; }
 
 void keyHandler() {
-
+	
 }
 
 void TXAvailableHandler() {
@@ -106,10 +107,26 @@ void Init() {
 	//Note: The IM, IS, IBE, and IEV registers reset to 0.
 	//		The only line that is actually needed here
 	//		is enabling interrupts
+<<<<<<< HEAD
 	
 	
 	//PA2 will be connected to the keyboard clock
 
+=======
+	GPIO_PORTF_IM_R = 0; //disable port F's interrupt handler while configuring
+	GPIO_PORTF_IS_R = 0; //Sets interrupt to detect edge
+	GPIO_PORTF_IBE_R = 0; //interrupt only detects one edge
+	GPIO_PORTF_IEV_R = 0; //detects negative edge (button is active-low)
+	GPIO_PORTF_IM_R = 0x1; //enables interrupts for PF0
+	
+	
+	//PA2 will be connected to the keyboard clock
+	GPIO_PORTA_IM_R = 0; //disable port A's interrupt handler while configuring
+	GPIO_PORTA_IS_R = 0; //Sets interrupt to detect edge
+	GPIO_PORTA_IBE_R = 0; //interrupt only detects one edge
+	GPIO_PORTA_IEV_R = 0; //detects negative edge (button is active-low)
+	GPIO_PORTA_IM_R = 0x4; //enables interrupts for PA3
+>>>>>>> 5f569a6affb73aff357e43b4046cea19fc066f71
 	
 	NVIC_PRI0_R = 0xE0; //Sets priority of Port A to 7
 	
@@ -117,8 +134,9 @@ void Init() {
 }
 
 int main(void) {
+	unsigned int z = 0;
 	Init();
-	GenTable();
-
+	
+	while (1) { ++z; }
 	return 1;
 }
