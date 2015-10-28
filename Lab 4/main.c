@@ -63,16 +63,29 @@ void Init() {
 	// configure port A
 	GPIO_PORTA_CR_R = 0x7;
 	GPIO_PORTA_AFSEL_R = 0x7;
-	GPIO_PORTA_DEN_R = 0x7;
 	GPIO_PORTA_DIR_R = 0x1;
 	GPIO_PORTA_PUR_R = 0x1;
+	GPIO_PORTA_DEN_R = 0x7;
+	GPIO_PORTA_IM_R = 0; //Mask port A during interrupt config
+	GPIO_PORTA_IS_R = 0; //Sets interrupt to detect edge
+	GPIO_PORTA_IBE_R = 0; //interrupt only detects one edge
+	GPIO_PORTA_IEV_R = 0; //detects negative edge (button is active-low)
+	GPIO_PORTA_IM_R = 0x4; //enables interrupts for PA2
 	
 	// configure port F
 	GPIO_PORTF_CR_R = 0x1;
-	GPIO_PORTF_DEN_R = 0x1; // Set Digital Enable
 	GPIO_PORTF_PUR_R = 0x1; // Set Pull-Up Select
 	GPIO_PORTF_DIR_R = 0x0; // configure pins as input
 	GPIO_PORTF_AFSEL_R = 0x0; // Disable AF
+	GPIO_PORTF_DEN_R = 0x1; // Set Digital Enable
+	GPIO_PORTF_IM_R = 0; //Mask port F during interrupt config
+	GPIO_PORTF_IS_R = 0; //Sets interrupt to detect edge
+	GPIO_PORTF_IBE_R = 0; //interrupt only detects one edge
+	GPIO_PORTF_IEV_R = 0; //detects negative edge (button is active-low)
+	GPIO_PORTF_IM_R = 0x1; //enables interrupts for PF0
+	
+	//port A is num 1, port F is num 30
+	NVIC_EN0_R = 0x20000001; //enable interrupts from ports A and F
 
 	// disable uart0
 	UART1_CTL_R = 0x0;
@@ -93,19 +106,10 @@ void Init() {
 	//Note: The IM, IS, IBE, and IEV registers reset to 0.
 	//		The only line that is actually needed here
 	//		is enabling interrupts
-	GPIO_PORTF_IM_R = 0; //Mask port F during config
-	GPIO_PORTF_IS_R = 0; //Sets interrupt to detect edge
-	GPIO_PORTF_IBE_R = 0; //interrupt only detects one edge
-	GPIO_PORTF_IEV_R = 0; //detects negative edge (button is active-low)
-	GPIO_PORTF_IM_R = 0x1; //enables interrupts for PF0
 	
 	
 	//PA2 will be connected to the keyboard clock
-	GPIO_PORTA_IM_R = 0; //Mask port A during config
-	GPIO_PORTA_IS_R = 0; //Sets interrupt to detect edge
-	GPIO_PORTA_IBE_R = 0; //interrupt only detects one edge
-	GPIO_PORTA_IEV_R = 0; //detects negative edge (button is active-low)
-	GPIO_PORTA_IM_R = 0x4; //enables interrupts for PF0
+
 	
 	NVIC_PRI0_R = 0xE0; //Sets priority of Port A to 7
 	
