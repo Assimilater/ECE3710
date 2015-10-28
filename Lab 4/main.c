@@ -92,8 +92,8 @@ void Init() {
 	GPIO_PORTF_IEV_R = 0; //detects negative edge (button is active-low)
 	GPIO_PORTF_IM_R = 0x1; //enables interrupts for PF0
 	
-	//port A is num 1, port F is num 30
-	NVIC_EN0_R = 0x20000001; //enable interrupts from ports A and F
+	//port A is num 0, port F is num 30
+	NVIC_EN0_R = 0x40000001; //enable interrupts from ports A and F
 	
 	NVIC_PRI0_R = 0xE0; //Sets priority of Port A to 7
 
