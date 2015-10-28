@@ -94,6 +94,8 @@ void Init() {
 	
 	//port A is num 1, port F is num 30
 	NVIC_EN0_R = 0x20000001; //enable interrupts from ports A and F
+	
+	NVIC_PRI0_R = 0xE0; //Sets priority of Port A to 7
 
 	// disable uart0
 	UART1_CTL_R = 0x0;
@@ -109,16 +111,6 @@ void Init() {
 	//UART0[UART_CTL+1] = 0x3;
 	UART0_CTL_R = 0x301;
 
-	// Configure handlers
-	//PF0 will be connected to the button
-	//Note: The IM, IS, IBE, and IEV registers reset to 0.
-	//		The only line that is actually needed here
-	//		is enabling interrupts
-
-	
-	NVIC_PRI0_R = 0xE0; //Sets priority of Port A to 7
-	
-	
 }
 
 int main(void) {
