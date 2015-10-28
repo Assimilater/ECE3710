@@ -66,7 +66,7 @@ void Init() {
 	// set serial parameters
 	UART0_LCRH_R = 0x70; //FIFO enabled, 8-bit word
 
-	// 6. enable tx rx and uart
+	// enable tx rx and uart
 	//UART0[UART_CTL+1] = 0x3;
 	UART0_CTL_R = 0x301;
 }
