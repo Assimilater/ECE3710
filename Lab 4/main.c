@@ -61,9 +61,9 @@ void Init() {
 	GPIO_PORTB_LOCK_R = GPIO_UNLOCK; //unlock portF
 
 	// configure port A
-	GPIO_PORTA_CR_R = 0x3;
-	GPIO_PORTA_AFSEL_R = 0x3;
-	GPIO_PORTA_DEN_R = 0x3;
+	GPIO_PORTA_CR_R = 0x7;
+	GPIO_PORTA_AFSEL_R = 0x7;
+	GPIO_PORTA_DEN_R = 0x7;
 	GPIO_PORTA_DIR_R = 0x1;
 	GPIO_PORTA_PUR_R = 0x1;
 	
@@ -89,6 +89,27 @@ void Init() {
 	UART0_CTL_R = 0x301;
 
 	// Configure handlers
+	//PF0 will be connected to the button
+	//Note: The IM, IS, IBE, and IEV registers reset to 0.
+	//		The only line that is actually needed here
+	//		is enabling interrupts
+	GPIO_PORTF_IM_R = 0; //Mask port F during config
+	GPIO_PORTF_IS_R = 0; //Sets interrupt to detect edge
+	GPIO_PORTF_IBE_R = 0; //interrupt only detects one edge
+	GPIO_PORTF_IEV_R = 0; //detects negative edge (button is active-low)
+	GPIO_PORTF_IM_R = 0x1; //enables interrupts for PF0
+	
+	
+	//PA2 will be connected to the keyboard clock
+	GPIO_PORTA_IM_R = 0; //Mask port A during config
+	GPIO_PORTA_IS_R = 0; //Sets interrupt to detect edge
+	GPIO_PORTA_IBE_R = 0; //interrupt only detects one edge
+	GPIO_PORTA_IEV_R = 0; //detects negative edge (button is active-low)
+	GPIO_PORTA_IM_R = 0x4; //enables interrupts for PF0
+	
+	NVIC_PRI0_R = 0xE0; //Sets priority of Port A to 7
+	
+	
 }
 
 int main(void) {
