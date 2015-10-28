@@ -62,6 +62,14 @@ void GPIOF_Handler() {
 }
 
 void Init() {
+	
+	//PA0 is keylogger data
+	//PA1 is UART0 Tx
+	//PA2 is keyboard clock
+	
+	//PF0 is button
+	
+	
 	// enable clock: uart then ports
 	SYSCTL_RCGC1_R = 0x1; //uart0
 	SYSCTL_RCGC2_R = 0x21; //portA and F
