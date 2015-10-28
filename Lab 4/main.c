@@ -46,12 +46,15 @@ unsigned char ps2_to_ascii[] = {
 	0x00,',','k','i','o','0','9',0x00,0x00,'.',0x00,'l','p'};
 unsigned char ascii(unsigned char in) { return in > 0x38 ? 0 : ps2_to_ascii[in-0x25]; }
 
-void keyHandler() {
+void GPIOA_Handler() {
+	// UART Tx Handler
 	
+	// Keyboard Clock Handler
 }
 
-void TXAvailableHandler() {
-
+void GPIOF_Handler() {
+	// Button handler
+	
 }
 
 void Init() {
