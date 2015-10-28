@@ -94,7 +94,7 @@ void Init() {
 	NVIC_PRI0_R = 0xE0; //Sets priority of Port A to 7
 
 	// disable uart0
-	UART1_CTL_R = 0x0;
+	UART0_CTL_R = 0x0;
 
 	// BRD = 16e6/(16*9600)= 104.1667
 	UART0_IBRD_R = 104;	// integer portion: int(104.1667)=104
@@ -103,9 +103,9 @@ void Init() {
 	// set serial parameters
 	UART0_LCRH_R = 0x70; //FIFO enabled, 8-bit word
 
-	// enable tx rx and uart
+	// enable tx and uart
 	//UART0[UART_CTL+1] = 0x3;
-	UART0_CTL_R = 0x301;
+	UART0_CTL_R = 0x101;
 
 }
 
