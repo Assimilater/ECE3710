@@ -47,9 +47,13 @@ unsigned char ps2_to_ascii[] = {
 unsigned char ascii(unsigned char in) { return in > 0x38 ? 0 : ps2_to_ascii[in-0x25]; }
 
 void GPIOA_Handler() {
+	// Keyboard Clock Handler
+	
+}
+
+void GPIOB_Handler() {
 	// UART Tx Handler
 	
-	// Keyboard Clock Handler
 }
 
 void GPIOF_Handler() {
