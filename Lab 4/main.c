@@ -67,7 +67,7 @@ void Init() {
 	GPIO_PORTA_DIR_R = 0x1;
 	GPIO_PORTA_PUR_R = 0x1;
 	GPIO_PORTA_DEN_R = 0x7;
-	GPIO_PORTA_IM_R = 0; //Mask port A during interrupt config
+	GPIO_PORTA_IM_R = 0; //disable port A's interrupt handler while configuring
 	GPIO_PORTA_IS_R = 0; //Sets interrupt to detect edge
 	GPIO_PORTA_IBE_R = 0; //interrupt only detects one edge
 	GPIO_PORTA_IEV_R = 0; //detects negative edge (button is active-low)
@@ -79,7 +79,7 @@ void Init() {
 	GPIO_PORTF_DIR_R = 0x0; // configure pins as input
 	GPIO_PORTF_AFSEL_R = 0x0; // Disable AF
 	GPIO_PORTF_DEN_R = 0x1; // Set Digital Enable
-	GPIO_PORTF_IM_R = 0; //Mask port F during interrupt config
+	GPIO_PORTF_IM_R = 0; //disable port F's interrupt handler while configuring
 	GPIO_PORTF_IS_R = 0; //Sets interrupt to detect edge
 	GPIO_PORTF_IBE_R = 0; //interrupt only detects one edge
 	GPIO_PORTF_IEV_R = 0; //detects negative edge (button is active-low)
@@ -107,26 +107,7 @@ void Init() {
 	//Note: The IM, IS, IBE, and IEV registers reset to 0.
 	//		The only line that is actually needed here
 	//		is enabling interrupts
-<<<<<<< HEAD
-	
-	
-	//PA2 will be connected to the keyboard clock
 
-=======
-	GPIO_PORTF_IM_R = 0; //disable port F's interrupt handler while configuring
-	GPIO_PORTF_IS_R = 0; //Sets interrupt to detect edge
-	GPIO_PORTF_IBE_R = 0; //interrupt only detects one edge
-	GPIO_PORTF_IEV_R = 0; //detects negative edge (button is active-low)
-	GPIO_PORTF_IM_R = 0x1; //enables interrupts for PF0
-	
-	
-	//PA2 will be connected to the keyboard clock
-	GPIO_PORTA_IM_R = 0; //disable port A's interrupt handler while configuring
-	GPIO_PORTA_IS_R = 0; //Sets interrupt to detect edge
-	GPIO_PORTA_IBE_R = 0; //interrupt only detects one edge
-	GPIO_PORTA_IEV_R = 0; //detects negative edge (button is active-low)
-	GPIO_PORTA_IM_R = 0x4; //enables interrupts for PA3
->>>>>>> 5f569a6affb73aff357e43b4046cea19fc066f71
 	
 	NVIC_PRI0_R = 0xE0; //Sets priority of Port A to 7
 	
