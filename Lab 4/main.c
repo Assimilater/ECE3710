@@ -52,7 +52,7 @@ void UART1_Handler() {
 //---------------------------------------------------------------------------------------+
 void GPIOF_Handler() {
 	static bool enabled = true;
-	GPIO_PORTF_ICR_R = 0x1; // Clears interrupt
+	GPIO_PORTF_ICR_R = 0x11; // Clears interrupt
 	
 	enabled = enabled == true ? false : true;
 	if (enabled) {
@@ -101,13 +101,14 @@ void InitConfig() {
 	GPIO_PORTB_DEN_R = 0x2;
 	
 	// configure port F
-	GPIO_PORTF_CR_R = 0xE;
 	GPIO_PORTF_LOCK_R = GPIO_UNLOCK; //unlock portF
 	
-	GPIO_PORTF_PUR_R = 0x11; // Set Pull-Up Select
-	GPIO_PORTF_DIR_R = 0x0E; // configure pins 0 and 4 as input and 1-3 as output
-	GPIO_PORTF_AFSEL_R = 0x0; // Disable AF
+	GPIO_PORTF_CR_R = 0x1F;
 	GPIO_PORTF_DEN_R = 0x1F; // Set Digital Enable
+	GPIO_PORTF_PUR_R = 0x11; // Set Pull-Up Select
+	
+	GPIO_PORTF_DIR_R = 0x0E; // configure pins 0 and 4 as input and 1-3 as output
+	
 	GPIO_PORTF_IM_R = 0; //disable port F's interrupt handler while configuring
 	GPIO_PORTF_IS_R = 0; //Sets interrupt to detect edge
 	GPIO_PORTF_IBE_R = 0; //interrupt only detects one edge
