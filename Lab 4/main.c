@@ -30,10 +30,10 @@ unsigned char ascii(unsigned char in) {
 //---------------------------------------------------------------------------------------+
 // Pointers for managing the ascii buffer (that is to say, the key log)                  |
 //---------------------------------------------------------------------------------------+
-// Insert variables used in UART1, and GPIOA
-char memory[500];
-int q = 0; 
 #define KEYBOARD_DATA (*((volatile unsigned int *)0x42087F8C)) // PF3: 0x42000000 + 32*0x43FC + 4*3
+const int BUFFER_SIZE = 500;
+char memory[BUFFER_SIZE + 2];
+int start = 0, end = 0;
 
 //---------------------------------------------------------------------------------------+
 // Interrupt handler used to add characters to the key log buffer                        |
@@ -45,6 +45,7 @@ void GPIOA_Handler() {
 	static bool ignore = false;
 	
 	GPIO_PORTA_ICR_R = 0x4; // Clears interrupt
+	if (end == BUFFER_SIZE) { return; } // Don't overflow our buffer!
 	
 	if (bit > 0){
 		temp += KEYBOARD_DATA << (bit++ - 1);
@@ -60,7 +61,7 @@ void GPIOA_Handler() {
 		} else { // Full character
 			temp = ascii(temp);
 			if (temp > 0) {
-				memory[q++] = temp;
+				memory[end++] = temp;
 			}
 		}
 	} else if (bit == 11) {
@@ -74,10 +75,14 @@ void GPIOA_Handler() {
 //---------------------------------------------------------------------------------------+
 void UART1_Handler() {
 	UART1_ICR_R = 0x20; // Clears interrupt
+	if (end == 0) { return; }
 	
 	// Check bit 5 for txfull flag and ascii buffer for remaining data to send
-	while (!(UART1_FR_R & 0x20) && 0) { // TODO: Check if ascii stream is finished
-		UART1_DR_R = 0; // enter byte to write
+	while (!(UART1_FR_R & 0x20) && start != end) { // TODO: Check if ascii stream is finished
+		UART1_DR_R = memory[start++]; // write a byte to the buffer
+	}
+	if (start == end) {
+		start = end = 0;
 	}
 }
 
@@ -104,6 +109,12 @@ void GPIOF_Handler() {
 		
 		// Disable GPIOA_Handler
 		GPIO_PORTA_IM_R = 0;
+		
+		// Add a \r\n
+		memory[end++] = '\r';
+		memory[end++] = '\n';
+		
+		// Start sending data via UART
 		UART1_Handler();
 	}
 }
