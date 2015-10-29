@@ -78,7 +78,7 @@ void Init() {
 	SYSCTL_RCGC1_R = 0x2; //UART1
 	SYSCTL_RCGC2_R = 0x21; //portA and F
 	
-	GPIO_PORTB_LOCK_R = GPIO_UNLOCK; //unlock portF
+	GPIO_PORTF_LOCK_R = GPIO_UNLOCK; //unlock portF
 
 	// configure port A
 	GPIO_PORTA_CR_R = 0xC;
@@ -92,9 +92,9 @@ void Init() {
 	GPIO_PORTA_IM_R = 0x4; //enables interrupts for PA2
 	
 	// configure port B
-	GPIO_PORTA_CR_R = 0x2;
-	GPIO_PORTA_AFSEL_R = 0x2;
-	GPIO_PORTA_DEN_R = 0x2;
+	GPIO_PORTB_CR_R = 0x2;
+	GPIO_PORTB_AFSEL_R = 0x2;
+	GPIO_PORTB_DEN_R = 0x2;
 	
 	// configure port F
 	GPIO_PORTF_CR_R = 0x1;
