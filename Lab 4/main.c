@@ -56,9 +56,13 @@ void GPIOF_Handler() {
 	if (enabled) {
 		// Turn light green
 		// Enable GPIOA_Handler
+		GPIO_PORTA_IM_R = 0x4;
+		GPIO_PORTA_ICR_R = 0x2; // Clears interrupt (just in case)
+		
 	} else {
 		// Turn light red
 		// Disable GPIOA_Handler
+		GPIO_PORTA_IM_R = 0;
 		UART0_Handler();
 	}
 }
@@ -68,11 +72,9 @@ void Init() {
 	//PA0 is keylogger data
 	//PA1 is UART0 Tx
 	//PA2 is keyboard clock
-	
 	//PF0 is button
 	
-	
-	// enable clock: uart then ports
+	// enable clocks
 	SYSCTL_RCGC1_R = 0x1; //uart0
 	SYSCTL_RCGC2_R = 0x21; //portA and F
 	
@@ -119,8 +121,8 @@ void Init() {
 	
 	UART0_IFLS_R = 0x3; // bit in UARTRIS_R is set when Tx FIFO <= 1/4 full
 	UART0_IM_R = 0x20; // enables interrupts for Tx
+	
 	// enable tx and uart
-	//UART0[UART_CTL+1] = 0x3;
 	UART0_CTL_R = 0x101;
 
 }
