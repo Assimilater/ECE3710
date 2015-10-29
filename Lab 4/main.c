@@ -52,7 +52,7 @@ void GPIOF_Handler() {
 	static bool enabled = false;
 	GPIO_PORTF_ICR_R = 0x1; // Clears interrupt
 	
-	enabled = !enabled;
+	enabled = enabled == true ? false : true;
 	if (enabled) {
 		// Turn light green
 		// Enable GPIOA_Handler
