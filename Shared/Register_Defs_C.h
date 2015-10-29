@@ -92,6 +92,7 @@
 #define GPIO_PORTB_DEN_R        (*((volatile unsigned long *)0x4000551C))
 #define GPIO_PORTB_LOCK_R       (*((volatile unsigned long *)0x40005520))
 #define GPIO_PORTB_CR_R         (*((volatile unsigned long *)0x40005524))
+#define GPIO_PORTB_PCTL_R         (*((volatile unsigned long *)0x4000552C))
 
 //*****************************************************************************
 //

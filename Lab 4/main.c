@@ -141,6 +141,7 @@ void InitConfig() {
 	GPIO_PORTB_CR_R = 0x2;
 	GPIO_PORTB_AFSEL_R = 0x2;
 	GPIO_PORTB_DEN_R = 0x2;
+	GPIO_PORTB_PCTL_R = 0x11;
 	
 	// configure port F
 	GPIO_PORTF_LOCK_R = GPIO_UNLOCK; //unlock portF
