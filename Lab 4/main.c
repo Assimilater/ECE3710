@@ -13,13 +13,13 @@ typedef char bool;
 
 //---------------------------------------------------------------------------------------+
 // Lookup table for converting ps/2 key strokes to ascii                                 |
-// The table starts at 0x15, and ends at 0x4D (meaning last index is 0x38)               |
+// The table starts at 0x15 and ends at 0x4D (meaning last index is 0x38)                |
 //---------------------------------------------------------------------------------------+
 unsigned char ps2_to_ascii[] = {
 	'q','1',0x00,0x00,0x00,'z','s','a','w','2',0x00,
 	0x00,'c','x','d','e','4','3',0x00,0x00,' ','v','f','t','r','5',0x00,0x00,
 	'n','b','h','g','y','6',0x00,0x00,0x00,'m','j','u','7','8',0x00,
-	0x00,',','k','i','o','0','9',0x00,0x00,'.',0x00,'l',0x00, 'p'
+	0x00,',','k','i','o','0','9',0x00,0x00,'.',0x00,'l',0x00,'p'
 };
 unsigned char ascii(unsigned char in) {
 	if (in < 0x15) { return 0; }
@@ -138,9 +138,11 @@ void InitConfig() {
 	GPIO_PORTA_IM_R = 0x4; //enables interrupts for PA2
 	
 	// configure port B
-	GPIO_PORTB_CR_R = 0x2;
-	GPIO_PORTB_AFSEL_R = 0x2;
-	GPIO_PORTB_DEN_R = 0x2;
+	GPIO_PORTB_CR_R = 0x3;
+	GPIO_PORTB_AFSEL_R = 0x3;
+	GPIO_PORTB_DEN_R = 0x3;
+	GPIO_PORTB_PUR_R = 0x1;
+	GPIO_PORTB_DIR_R = 0x1;
 	
 	// configure port F
 	GPIO_PORTF_LOCK_R = GPIO_UNLOCK; //unlock portF
