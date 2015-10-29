@@ -19,7 +19,7 @@ unsigned char ps2_to_ascii[] = {
 	'q','1',0x00,0x00,0x00,'z','s','a','w','2',0x00,
 	0x00,'c','x','d','e','4','3',0x00,0x00,' ','v','f','t','r','5',0x00,0x00,
 	'n','b','h','g','y','6',0x00,0x00,0x00,'m','j','u','7','8',0x00,
-	0x00,',','k','i','o','0','9',0x00,0x00,'.',0x00,'l','p'
+	0x00,',','k','i','o','0','9',0x00,0x00,'.',0x00,'l',0x00, 'p'
 };
 unsigned char ascii(unsigned char in) {
 	if (in < 0x15) { return 0; }
@@ -44,11 +44,14 @@ void GPIOA_Handler() {
 	static int bit = 0;
 	static bool ignore = false;
 	
-	GPIO_PORTA_ICR_R = 0x2; // Clears interrupt
+	GPIO_PORTA_ICR_R = 0x4; // Clears interrupt
 	
 	if (bit > 0){
 		temp += KEYBOARD_DATA << (bit++ - 1);
+	} else {
+		bit++;
 	}
+	
 	if (bit == 9) {
 		if (temp == check) {
 			ignore = true;
@@ -116,9 +119,6 @@ void InitConfig() {
 	SYSCTL_RCGC2_R = 0x23; //port A, B, and F
 
 	// configure port A
-	GPIO_PORTA_CR_R = 0xC;
-	GPIO_PORTA_DIR_R = 0x8;
-	GPIO_PORTA_PUR_R = 0x8;
 	GPIO_PORTA_DEN_R = 0xC;
 	GPIO_PORTA_IM_R = 0; //disable port A's interrupt handler while configuring
 	GPIO_PORTA_IS_R = 0; //Sets interrupt to detect edge
