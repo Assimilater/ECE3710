@@ -51,9 +51,11 @@ void GPIOA_Handler() {
 	
 }
 
-void GPIOB_Handler() {
+void UART0_Handler() {
 	// UART Tx Handler
+	UART0_ICR_R = 0x20; //Tx interrupt clear
 	
+	UART0_FR_R; //check bit 5 for full tx
 }
 
 void GPIOF_Handler() {
@@ -78,7 +80,7 @@ void Init() {
 
 	// configure port A
 	GPIO_PORTA_CR_R = 0x7;
-	GPIO_PORTA_AFSEL_R = 0x7;
+	GPIO_PORTA_AFSEL_R = 0x2;
 	GPIO_PORTA_DIR_R = 0x1;
 	GPIO_PORTA_PUR_R = 0x1;
 	GPIO_PORTA_DEN_R = 0x7;
@@ -114,7 +116,9 @@ void Init() {
 
 	// set serial parameters
 	UART0_LCRH_R = 0x70; //FIFO enabled, 8-bit word
-
+	
+	UART0_IFLS_R = 0x3; // bit in UARTRIS_R is set when Tx FIFO <= 1/4 full
+	UART0_IM_R = 0x20; // enables interrupts for Tx
 	// enable tx and uart
 	//UART0[UART_CTL+1] = 0x3;
 	UART0_CTL_R = 0x101;
