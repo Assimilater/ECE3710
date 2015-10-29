@@ -36,6 +36,7 @@ volatile unsigned int UART0_STAT __attribute__((at(0x4000C018)));
 
 #define GPIO_UNLOCK		0x4C4F434B
 
+
 // This is a look up table for basic key strokes. 
 // This translates from ps/2 to ascii.
 // The table starts at 0x15, and ends at 0x4D (meaning last index is 0x38)
@@ -48,6 +49,7 @@ unsigned char ascii(unsigned char in) { return in > 0x38 ? 0 : ps2_to_ascii[in-0
 
 void GPIOA_Handler() {
 	// Keyboard Clock Handler
+	GPIO_PORTA_ICR_R = 0x2; // Clears interrupt
 	
 }
 
@@ -60,6 +62,7 @@ void UART0_Handler() {
 
 void GPIOF_Handler() {
 	// Button handler
+	GPIO_PORTF_ICR_R = 0x1; // Clears interrupt
 	
 }
 
