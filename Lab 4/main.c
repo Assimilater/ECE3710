@@ -144,13 +144,10 @@ void InitConfig() {
 	
 	// configure port F
 	GPIO_PORTF_LOCK_R = GPIO_UNLOCK; //unlock portF
-	
 	GPIO_PORTF_CR_R = 0x1F;
 	GPIO_PORTF_DEN_R = 0x1F; // Set Digital Enable
 	GPIO_PORTF_PUR_R = 0x11; // Set Pull-Up Select
-	
 	GPIO_PORTF_DIR_R = 0x0E; // configure pins 0 and 4 as input and 1-3 as output
-	
 	GPIO_PORTF_IM_R = 0; //disable port F's interrupt handler while configuring
 	GPIO_PORTF_IS_R = 0; //Sets interrupt to detect edge
 	GPIO_PORTF_IBE_R = 0; //interrupt only detects one edge
@@ -159,27 +156,18 @@ void InitConfig() {
 	
 	//port A is num 0, port F is num 30
 	NVIC_EN0_R = 0x40000041; //enable interrupts from ports A and F and UART
-	
 	NVIC_PRI0_R = 0xE0; //Sets priority of Port A to 7
 
-	// disable UART1
-	UART1_CTL_R = 0x0;
-
-	// BRD = 16e6/(16*9600)= 104.1667
+	UART1_CTL_R = 0x0;	// disable UART1 while configuring
+						// BRD = 16e6/(16*9600)= 104.1667
 	UART1_IBRD_R = 104;	// integer portion: int(104.1667)=104
 	UART1_FBRD_R = 0xB;	// fractional portion: int(.1667*2^6+0.5)=11
-
-	// set serial parameters
 	UART1_LCRH_R = 0x70; //FIFO enabled, 8-bit word
-	
 	UART1_CC_R = 0; //Use system clock
 	
 	UART1_IFLS_R = 0x3; // bit in UARTRIS_R is set when Tx FIFO <= 1/4 full
 	UART1_IM_R = 0x20; // enables interrupts for Tx
-	
-	// enable tx and uart
-	UART1_CTL_R = 0x101;
-
+	UART1_CTL_R = 0x301; // enable tx and uart
 }
 
 int main(void) {
