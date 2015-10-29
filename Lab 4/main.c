@@ -34,7 +34,7 @@ unsigned char ascii(unsigned char in) {
 char memory[500];
 int q = 0; 
 #define KEYBOARD_DATA (*((volatile unsigned int *)0x42087F8C)) // PF3: 0x42000000 + 32*0x43FC + 4*3
-	
+
 //---------------------------------------------------------------------------------------+
 // Interrupt handler used to add characters to the key log buffer                        |
 //---------------------------------------------------------------------------------------+
@@ -50,17 +50,15 @@ void GPIOA_Handler() {
 		temp += KEYBOARD_DATA << (bit++ - 1);
 	}
 	if (bit == 9) {
-		if (temp == check || ignore == true) {
-			if (ignore == true) {
-				ignore = false;
+		if (temp == check) {
+			ignore = true;
+		} else if (ignore) {
+			ignore = false;
+		} else { // Full character
+			temp = ascii(temp);
+			if (temp > 0) {
+				memory[q++] = temp;
 			}
-			else {
-				ignore = true;
-			}
-		}
-		else {
-			// Full character
-			memory[q++] = ascii(temp);
 		}
 	}
 	if (bit == 11) {
