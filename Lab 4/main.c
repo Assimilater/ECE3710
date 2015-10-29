@@ -116,7 +116,7 @@ void InitConfig() {
 	GPIO_PORTF_IM_R = 0x11; //enables interrupts for PF0 and PF4
 	
 	//port A is num 0, port F is num 30
-	NVIC_EN0_R = 0x40000001; //enable interrupts from ports A and F
+	NVIC_EN0_R = 0x40000041; //enable interrupts from ports A and F and UART
 	
 	NVIC_PRI0_R = 0xE0; //Sets priority of Port A to 7
 
