@@ -26,6 +26,7 @@ unsigned char ascii(unsigned char in) { return in > 0x38 ? 0 : ps2_to_ascii[in-0
 //---------------------------------------------------------------------------------------+
 void GPIOA_Handler() {
 	// Keyboard Clock Handler
+	GPIO_PORTA_ICR_R = 0x2; // Clears interrupt
 	
 }
 
@@ -48,6 +49,7 @@ void UART0_Handler() {
 void GPIOF_Handler() {
 	static bool enabled = false;
 	// Button handler
+	GPIO_PORTF_ICR_R = 0x1; // Clears interrupt
 	
 	
 }
