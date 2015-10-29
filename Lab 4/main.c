@@ -61,7 +61,7 @@ void GPIOA_Handler() {
 			}
 		}
 	}
-	if (bit == 11) {
+	else if (bit == 11) {
 		temp = bit = 0;
 	}
 	
