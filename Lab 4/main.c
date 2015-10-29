@@ -1,8 +1,8 @@
 #include "../Shared/Register_Defs_C.h"
 
 #define GPIO_UNLOCK 0x4C4F434B
-#define RED_LIGHT (*((volatile unsigned int *)0x424A7F84)) // PF1: 0x4200000 + 32*0x253FC + 4*1
-#define GREEN_LIGHT (*((volatile unsigned int *)0x424A7F8C)) // PF3: 0x4200000 + 32*0x253FC + 4*3
+#define RED_LIGHT (*((volatile unsigned int *)0x424A7F84)) // PF1: 0x42000000 + 32*0x253FC + 4*1
+#define GREEN_LIGHT (*((volatile unsigned int *)0x424A7F8C)) // PF3: 0x42000000 + 32*0x253FC + 4*3
 
 //---------------------------------------------------------------------------------------+
 // Boolean implementation (minus the nice data compaction afforded to c++)               |
@@ -26,13 +26,29 @@ unsigned char ascii(unsigned char in) { return in > 0x38 ? 0 : ps2_to_ascii[in-0
 // Pointers for managing the ascii buffer (that is to say, the key log)                  |
 //---------------------------------------------------------------------------------------+
 // Insert variables used in UART1, and GPIOA
-
+char memory[500];
+int q = 0; 
+#define KEYBOARD_DATA (*((volatile unsigned int *)0x42087F8C)) // PF3: 0x42000000 + 32*0x43FC + 4*3
+	
 //---------------------------------------------------------------------------------------+
 // Interrupt handler used to add characters to the key log buffer                        |
 //---------------------------------------------------------------------------------------+
 void GPIOA_Handler() {
 	GPIO_PORTA_ICR_R = 0x2; // Clears interrupt
 	
+	static char temp = 0;
+	static int bit = 0;
+	
+	if (bit > 0){
+		temp += KEYBOARD_DATA << (bit++ - 1);
+	}
+	if (bit == 9) {
+		memory[q++] = ascii(temp);
+		// Full character
+	}
+	if (bit == 11) {
+		temp = bit = 0;
+	}
 }
 
 //---------------------------------------------------------------------------------------+
