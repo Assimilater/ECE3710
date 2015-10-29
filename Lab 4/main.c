@@ -63,7 +63,7 @@ void GPIOA_Handler() {
 			memory[q++] = ascii(temp);
 		}
 	}
-	if (bit == 11) {
+	else if (bit == 11) {
 		temp = bit = 0;
 	}
 	
