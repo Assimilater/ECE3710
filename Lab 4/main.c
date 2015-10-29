@@ -19,8 +19,13 @@ unsigned char ps2_to_ascii[] = {
 	'q','1',0x00,0x00,0x00,'z','s','a','w','2',0x00,
 	0x00,'c','x','d','e','4','3',0x00,0x00,' ','v','f','t','r','5',0x00,0x00,
 	'n','b','h','g','y','6',0x00,0x00,0x00,'m','j','u','7','8',0x00,
-	0x00,',','k','i','o','0','9',0x00,0x00,'.',0x00,'l','p'};
-unsigned char ascii(unsigned char in) { return in > 0x38 ? 0 : ps2_to_ascii[in-0x25]; }
+	0x00,',','k','i','o','0','9',0x00,0x00,'.',0x00,'l','p'
+};
+unsigned char ascii(unsigned char in) {
+	if (in < 0x15) { return 0; }
+	if (in > 0x4D) { return 0; }
+	return ps2_to_ascii[in-0x15];
+}
 
 //---------------------------------------------------------------------------------------+
 // Pointers for managing the ascii buffer (that is to say, the key log)                  |
