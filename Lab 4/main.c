@@ -20,12 +20,15 @@ unsigned char ps2_to_ascii[] = {
 	0x00,',','k','i','o','0','9',0x00,0x00,'.',0x00,'l','p'};
 unsigned char ascii(unsigned char in) { return in > 0x38 ? 0 : ps2_to_ascii[in-0x25]; }
 
+//---------------------------------------------------------------------------------------+
+// Pointers for managing the ascii buffer (that is to say, the key log)                  |
+//---------------------------------------------------------------------------------------+
+// Insert variables used in UART0, and GPIOA
 
 //---------------------------------------------------------------------------------------+
 // Interrupt handler used to add characters to the key log buffer                        |
 //---------------------------------------------------------------------------------------+
 void GPIOA_Handler() {
-	// Keyboard Clock Handler
 	GPIO_PORTA_ICR_R = 0x2; // Clears interrupt
 	
 }
@@ -34,10 +37,9 @@ void GPIOA_Handler() {
 // Interrupt handler used fill the TX buffer when there's room and data left to send     |
 //---------------------------------------------------------------------------------------+
 void UART0_Handler() {
-	//Tx interrupt clear
-	UART0_ICR_R = 0x20;
+	UART0_ICR_R = 0x20; // Clears interrupt
 	
-	// check bit 5 for full tx and fill until full
+	// Check bit 5 for txfull flag and ascii buffer for remaining data to send
 	while (!(UART0_FR_R & 0x20) && 1) { // TODO: Check if ascii stream is finished
 		UART0_DR_R = 0; // enter byte to write
 	}
@@ -48,10 +50,17 @@ void UART0_Handler() {
 //---------------------------------------------------------------------------------------+
 void GPIOF_Handler() {
 	static bool enabled = false;
-	// Button handler
 	GPIO_PORTF_ICR_R = 0x1; // Clears interrupt
 	
-	
+	enabled = !enabled;
+	if (enabled) {
+		// Turn light green
+		// Enable GPIOA_Handler
+	} else {
+		// Turn light red
+		// Disable GPIOA_Handler
+		UART0_Handler();
+	}
 }
 
 void Init() {
