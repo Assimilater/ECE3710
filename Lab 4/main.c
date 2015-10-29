@@ -172,6 +172,8 @@ void InitConfig() {
 	// set serial parameters
 	UART1_LCRH_R = 0x70; //FIFO enabled, 8-bit word
 	
+	UART1_CC_R = 0; //Use system clock
+	
 	UART1_IFLS_R = 0x3; // bit in UARTRIS_R is set when Tx FIFO <= 1/4 full
 	UART1_IM_R = 0x20; // enables interrupts for Tx
 	

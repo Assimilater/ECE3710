@@ -216,6 +216,7 @@
 #define UART1_RIS_R             (*((volatile unsigned long *)0x4000D03C))
 #define UART1_MIS_R             (*((volatile unsigned long *)0x4000D040))
 #define UART1_ICR_R             (*((volatile unsigned long *)0x4000D044))
+#define UART1_CC_R             (*((volatile unsigned long *)0x4000DFC8))
 
 //*****************************************************************************
 //
