@@ -34,21 +34,34 @@ int q = 0;
 // Interrupt handler used to add characters to the key log buffer                        |
 //---------------------------------------------------------------------------------------+
 void GPIOA_Handler() {
-	GPIO_PORTA_ICR_R = 0x2; // Clears interrupt
-	
+	const char check = 0xF0;
 	static char temp = 0;
 	static int bit = 0;
+	static bool ignore = false;
+	
+	GPIO_PORTA_ICR_R = 0x2; // Clears interrupt
 	
 	if (bit > 0){
 		temp += KEYBOARD_DATA << (bit++ - 1);
 	}
 	if (bit == 9) {
-		memory[q++] = ascii(temp);
-		// Full character
+		if (temp == check || ignore == true) {
+			if (ignore == true) {
+				ignore = false;
+			}
+			else {
+				ignore = true;
+			}
+		}
+		else {
+			// Full character
+			memory[q++] = ascii(temp);
+		}
 	}
 	if (bit == 11) {
 		temp = bit = 0;
 	}
+	
 }
 
 //---------------------------------------------------------------------------------------+
