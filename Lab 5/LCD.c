@@ -1,9 +1,8 @@
 #include "LCD.h"
-//C:\Users\John\Source\School\ECE 3710\Lab 5
 
-void LCD_Init()
-{
-	int i;
+void LCD_Init() {
+    /*
+    int i;
     writeCmd(0xCB); //Power Control A
     writeDat(0x39);
     writeDat(0x2C);
@@ -13,7 +12,7 @@ void LCD_Init()
 
     writeCmd(0xCF); //Power Control B
     writeDat(0x00);
-    writeDat(0XC1); //**Driver specification has 0x81
+    writeDat(0XC1); //Driver specification has 0x81
     writeDat(0X30);
 
     writeCmd(0xE8); //Driver timing control A
@@ -103,8 +102,9 @@ void LCD_Init()
     writeDat(0x0F);
 
     writeCmd(0x11);    //Exit Sleep
-		for( i = 0; i < 20000; i++) { i++;}
+        for( i = 0; i < 20000; i++) { i++;}
 
     writeCmd(0x29);    //Display on
     //writeCmd(0x2c);
+    */
 }
