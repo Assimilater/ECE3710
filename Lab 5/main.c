@@ -1,4 +1,5 @@
-#include "Controller.h"
+#include "../Shared/Controller.h"
+#include "../Shared/bool.h"
 #include "LCD.h"
 
 void exec() {
