@@ -1,4 +1,5 @@
 #include "../Shared/Controller.h"
+#include "../Shared/GPIO.h"
 #include "../Shared/bool.h"
 #include "LCD.h"
 
