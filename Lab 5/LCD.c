@@ -1,29 +1,32 @@
 #include "LCD.h"
 
-void LCD_WriteCmd(unsigned char cmd) {
-	GPIO.PortD->DATA.bit2 = 0; // CSX "LCD, pay attention!"
-	GPIO.PortD->DATA.bit3 = 0; // DCX cmd
-	GPIO.PortD->DATA.bit6 = 0; // WRX
+void LCD_WriteCmd(const unsigned char cmd) {
+	LCD_CSX = 0; // CSX "LCD, pay attention!"
+	LCD_DCX = 0; // DCX cmd
+	LCD_WRX = 0; // WRX
 	GPIO.PortB->DATA.byte[0] = cmd;
-	GPIO.PortD->DATA.bit6 = 1; // WRX read on +edge	
+	LCD_WRX = 1; // WRX read on +edge
 }
-void LCD_WriteData(unsigned char* data, int len) {
+void LCD_WriteData(const unsigned char* data, const int len) {
 	int i;
-	GPIO.PortD->DATA.bit3 = 1; // DCX Data
+	LCD_CSX = 0; // CSX "LCD, pay attention!"
+	LCD_DCX = 1; // DCX Data
 	for (i = 0; i < len; ++i) {
-		// LCD_WriteData(data[i]);
-		GPIO.PortD->DATA.bit6 = 0; // WRX
+		LCD_WRX = 0; // WRX
 		GPIO.PortB->DATA.byte[0] = data[i];
-		GPIO.PortD->DATA.bit6 = 1; // WRX read on +edge
+		LCD_WRX = 1; // WRX read on +edge
 	}
-	GPIO.PortD->DATA.bit2 = 0; // CSX "LCD, pay attention!"
 
 }
-void LCD_WriteBlock(unsigned char* data, int len, int n) {
+void LCD_WriteBlock(const unsigned char* data, const int len, const int n) {
 	int i, j;
+	LCD_CSX = 0; // CSX "LCD, pay attention!"
+	LCD_DCX = 1; // DCX Data
 	for (j = 0; j < n; ++j) {
 		for (i = 0; i < len; ++i) {
-			// LCD_WriteData(data[i]);
+			LCD_WRX = 0; // WRX
+			GPIO.PortB->DATA.byte[0] = data[i];
+			LCD_WRX = 1; // WRX read on +edge
 		}
 	}
 }
