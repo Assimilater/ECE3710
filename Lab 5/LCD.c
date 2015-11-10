@@ -1,22 +1,29 @@
 #include "LCD.h"
 
-void LCD_WriteCmd(unsigned char* cmd, int len) {
-	int i;
-	for (i = 0; i < len; ++i) {
-		// writeCmd(cmd[i]);
-	}
+void LCD_WriteCmd(unsigned char cmd) {
+	GPIO.PortD->DATA.bit2 = 0; // CSX "LCD, pay attention!"
+	GPIO.PortD->DATA.bit3 = 0; // DCX cmd
+	GPIO.PortD->DATA.bit6 = 0; // WRX
+	GPIO.PortB->DATA.byte[0] = cmd;
+	GPIO.PortD->DATA.bit6 = 1; // WRX read on +edge	
 }
 void LCD_WriteData(unsigned char* data, int len) {
 	int i;
+	GPIO.PortD->DATA.bit3 = 1; // DCX Data
 	for (i = 0; i < len; ++i) {
-		// writeDat(data[i]);
+		// LCD_WriteData(data[i]);
+		GPIO.PortD->DATA.bit6 = 0; // WRX
+		GPIO.PortB->DATA.byte[0] = data[i];
+		GPIO.PortD->DATA.bit6 = 1; // WRX read on +edge
 	}
+	GPIO.PortD->DATA.bit2 = 0; // CSX "LCD, pay attention!"
+
 }
 void LCD_WriteBlock(unsigned char* data, int len, int n) {
 	int i, j;
 	for (j = 0; j < n; ++j) {
 		for (i = 0; i < len; ++i) {
-			// writeDat(data[i]);
+			// LCD_WriteData(data[i]);
 		}
 	}
 }
@@ -24,108 +31,104 @@ void LCD_WriteBlock(unsigned char* data, int len, int n) {
 void LCD_Test() {
 	/*
 	int i;
-	writeCmd(0xCB); //Power Control A
-	writeDat(0x39);
-	writeDat(0x2C);
-	writeDat(0x00);
-	writeDat(0x34);
-	writeDat(0x02);
+	LCD_WriteCmd(0xCB); //Power Control A
+	LCD_WriteData({0x39, 0x2C, 0x00, 0x34, 0x02}, 5);
 
-	writeCmd(0xCF); //Power Control B
-	writeDat(0x00);
-	writeDat(0XC1); //Driver specification has 0x81
-	writeDat(0X30);
+	LCD_WriteCmd(0xCF); //Power Control B
+	LCD_WriteData(0x00);
+	LCD_WriteData(0XC1); //Driver specification has 0x81
+	LCD_WriteData(0X30);
 
-	writeCmd(0xE8); //Driver timing control A
-	writeDat(0x85);
-	writeDat(0x00);
-	writeDat(0x78);
+	LCD_WriteCmd(0xE8); //Driver timing control A
+	LCD_WriteData(0x85);
+	LCD_WriteData(0x00);
+	LCD_WriteData(0x78);
 
-	writeCmd(0xEA); //Driver timing control B
-	writeDat(0x00);
-	writeDat(0x00);
+	LCD_WriteCmd(0xEA); //Driver timing control B
+	LCD_WriteData(0x00);
+	LCD_WriteData(0x00);
 
-	writeCmd(0xED); //Power on sequence control
-	writeDat(0x64);
-	writeDat(0x03);
-	writeDat(0X12);
-	writeDat(0X81);
+	LCD_WriteCmd(0xED); //Power on sequence control
+	LCD_WriteData(0x64);
+	LCD_WriteData(0x03);
+	LCD_WriteData(0X12);
+	LCD_WriteData(0X81);
 
-	writeCmd(0xF7); //Pump ratio control
-	writeDat(0x20);
+	LCD_WriteCmd(0xF7); //Pump ratio control
+	LCD_WriteData(0x20);
 
-	writeCmd(0xC0);    //Power control 1
-	writeDat(0x23);   //VRH[5:0]
+	LCD_WriteCmd(0xC0);    //Power control 1
+	LCD_WriteData(0x23);   //VRH[5:0]
 
-	writeCmd(0xC1);    //Power control 2
-	writeDat(0x10);   //SAP[2:0];BT[3:0]
+	LCD_WriteCmd(0xC1);    //Power control 2
+	LCD_WriteData(0x10);   //SAP[2:0];BT[3:0]
 
-	writeCmd(0xC5);    //VCM control
-	writeDat(0x3e); //对比度调节
-	writeDat(0x28);
+	LCD_WriteCmd(0xC5);    //VCM control
+	LCD_WriteData(0x3e); //对比度调节
+	LCD_WriteData(0x28);
 
-	writeCmd(0xC7);    //VCM control2
-	writeDat(0x86);  //--
+	LCD_WriteCmd(0xC7);    //VCM control2
+	LCD_WriteData(0x86);  //--
 
-	writeCmd(0x36);    // Memory Access Control
-	writeDat(0x48); //C8       //48 68竖屏//28 E8 横屏
+	LCD_WriteCmd(0x36);    // Memory Access Control
+	LCD_WriteData(0x48); //C8       //48 68竖屏//28 E8 横屏
 
-	writeCmd(0x3A); //Pixel format Set
-	writeDat(0x55);
+	LCD_WriteCmd(0x3A); //Pixel format Set
+	LCD_WriteData(0x55);
 
-	writeCmd(0xB1); //Frame Control
-	writeDat(0x00);
-	writeDat(0x18);
+	LCD_WriteCmd(0xB1); //Frame Control
+	LCD_WriteData(0x00);
+	LCD_WriteData(0x18);
 
-	writeCmd(0xB6);    // Display Function Control
-	writeDat(0x08);
-	writeDat(0x82);
-	writeDat(0x27);
+	LCD_WriteCmd(0xB6);    // Display Function Control
+	LCD_WriteData(0x08);
+	LCD_WriteData(0x82);
+	LCD_WriteData(0x27);
 
-	writeCmd(0xF2);    // 3Gamma Function Disable
-	writeDat(0x00);
+	LCD_WriteCmd(0xF2);    // 3Gamma Function Disable
+	LCD_WriteData(0x00);
 
-	writeCmd(0x26);    //Gamma curve selected
-	writeDat(0x01);
+	LCD_WriteCmd(0x26);    //Gamma curve selected
+	LCD_WriteData(0x01);
 
-	writeCmd(0xE0);    //Set Gamma
-	writeDat(0x0F);
-	writeDat(0x31);
-	writeDat(0x2B);
-	writeDat(0x0C);
-	writeDat(0x0E);
-	writeDat(0x08);
-	writeDat(0x4E);
-	writeDat(0xF1);
-	writeDat(0x37);
-	writeDat(0x07);
-	writeDat(0x10);
-	writeDat(0x03);
-	writeDat(0x0E);
-	writeDat(0x09);
-	writeDat(0x00);
+	LCD_WriteCmd(0xE0);    //Set Gamma
+	LCD_WriteData(0x0F);
+	LCD_WriteData(0x31);
+	LCD_WriteData(0x2B);
+	LCD_WriteData(0x0C);
+	LCD_WriteData(0x0E);
+	LCD_WriteData(0x08);
+	LCD_WriteData(0x4E);
+	LCD_WriteData(0xF1);
+	LCD_WriteData(0x37);
+	LCD_WriteData(0x07);
+	LCD_WriteData(0x10);
+	LCD_WriteData(0x03);
+	LCD_WriteData(0x0E);
+	LCD_WriteData(0x09);
+	LCD_WriteData(0x00);
 
-	writeCmd(0XE1);    //Set Gamma
-	writeDat(0x00);
-	writeDat(0x0E);
-	writeDat(0x14);
-	writeDat(0x03);
-	writeDat(0x11);
-	writeDat(0x07);
-	writeDat(0x31);
-	writeDat(0xC1);
-	writeDat(0x48);
-	writeDat(0x08);
-	writeDat(0x0F);
-	writeDat(0x0C);
-	writeDat(0x31);
-	writeDat(0x36);
-	writeDat(0x0F);
+	LCD_WriteCmd(0XE1);    //Set Gamma
+	LCD_WriteData(0x00);
+	LCD_WriteData(0x0E);
+	LCD_WriteData(0x14);
+	LCD_WriteData(0x03);
+	LCD_WriteData(0x11);
+	LCD_WriteData(0x07);
+	LCD_WriteData(0x31);
+	LCD_WriteData(0xC1);
+	LCD_WriteData(0x48);
+	LCD_WriteData(0x08);
+	LCD_WriteData(0x0F);
+	LCD_WriteData(0x0C);
+	LCD_WriteData(0x31);
+	LCD_WriteData(0x36);
+	LCD_WriteData(0x0F);
 
-	writeCmd(0x11);    //Exit Sleep
+	LCD_WriteCmd(0x11);    //Exit Sleep
 		for( i = 0; i < 20000; i++) { i++;}
 
-	writeCmd(0x29);    //Display on
-	//writeCmd(0x2c);
+	LCD_WriteCmd(0x29);    //Display on
+	//LCD_WriteCmd(0x2c);
 	*/
 }
