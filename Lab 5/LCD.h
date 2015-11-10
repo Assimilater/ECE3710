@@ -11,6 +11,8 @@
 //---------------------------------------------------------------------------------------+
 #include "LCD_Codes.h"
 extern code LCD_CODE_PWRA[SIZE_CODE_PWRA];
+extern code LCD_CODE_PWRB[SIZE_CODE_PWRB];
+extern code LCD_CODE_DTCA[SIZE_CODE_DTCA];
 
 //---------------------------------------------------------------------------------------+
 // Register definintions specific to the LCD                                             |

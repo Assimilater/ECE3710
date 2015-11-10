@@ -29,21 +29,17 @@ void LCD_WriteBlock(unsigned char* data, int len, int n) {
 }
 
 void LCD_Test() {
+	LCD_WriteCmd(LCD_CODE_PWRA[0]); // Power Control A
+	LCD_WriteData(LCD_CODE_PWRA + 1, SIZE_CODE_PWRA - 1);
+	
+	LCD_WriteCmd(LCD_CODE_PWRB[0]); // Power Control B
+	LCD_WriteData(LCD_CODE_PWRB + 1, SIZE_CODE_PWRB - 1);
+	
+	LCD_WriteCmd(LCD_CODE_DTCA[0]); // Driver timing control A
+	LCD_WriteData(LCD_CODE_DTCA + 1, SIZE_CODE_DTCA - 1);
+
 	/*
 	int i;
-	LCD_WriteCmd(0xCB); //Power Control A
-	LCD_WriteData({0x39, 0x2C, 0x00, 0x34, 0x02}, 5);
-
-	LCD_WriteCmd(0xCF); //Power Control B
-	LCD_WriteData(0x00);
-	LCD_WriteData(0XC1); //Driver specification has 0x81
-	LCD_WriteData(0X30);
-
-	LCD_WriteCmd(0xE8); //Driver timing control A
-	LCD_WriteData(0x85);
-	LCD_WriteData(0x00);
-	LCD_WriteData(0x78);
-
 	LCD_WriteCmd(0xEA); //Driver timing control B
 	LCD_WriteData(0x00);
 	LCD_WriteData(0x00);
