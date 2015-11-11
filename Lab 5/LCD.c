@@ -52,89 +52,54 @@ void LCD_Test() {
 	
 	LCD_WriteCmd(LCD_CODE_DTCA[0]); // Driver timing control A
 	LCD_WriteData(LCD_CODE_DTCA + 1, SIZE_CODE_DTCA - 1);
-
+	
+	LCD_WriteCmd(LCD_CODE_DTCB[0]); // Driver timing control B
+	LCD_WriteData(LCD_CODE_DTCB + 1, SIZE_CODE_DTCB - 1);
+	
+	LCD_WriteCmd(LCD_CODE_PSQC[0]); // Power on sequence control
+	LCD_WriteData(LCD_CODE_PSQC + 1, SIZE_CODE_PSQC - 1);
+	
+	LCD_WriteCmd(LCD_CODE_PMRC[0]); // Pump ratio control
+	LCD_WriteData(LCD_CODE_PMRC + 1, SIZE_CODE_PMRC - 1);
+	
+	LCD_WriteCmd(LCD_CODE_PCL1[0]); // Power control 1
+	LCD_WriteData(LCD_CODE_PCL1 + 1, SIZE_CODE_PCL1 - 1);
+	
+	LCD_WriteCmd(LCD_CODE_PCL2[0]); // Power control 2
+	LCD_WriteData(LCD_CODE_PCL2 + 1, SIZE_CODE_PCL2 - 1);
+	
+	LCD_WriteCmd(LCD_CODE_VCM1[0]); // VCM control
+	LCD_WriteData(LCD_CODE_VCM1 + 1, SIZE_CODE_VCM1 - 1);
+	
+	LCD_WriteCmd(LCD_CODE_VCM2[0]); // VCM control2
+	LCD_WriteData(LCD_CODE_VCM2 + 1, SIZE_CODE_VCM2 - 1);
+	
+	LCD_WriteCmd(LCD_CODE_MACL[0]); // Memory Access Control
+	LCD_WriteData(LCD_CODE_MACL + 1, SIZE_CODE_MACL - 1);
+	
+	LCD_WriteCmd(LCD_CODE_PXFS[0]); // Pixel format Set
+	LCD_WriteData(LCD_CODE_PXFS + 1, SIZE_CODE_PXFS - 1);
+	
+	LCD_WriteCmd(LCD_CODE_FMCL[0]); // Frame Control
+	LCD_WriteData(LCD_CODE_FMCL + 1, SIZE_CODE_FMCL - 1);
+	
+	LCD_WriteCmd(LCD_CODE_DFCL[0]); // Display Function Control
+	LCD_WriteData(LCD_CODE_DFCL + 1, SIZE_CODE_DFCL - 1);
+	
+	LCD_WriteCmd(LCD_CODE_3GFD[0]); // 3Gamma Function Disable
+	LCD_WriteData(LCD_CODE_3GFD + 1, SIZE_CODE_3GFD - 1);
+	
+	LCD_WriteCmd(LCD_CODE_GCSL[0]); // Gamma curve selected
+	LCD_WriteData(LCD_CODE_GCSL + 1, SIZE_CODE_GCSL - 1);
+	
+	LCD_WriteCmd(LCD_CODE_SGM0[0]); // Set Gamma 0
+	LCD_WriteData(LCD_CODE_SGM0 + 1, SIZE_CODE_SGM0 - 1);
+	
+	LCD_WriteCmd(LCD_CODE_SGM1[0]); // Set Gamma 1
+	LCD_WriteData(LCD_CODE_SGM1 + 1, SIZE_CODE_SGM1 - 1);
+	
 	/*
 	int i;
-	LCD_WriteCmd(0xEA); //Driver timing control B
-	LCD_WriteData(0x00);
-	LCD_WriteData(0x00);
-
-	LCD_WriteCmd(0xED); //Power on sequence control
-	LCD_WriteData(0x64);
-	LCD_WriteData(0x03);
-	LCD_WriteData(0X12);
-	LCD_WriteData(0X81);
-
-	LCD_WriteCmd(0xF7); //Pump ratio control
-	LCD_WriteData(0x20);
-
-	LCD_WriteCmd(0xC0);    //Power control 1
-	LCD_WriteData(0x23);   //VRH[5:0]
-
-	LCD_WriteCmd(0xC1);    //Power control 2
-	LCD_WriteData(0x10);   //SAP[2:0];BT[3:0]
-
-	LCD_WriteCmd(0xC5);    //VCM control
-	LCD_WriteData(0x3e); //对比度调节
-	LCD_WriteData(0x28);
-
-	LCD_WriteCmd(0xC7);    //VCM control2
-	LCD_WriteData(0x86);  //--
-
-	LCD_WriteCmd(0x36);    // Memory Access Control
-	LCD_WriteData(0x48); //C8       //48 68竖屏//28 E8 横屏
-
-	LCD_WriteCmd(0x3A); //Pixel format Set
-	LCD_WriteData(0x55);
-
-	LCD_WriteCmd(0xB1); //Frame Control
-	LCD_WriteData(0x00);
-	LCD_WriteData(0x18);
-
-	LCD_WriteCmd(0xB6);    // Display Function Control
-	LCD_WriteData(0x08);
-	LCD_WriteData(0x82);
-	LCD_WriteData(0x27);
-
-	LCD_WriteCmd(0xF2);    // 3Gamma Function Disable
-	LCD_WriteData(0x00);
-
-	LCD_WriteCmd(0x26);    //Gamma curve selected
-	LCD_WriteData(0x01);
-
-	LCD_WriteCmd(0xE0);    //Set Gamma
-	LCD_WriteData(0x0F);
-	LCD_WriteData(0x31);
-	LCD_WriteData(0x2B);
-	LCD_WriteData(0x0C);
-	LCD_WriteData(0x0E);
-	LCD_WriteData(0x08);
-	LCD_WriteData(0x4E);
-	LCD_WriteData(0xF1);
-	LCD_WriteData(0x37);
-	LCD_WriteData(0x07);
-	LCD_WriteData(0x10);
-	LCD_WriteData(0x03);
-	LCD_WriteData(0x0E);
-	LCD_WriteData(0x09);
-	LCD_WriteData(0x00);
-
-	LCD_WriteCmd(0XE1);    //Set Gamma
-	LCD_WriteData(0x00);
-	LCD_WriteData(0x0E);
-	LCD_WriteData(0x14);
-	LCD_WriteData(0x03);
-	LCD_WriteData(0x11);
-	LCD_WriteData(0x07);
-	LCD_WriteData(0x31);
-	LCD_WriteData(0xC1);
-	LCD_WriteData(0x48);
-	LCD_WriteData(0x08);
-	LCD_WriteData(0x0F);
-	LCD_WriteData(0x0C);
-	LCD_WriteData(0x31);
-	LCD_WriteData(0x36);
-	LCD_WriteData(0x0F);
 
 	LCD_WriteCmd(0x11);    //Exit Sleep
 		for( i = 0; i < 20000; i++) { i++;}
