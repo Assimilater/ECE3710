@@ -31,6 +31,18 @@ void LCD_WriteBlock(const unsigned char* data, const int len, const int n) {
 	}
 }
 
+void LCD_SetColumn(unsigned short Start, unsigned short End){
+	LCD_WriteCmd(0x2A);
+	LCD_WriteData((unsigned char*)&Start, 2);
+	LCD_WriteData((unsigned char*)&End, 2);
+}
+
+void LCD_SetPage(unsigned short Start, unsigned short End){
+	LCD_WriteCmd(0x2B);
+	LCD_WriteData((unsigned char*)&Start, 2);
+	LCD_WriteData((unsigned char*)&End, 2);
+}
+
 void LCD_Test() {
 	LCD_WriteCmd(LCD_CODE_PWRA[0]); // Power Control A
 	LCD_WriteData(LCD_CODE_PWRA + 1, SIZE_CODE_PWRA - 1);
