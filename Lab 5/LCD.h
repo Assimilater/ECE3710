@@ -37,13 +37,13 @@ extern code LCD_CODE_SGM1[SIZE_CODE_SGM1];
 #define LCD_WRX BAND_GPIO_PD6
 #define LCD_RDX BAND_GPIO_PD7
 
-
 //---------------------------------------------------------------------------------------+
 // Driver Functions                                                                      |
 //---------------------------------------------------------------------------------------+
+void LCD_WriteCmd(const unsigned char);
+void LCD_WriteData(const unsigned char*, const int);
+void LCD_WriteBlock(const unsigned char*, const int, const int);
 
-
-
-
+void LCD_Test();
 
 #endif
