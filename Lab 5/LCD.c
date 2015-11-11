@@ -44,6 +44,8 @@ void LCD_SetPage(const unsigned short Start, const unsigned short End) {
 }
 
 void LCD_Test() {
+	int i;
+	
 	LCD_WriteCmd(LCD_CODE_PWRA[0]); // Power Control A
 	LCD_WriteData(LCD_CODE_PWRA + 1, SIZE_CODE_PWRA - 1);
 	
@@ -98,13 +100,8 @@ void LCD_Test() {
 	LCD_WriteCmd(LCD_CODE_SGM1[0]); // Set Gamma 1
 	LCD_WriteData(LCD_CODE_SGM1 + 1, SIZE_CODE_SGM1 - 1);
 	
-	/*
-	int i;
-
-	LCD_WriteCmd(0x11);    //Exit Sleep
-		for( i = 0; i < 20000; i++) { i++;}
-
-	LCD_WriteCmd(0x29);    //Display on
-	//LCD_WriteCmd(0x2c);
-	*/
+	LCD_WriteCmd(0x11); //Exit Sleep
+	for(i = 0; i < 20000; i++) { i++; }
+	LCD_WriteCmd(0x29); //Display on
+	LCD_WriteCmd(0x2c);
 }
