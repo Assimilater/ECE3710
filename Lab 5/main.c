@@ -43,6 +43,9 @@ const short ROW_OUTER_3YF = PADR_OUTER * 3 + LENGTH_OUTER * 3;
 // Any program logic                                                                     |
 //---------------------------------------------------------------------------------------+
 void exec() {
+	LCD_WriteBlock(LCD_COLOR_RED, SIZE_COLOR, 240*320);
+	
+	
 	// Fill in the outer boxes
 	LCD_SetColumn(COL_OUTER_Y0, COL_OUTER_YF);
 	

@@ -104,5 +104,5 @@ void LCD_Test() {
 	LCD_WriteCmd(0x11); //Exit Sleep
 	for(i = 0; i < 20000; i++) { i++; }
 	LCD_WriteCmd(0x29); //Display on
-	LCD_WriteCmd(0x2c);
+	//LCD_WriteCmd(0x2c);
 }
