@@ -5,11 +5,24 @@
 // Inlucded dependencies                                                                 |
 //---------------------------------------------------------------------------------------+
 #include "../Shared/Controller.h"
+#include "LCD_Codes.h"
+
+//---------------------------------------------------------------------------------------+
+// Color Codes For The LCD                                                               |
+//---------------------------------------------------------------------------------------+
+extern code LCD_COLOR_WHITE[SIZE_COLOR];
+extern code LCD_COLOR_BLACK[SIZE_COLOR];
+extern code LCD_COLOR_GREY[SIZE_COLOR];
+extern code LCD_COLOR_BLUE[SIZE_COLOR];
+extern code LCD_COLOR_RED[SIZE_COLOR];
+extern code LCD_COLOR_MAGENTA[SIZE_COLOR];
+extern code LCD_COLOR_GREEN[SIZE_COLOR];
+extern code LCD_COLOR_CYAN[SIZE_COLOR];
+extern code LCD_COLOR_YELLOW[SIZE_COLOR];
 
 //---------------------------------------------------------------------------------------+
 // Command Codes For The LCD                                                             |
 //---------------------------------------------------------------------------------------+
-#include "LCD_Codes.h"
 extern code LCD_CODE_PWRA[SIZE_CODE_PWRA];
 extern code LCD_CODE_PWRB[SIZE_CODE_PWRB];
 extern code LCD_CODE_DTCA[SIZE_CODE_DTCA];

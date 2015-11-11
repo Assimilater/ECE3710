@@ -23,5 +23,6 @@ typedef const unsigned char code;
 #define SIZE_CODE_GCSL          2
 #define SIZE_CODE_SGM0          16
 #define SIZE_CODE_SGM1          16
+#define SIZE_COLOR              2
 
 #endif

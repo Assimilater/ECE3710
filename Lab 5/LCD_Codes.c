@@ -22,3 +22,16 @@ code LCD_CODE_GCSL[SIZE_CODE_GCSL] = {0x26, 0x01};
 
 code LCD_CODE_SGM0[SIZE_CODE_SGM0] = {0xE0, 0x0F, 0x31, 0x2B, 0x0C, 0x0E, 0x08, 0x4E, 0xF1, 0x37, 0x07, 0x10, 0x03, 0x0E, 0x09, 0x00};
 code LCD_CODE_SGM1[SIZE_CODE_SGM1] = {0xE1, 0x00, 0x0E, 0x14, 0x03, 0x11, 0x07, 0x31, 0xC1, 0x48, 0x08, 0x0F, 0x0C, 0x31, 0x36, 0x0F};
+
+//---------------------------------------------------------------------------------------+
+// Color Codes For The LCD                                                               |
+//---------------------------------------------------------------------------------------+
+code LCD_COLOR_WHITE	[SIZE_COLOR] = {0xFF, 0xFF};
+code LCD_COLOR_BLACK	[SIZE_COLOR] = {0x00, 0x01};
+code LCD_COLOR_GREY		[SIZE_COLOR] = {0xF7, 0xDE};
+code LCD_COLOR_BLUE		[SIZE_COLOR] = {0x00, 0x1F};
+code LCD_COLOR_RED		[SIZE_COLOR] = {0xF8, 0x00};
+code LCD_COLOR_MAGENTA	[SIZE_COLOR] = {0xF8, 0x1F};
+code LCD_COLOR_GREEN	[SIZE_COLOR] = {0x07, 0xE0};
+code LCD_COLOR_CYAN		[SIZE_COLOR] = {0x7F, 0xFF};
+code LCD_COLOR_YELLOW	[SIZE_COLOR] = {0xFF, 0xE0};
