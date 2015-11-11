@@ -80,11 +80,13 @@ void init() {
 	//GPIO.PortB->DEN.byte[0] = 0xFF;
 	//GPIO.PortB->DIR.byte[0] = 0xFF;
 	GPIOB->DEN = 0xFF;
+	GPIOB->AFSEL = 0x0;
 	GPIOB->DIR = 0xFF;
 	
 	//GPIO.PortD->DEN.byte[0] = 0xFF;
 	//GPIO.PortD->DIR.byte[0] = 0xFF;
 	GPIOD->DEN = 0xFF;
+	GPIOD->AFSEL = 0x0;
 	GPIOD->DIR = 0xFF;
 	
 	LCD_Test();

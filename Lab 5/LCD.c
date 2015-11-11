@@ -104,8 +104,8 @@ void LCD_Test() {
 	LCD_WriteCmd(LCD_CODE_SGM1[0]); // Set Gamma 1
 	LCD_WriteData(LCD_CODE_SGM1 + 1, SIZE_CODE_SGM1 - 1);
 	
-	LCD_WriteCmd(0x11); //Exit Sleep
+	LCD_WriteCmd(0x11); // Exit Sleep
 	for(i = 0; i < 20000; i++) { i++; }
-	LCD_WriteCmd(0x29); //Display on
+	LCD_WriteCmd(0x29); // Display on
 	//LCD_WriteCmd(0x2c);
 }
