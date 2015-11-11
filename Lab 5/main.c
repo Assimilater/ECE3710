@@ -72,7 +72,7 @@ void exec() {
 // Any configuration on the microcontroller                                              |
 //---------------------------------------------------------------------------------------+
 void init() {
-//	REG* RCGC2 = (REG*)SYSCTL->RCGC2;
+	//REG* RCGC2 = (REG*)SYSCTL->RCGC2;
 	SYSCTL->RCGC2 = 0xA; //enable port D
 	GPIO.PortB->DEN.byte[0] = 0xFF;
 	GPIO.PortB->DIR.byte[0] = 0xFF;

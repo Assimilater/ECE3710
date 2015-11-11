@@ -20,6 +20,7 @@ void LCD_WriteData(const unsigned char* data, const int len) {
 }
 void LCD_WriteBlock(const unsigned char* data, const int len, const int n) {
 	int i, j;
+	LCD_WriteCmd(0x2C);
 	LCD_CSX = 0; // CSX "LCD, pay attention!"
 	LCD_DCX = 1; // DCX Data
 	for (j = 0; j < n; ++j) {
