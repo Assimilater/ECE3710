@@ -47,6 +47,6 @@ void LCD_WriteBlock(const unsigned char*, const int, const int);
 void LCD_SetColumn(const unsigned short, const unsigned short);
 void LCD_SetPage(const unsigned short, const unsigned short);
 
-void LCD_Test();
+void LCD_Test(void);
 
 #endif
