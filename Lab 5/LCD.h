@@ -13,6 +13,21 @@
 extern code LCD_CODE_PWRA[SIZE_CODE_PWRA];
 extern code LCD_CODE_PWRB[SIZE_CODE_PWRB];
 extern code LCD_CODE_DTCA[SIZE_CODE_DTCA];
+extern code LCD_CODE_DTCB[SIZE_CODE_DTCB];
+extern code LCD_CODE_PSQC[SIZE_CODE_PSQC];
+extern code LCD_CODE_PMRC[SIZE_CODE_PMRC];
+extern code LCD_CODE_PCL1[SIZE_CODE_PCL1];
+extern code LCD_CODE_PCL2[SIZE_CODE_PCL2];
+extern code LCD_CODE_VCM1[SIZE_CODE_VCM1];
+extern code LCD_CODE_VCM2[SIZE_CODE_VCM2];
+extern code LCD_CODE_MACL[SIZE_CODE_MACL];
+extern code LCD_CODE_PXFS[SIZE_CODE_PXFS];
+extern code LCD_CODE_FMCL[SIZE_CODE_FMCL];
+extern code LCD_CODE_DFCL[SIZE_CODE_DFCL];
+extern code LCD_CODE_3GFD[SIZE_CODE_3GFD];
+extern code LCD_CODE_GCSL[SIZE_CODE_GCSL];
+extern code LCD_CODE_SGM0[SIZE_CODE_SGM0];
+extern code LCD_CODE_SGM1[SIZE_CODE_SGM1];
 
 //---------------------------------------------------------------------------------------+
 // Register definintions specific to the LCD                                             |
