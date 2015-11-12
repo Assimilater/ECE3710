@@ -1,5 +1,11 @@
 #include "LCD.h"
 
+void LCD_WaitChip() {
+	const static int delay = 100000;
+	int i = 0;
+	for (; i < delay; ++i);
+}
+
 void LCD_WriteCmd(const unsigned char cmd) {
 	LCD_CSX = 0; // CSX "LCD, pay attention!"
 	LCD_DCX = 0; // DCX cmd
@@ -60,10 +66,10 @@ void LCD_SetPage(const unsigned short Start, const unsigned short End) {
 	LCD_WriteData(bStream, 2);
 }
 void LCD_FillRegion(const Region r) {
-	int i;
 	LCD_SetColumn(r.ColumnStart, r.ColumnEnd);
 	LCD_SetPage(r.PageStart, r.PageEnd);
-	for(i = 0; i < 100000; i++) { i++; } // give the controller time to configure the page
+	
+	LCD_WaitChip(); // give the controller time to configure the page
 	LCD_WriteBlock(r.Color, SIZE_COLOR, (r.ColumnEnd - r.ColumnStart) * (r.PageEnd - r.PageStart));
 }
 
@@ -133,7 +139,7 @@ void LCD_Init() {
 	LCD_WriteData(LCD_CODE_SGM1 + 1, SIZE_CODE_SGM1 - 1);
 	
 	LCD_WriteCmd(0x11); // Exit Sleep
-	for(i = 0; i < 20000; i++) { i++; }
+	LCD_WaitChip();
 	LCD_WriteCmd(0x29); // Display on
 	
 	LCD_FillRegion(r);

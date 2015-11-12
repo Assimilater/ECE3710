@@ -160,6 +160,67 @@
 
 //---------------------------------------------------------------------------------------+
 //---------------------------------------------------------------------------------------+
+// SECTION: NVIC                                                                         |
+//---------------------------------------------------------------------------------------+
+//---------------------------------------------------------------------------------------+
+
+//---------------------------------------------------------------------------------------+
+// NVIC registers                                                                        |
+//---------------------------------------------------------------------------------------+
+#define NVIC_INT_TYPE_R         (*((volatile unsigned long *)0xE000E004))
+#define NVIC_ST_CTRL_R          (*((volatile unsigned long *)0xE000E010))
+#define NVIC_ST_RELOAD_R        (*((volatile unsigned long *)0xE000E014))
+#define NVIC_ST_CURRENT_R       (*((volatile unsigned long *)0xE000E018))
+#define NVIC_ST_CAL_R           (*((volatile unsigned long *)0xE000E01C))
+#define NVIC_EN0_R              (*((volatile unsigned long *)0xE000E100))
+#define NVIC_EN1_R              (*((volatile unsigned long *)0xE000E104))
+#define NVIC_DIS0_R             (*((volatile unsigned long *)0xE000E180))
+#define NVIC_DIS1_R             (*((volatile unsigned long *)0xE000E184))
+#define NVIC_PEND0_R            (*((volatile unsigned long *)0xE000E200))
+#define NVIC_PEND1_R            (*((volatile unsigned long *)0xE000E204))
+#define NVIC_UNPEND0_R          (*((volatile unsigned long *)0xE000E280))
+#define NVIC_UNPEND1_R          (*((volatile unsigned long *)0xE000E284))
+#define NVIC_ACTIVE0_R          (*((volatile unsigned long *)0xE000E300))
+#define NVIC_ACTIVE1_R          (*((volatile unsigned long *)0xE000E304))
+#define NVIC_PRI0_R             (*((volatile unsigned long *)0xE000E400))
+#define NVIC_PRI1_R             (*((volatile unsigned long *)0xE000E404))
+#define NVIC_PRI2_R             (*((volatile unsigned long *)0xE000E408))
+#define NVIC_PRI3_R             (*((volatile unsigned long *)0xE000E40C))
+#define NVIC_PRI4_R             (*((volatile unsigned long *)0xE000E410))
+#define NVIC_PRI5_R             (*((volatile unsigned long *)0xE000E414))
+#define NVIC_PRI6_R             (*((volatile unsigned long *)0xE000E418))
+#define NVIC_PRI7_R             (*((volatile unsigned long *)0xE000E41C))
+#define NVIC_PRI8_R             (*((volatile unsigned long *)0xE000E420))
+#define NVIC_PRI9_R             (*((volatile unsigned long *)0xE000E424))
+#define NVIC_PRI10_R            (*((volatile unsigned long *)0xE000E428))
+#define NVIC_CPUID_R            (*((volatile unsigned long *)0xE000ED00))
+#define NVIC_INT_CTRL_R         (*((volatile unsigned long *)0xE000ED04))
+#define NVIC_VTABLE_R           (*((volatile unsigned long *)0xE000ED08))
+#define NVIC_APINT_R            (*((volatile unsigned long *)0xE000ED0C))
+#define NVIC_SYS_CTRL_R         (*((volatile unsigned long *)0xE000ED10))
+#define NVIC_CFG_CTRL_R         (*((volatile unsigned long *)0xE000ED14))
+#define NVIC_SYS_PRI1_R         (*((volatile unsigned long *)0xE000ED18))
+#define NVIC_SYS_PRI2_R         (*((volatile unsigned long *)0xE000ED1C))
+#define NVIC_SYS_PRI3_R         (*((volatile unsigned long *)0xE000ED20))
+#define NVIC_SYS_HND_CTRL_R     (*((volatile unsigned long *)0xE000ED24))
+#define NVIC_FAULT_STAT_R       (*((volatile unsigned long *)0xE000ED28))
+#define NVIC_HFAULT_STAT_R      (*((volatile unsigned long *)0xE000ED2C))
+#define NVIC_DEBUG_STAT_R       (*((volatile unsigned long *)0xE000ED30))
+#define NVIC_MM_ADDR_R          (*((volatile unsigned long *)0xE000ED34))
+#define NVIC_FAULT_ADDR_R       (*((volatile unsigned long *)0xE000ED38))
+#define NVIC_MPU_TYPE_R         (*((volatile unsigned long *)0xE000ED90))
+#define NVIC_MPU_CTRL_R         (*((volatile unsigned long *)0xE000ED94))
+#define NVIC_MPU_NUMBER_R       (*((volatile unsigned long *)0xE000ED98))
+#define NVIC_MPU_BASE_R         (*((volatile unsigned long *)0xE000ED9C))
+#define NVIC_MPU_ATTR_R         (*((volatile unsigned long *)0xE000EDA0))
+#define NVIC_DBG_CTRL_R         (*((volatile unsigned long *)0xE000EDF0))
+#define NVIC_DBG_XFER_R         (*((volatile unsigned long *)0xE000EDF4))
+#define NVIC_DBG_DATA_R         (*((volatile unsigned long *)0xE000EDF8))
+#define NVIC_DBG_INT_R          (*((volatile unsigned long *)0xE000EDFC))
+#define NVIC_SW_TRIG_R          (*((volatile unsigned long *)0xE000EF00))
+
+//---------------------------------------------------------------------------------------+
+//---------------------------------------------------------------------------------------+
 // SECTION: GPIO                                                                         |
 //---------------------------------------------------------------------------------------+
 //---------------------------------------------------------------------------------------+

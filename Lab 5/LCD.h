@@ -49,7 +49,7 @@ extern code LCD_CODE_SGM1[SIZE_CODE_SGM1];
 #define LCD_DCX BAND_GPIO_PD3
 #define LCD_WRX BAND_GPIO_PD6
 #define LCD_RDX BAND_GPIO_PD7
-#define LCD_RST BAND_GPIO_PA2
+#define LCD_RST BAND_GPIO_PE2
 
 //---------------------------------------------------------------------------------------+
 // LCD Global Constants                                                                  |
@@ -65,6 +65,7 @@ typedef struct {
 //---------------------------------------------------------------------------------------+
 // Driver Functions                                                                      |
 //---------------------------------------------------------------------------------------+
+void LCD_WaitChip(void);
 void LCD_WriteCmd(const unsigned char);
 void LCD_WriteData(const unsigned char*, const int);
 void LCD_WriteBlock(const unsigned char*, const int, const int);

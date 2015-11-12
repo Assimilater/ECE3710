@@ -40,9 +40,8 @@ const short ROW_OUTER_3YF = PADR_OUTER * 3 + LENGTH_OUTER * 3;
 const short ROW_INNER_3YF = ROW_OUTER_3YF - PADR_INNER;
 
 //---------------------------------------------------------------------------------------+
-// Any program logic                                                                     |
+// Helper functions to easily manage the boxes after initialization                      |
 //---------------------------------------------------------------------------------------+
-
 void fillRed() {
 	const static Region r = {
 		COL_INNER_Y0,
@@ -52,7 +51,7 @@ void fillRed() {
 		LCD_COLOR_RED
 	};
 	LCD_FillRegion(r);
-	GPIOA->DATA &= ~0x8;
+	GPIO.PortE->DATA.bit3 = 0; // PA &= ~0x8;
 }
 
 void unfillRed() {
@@ -64,7 +63,7 @@ void unfillRed() {
 		LCD_COLOR_BLACK
 	};
 	LCD_FillRegion(r);
-	GPIOA->DATA |= 0x8;
+	GPIO.PortE->DATA.bit3 = 1;
 }
 
 void fillGreen() {
@@ -76,7 +75,7 @@ void fillGreen() {
 		LCD_COLOR_GREEN
 	};
 	LCD_FillRegion(r);
-	GPIOA->DATA &= ~0x10;
+	GPIO.PortE->DATA.bit4 = 0; // PA &= ~0x10
 }
 
 void unfillGreen() {
@@ -88,7 +87,7 @@ void unfillGreen() {
 		LCD_COLOR_BLACK
 	};
 	LCD_FillRegion(r);
-	GPIOA->DATA |= 0x10;
+	GPIO.PortE->DATA.bit4 = 1;
 }
 
 void fillYellow() {
@@ -100,7 +99,7 @@ void fillYellow() {
 		LCD_COLOR_YELLOW
 	};
 	LCD_FillRegion(r);
-	GPIOA->DATA &= ~0x20;
+	GPIO.PortE->DATA.bit5 = 0; // PA &= ~0x20
 }
 
 void unfillYellow() {
@@ -112,11 +111,73 @@ void unfillYellow() {
 		LCD_COLOR_BLACK
 	};
 	LCD_FillRegion(r);
-	GPIOA->DATA |= 0x20;
+	GPIO.PortE->DATA.bit5 = 1;
 }
 
-void exec() {
+//---------------------------------------------------------------------------------------+
+// Touchscreen SPI handlers                                                              |
+//---------------------------------------------------------------------------------------+
+int sample_cnt = 0;
+void GPIOA_Handler() {
+	// User is pressing down
+	GPIO.PortA->ICR.bit6 = 1;
+	sample_cnt = 0;
+	
+	// Disable GPIOA interrupts
+	GPIO.PortA->IM.bit6 = 0;
+	
+	// Enable SysTick interrupts
+	NVIC_ST_CTRL_R |= 0x3;
+}
+
+void SysTick_Handler() {
+	static const int SIZE = 10;
+	static char data[SIZE];
+	
+	if (GPIO.PortA->DATA.bit6) {
+		// User let go
+		
+		// Do the fill/unfill operation
+		
+		// Disable Systick interrups
+		NVIC_ST_CTRL_R &= ~0x3;
+		
+		// Enable GPIOA interrupts
+		GPIO.PortA->ICR.bit6 = 1;
+		GPIO.PortA->IM.bit6 = 1;
+	} else {
+		// User is pressing down
+		data[sample_cnt % SIZE] = 0; // Get value from SPI?
+	}
+}
+
+void flash() {
 	unsigned int i;
+	while (1) {
+		fillRed();
+		for(i = 0; i < 2483648; ++i);
+		
+		unfillRed();
+		for(i = 0; i < 2483648; ++i);
+		
+		fillGreen();
+		for(i = 0; i < 2483648; ++i);
+		
+		unfillGreen();
+		for(i = 0; i < 2483648; ++i);
+		
+		fillYellow();
+		for(i = 0; i < 2483648; ++i);
+		
+		unfillYellow();
+		for(i = 0; i < 2483648; ++i);
+	}
+}
+
+//---------------------------------------------------------------------------------------+
+// Program initialization logic                                                          |
+//---------------------------------------------------------------------------------------+
+void exec() {
 	Region r;
 	r.ColumnStart = COL_OUTER_Y0;
 	r.ColumnEnd = COL_OUTER_YF;
@@ -141,36 +202,20 @@ void exec() {
 	unfillRed();
 	unfillGreen();
 	unfillYellow();
-	
-	while (0) {
-		fillRed();
-		for(i = 0; i < 2483648; ++i){};
-		unfillRed();
-		for(i = 0; i < 2483648; ++i){};
-		fillGreen();
-		for(i = 0; i < 2483648; ++i){};
-		unfillGreen();
-		for(i = 0; i < 2483648; ++i){};
-		fillYellow();
-		for(i = 0; i < 2483648; ++i){};
-		unfillYellow();
-		for(i = 0; i < 2483648; ++i){};
-	}
+	//flash();
 }
 
 //---------------------------------------------------------------------------------------+
 // Any configuration on the microcontroller                                              |
 //---------------------------------------------------------------------------------------+
 void init() {
-	//REG* RCGC2 = (REG*)SYSCTL->RCGC2;
-	//RCGC2->bit0 = 1; // Enable port A
-	//RCGC2->bit1 = 1; // Enable port B
-	//RCGC2->bit3 = 1; // Enable port D
-	SYSCTL->RCGC2 = 0xB;
+	SYSCTL->RCGCGPIO = 0x1B;
+	SYSCTL->RCGCSSI = 0x1;
 	GPIO.PortD->LOCK.word = GPIO_UNLOCK;
 	
-	GPIO.PortA->DEN.byte[0] = 0x3C;
-	GPIO.PortA->DIR.byte[0] = 0x3C;
+	GPIO.PortA->DEN.byte[0] = 0xFC;
+	GPIO.PortA->AFSEL.byte[0] = 0x3C;
+	GPIO.PortA->PUR.byte[0] = 0x3C;
 	
 	GPIO.PortB->DEN.byte[0] = 0xFF;
 	GPIO.PortB->DIR.byte[0] = 0xFF;
@@ -179,6 +224,28 @@ void init() {
 	GPIO.PortD->DEN.byte[0] = 0xFF;
 	GPIO.PortD->DIR.byte[0] = 0xFF;
 	
+	GPIO.PortE->DEN.byte[0] = 0xFF;
+	GPIO.PortE->DIR.byte[0] = 0xFF;
+	
+	// Configure Systick
+	NVIC_ST_RELOAD_R = 16000; // 1ms
+	
+	// Configure SSI
+	SSI0->CR1 = 0;
+	SSI0->CC = 0;
+	// Set CPSR Register
+	// Set CR0 - Set SCR, SPH, SP0, FRF, DSS
+	
+	// Configure interrupts
+	GPIO.PortA->IM.word = 0;
+	GPIO.PortA->IS.word = 0;
+	GPIO.PortA->IBE.bit6 = 0;
+	GPIO.PortA->IEV.bit6 = 0;
+	GPIO.PortA->ICR.bit6 = 1;
+	GPIO.PortA->IM.bit6 = 1;
+	
+	NVIC_EN0_R = 0x1;
+	
 	LCD_Init();
 }
 
@@ -186,7 +253,9 @@ void init() {
 // No program logic should be contained here                                             |
 //---------------------------------------------------------------------------------------+
 int main() {
+	unsigned int i;
 	init();
 	exec();
-	return 0;
+	while (1) { ++i; }
+	return 1;
 }
