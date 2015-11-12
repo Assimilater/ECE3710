@@ -49,6 +49,14 @@ extern code LCD_CODE_SGM1[SIZE_CODE_SGM1];
 #define LCD_DCX BAND_GPIO_PD3
 #define LCD_WRX BAND_GPIO_PD6
 #define LCD_RDX BAND_GPIO_PD7
+#define LCD_RST BAND_GPIO_PA2
+
+//---------------------------------------------------------------------------------------+
+// LCD Global Constants                                                                  |
+//---------------------------------------------------------------------------------------+
+static const short LCD_ROWS = 320;
+static const short LCD_COLS = 240;
+static const int LCD_AREA = LCD_ROWS * LCD_COLS;//76800;//LCD_ROWS * (int)LCD_COLS;
 
 //---------------------------------------------------------------------------------------+
 // Driver Functions                                                                      |
@@ -60,6 +68,6 @@ void LCD_WriteBlock(const unsigned char*, const int, const int);
 void LCD_SetColumn(const unsigned short, const unsigned short);
 void LCD_SetPage(const unsigned short, const unsigned short);
 
-void LCD_Test(void);
+void LCD_Init(void);
 
 #endif

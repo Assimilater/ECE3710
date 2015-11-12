@@ -6,43 +6,44 @@
 //---------------------------------------------------------------------------------------+
 // Precalculated constants for the dimensions of our boxes                               |
 //---------------------------------------------------------------------------------------+
-const short LCD_ROWS = 320;
-const short LCD_COLS = 240;
-const short LENGTH_INNER = 60;
+const short LENGTH_INNER = 70;
 const short LENGTH_OUTER = 80;
 
-const short AREA_INNER = LENGTH_INNER * LENGTH_INNER;
 const short AREA_OUTER = LENGTH_OUTER * LENGTH_OUTER;
-const short PADC_INNER = (LCD_COLS - LENGTH_INNER) / 2;
+const short AREA_INNER = LENGTH_INNER * LENGTH_INNER;
+
 const short PADC_OUTER = (LCD_COLS - LENGTH_OUTER) / 2;
-const short PADR_INNER = (LCD_ROWS - LENGTH_INNER) / 4;
-const short PADR_OUTER = (LCD_ROWS - LENGTH_OUTER) / 4;
+const short PADC_INNER = (LCD_COLS - LENGTH_INNER) / 2;
 
-const short COL_INNER_Y0 = PADC_INNER;
+const short PADR_OUTER = (LCD_ROWS - (3 * LENGTH_OUTER)) / 4;
+const short PADR_INNER = (LENGTH_OUTER - LENGTH_INNER) / 2;
+
 const short COL_OUTER_Y0 = PADC_OUTER;
+const short COL_INNER_Y0 = PADC_INNER;
 
-const short COL_INNER_YF = COL_INNER_Y0 + LENGTH_INNER;
 const short COL_OUTER_YF = COL_OUTER_Y0 + LENGTH_OUTER;
+const short COL_INNER_YF = COL_INNER_Y0 + LENGTH_INNER;
 
-const short ROW_INNER_1Y0 = PADR_INNER;
 const short ROW_OUTER_1Y0 = PADR_OUTER;
-const short ROW_INNER_1YF = PADR_INNER + LENGTH_INNER;
+const short ROW_INNER_1Y0 = ROW_OUTER_1Y0 + PADR_INNER;
 const short ROW_OUTER_1YF = PADR_OUTER + LENGTH_OUTER;
+const short ROW_INNER_1YF = ROW_OUTER_1YF - PADR_INNER;
 
-const short ROW_INNER_2Y0 = PADR_INNER * 2 + LENGTH_INNER;
 const short ROW_OUTER_2Y0 = PADR_OUTER * 2 + LENGTH_OUTER;
-const short ROW_INNER_2YF = PADR_INNER * 2 + LENGTH_INNER * 2;
+const short ROW_INNER_2Y0 = ROW_OUTER_2Y0 + PADR_INNER;
 const short ROW_OUTER_2YF = PADR_OUTER * 2 + LENGTH_OUTER * 2;
+const short ROW_INNER_2YF = ROW_OUTER_2YF - PADR_INNER;
 
-const short ROW_INNER_3Y0 = PADR_INNER * 3 + LENGTH_INNER * 2;
 const short ROW_OUTER_3Y0 = PADR_OUTER * 3 + LENGTH_OUTER * 2;
-const short ROW_INNER_3YF = PADR_INNER * 3 + LENGTH_INNER * 3;
+const short ROW_INNER_3Y0 = ROW_OUTER_3Y0 + PADR_INNER;
 const short ROW_OUTER_3YF = PADR_OUTER * 3 + LENGTH_OUTER * 3;
+const short ROW_INNER_3YF = ROW_OUTER_3YF - PADR_INNER;
 
 //---------------------------------------------------------------------------------------+
 // Any program logic                                                                     |
 //---------------------------------------------------------------------------------------+
 void exec() {
+	//return;
 	// Fill in the outer boxes
 	LCD_SetColumn(COL_OUTER_Y0, COL_OUTER_YF);
 	
@@ -73,18 +74,24 @@ void exec() {
 //---------------------------------------------------------------------------------------+
 void init() {
 	//REG* RCGC2 = (REG*)SYSCTL->RCGC2;
-	SYSCTL->RCGC2 = 0xA; //enable port B and D
-	//GPIO.PortB->DEN.byte[0] = 0xFF;
-	//GPIO.PortB->DIR.byte[0] = 0xFF;
-	GPIOB->DEN = 0xFF;
-	GPIOB->DIR = 0xFF;
+	//RCGC2->bit0 = 1; // Enable port A
+	//RCGC2->bit1 = 1; // Enable port B
+	//RCGC2->bit3 = 1; // Enable port D
 	
-	//GPIO.PortD->DEN.byte[0] = 0xFF;
-	//GPIO.PortD->DIR.byte[0] = 0xFF;
-	GPIOD->DEN = 0xFF;
-	GPIOD->DIR = 0xFF;
+	SYSCTL->RCGC2 = 0xB;
+	GPIO.PortD->LOCK.word = GPIO_UNLOCK;
 	
-	LCD_Test();
+	GPIO.PortA->DEN.bit2 = 1;
+	GPIO.PortA->DIR.bit2 = 1;
+	
+	GPIO.PortB->DEN.byte[0] = 0xFF;
+	GPIO.PortB->DIR.byte[0] = 0xFF;
+	
+	GPIO.PortD->CR.byte[0] = 0xFF;
+	GPIO.PortD->DEN.byte[0] = 0xFF;
+	GPIO.PortD->DIR.byte[0] = 0xFF;
+	
+	LCD_Init();
 }
 
 //---------------------------------------------------------------------------------------+

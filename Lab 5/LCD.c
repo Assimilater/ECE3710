@@ -18,15 +18,15 @@ void LCD_WriteData(const unsigned char* data, const int len) {
 		GPIO.PortB->DATA.byte[0] = data[i];
 		LCD_WRX = 1; // WRX read on +edge
 	}
-
 }
 void LCD_WriteBlock(const unsigned char* data, const int len, const int n) {
 	int i, j;
+	for(i = 0; i < 100000; i++) { i++; }
 	LCD_WriteCmd(0x2C);
 	LCD_CSX = 0; // CSX "LCD, pay attention!"
 	LCD_DCX = 1; // DCX Data
 	LCD_RDX = 1; // Set Read high
-	for (j = 0; j < n; ++j) {
+	for (j = 1; j < n; ++j) {
 		for (i = 0; i < len; ++i) {
 			LCD_WRX = 0; // WRX
 			GPIO.PortB->DATA.byte[0] = data[i];
@@ -36,19 +36,36 @@ void LCD_WriteBlock(const unsigned char* data, const int len, const int n) {
 }
 
 void LCD_SetColumn(const unsigned short Start, const unsigned short End) {
+	unsigned char bStream[2];
 	LCD_WriteCmd(0x2A);
-	LCD_WriteData((unsigned char*)&Start, 2);
-	LCD_WriteData((unsigned char*)&End, 2);
+	
+	bStream[0] = (Start & 0xFF00) >> 8;
+	bStream[1] = (Start & 0x00FF);
+	LCD_WriteData(bStream, 2);
+	
+	bStream[0] = (End & 0xFF00) >> 8;
+	bStream[1] = (End & 0x00FF);
+	LCD_WriteData(bStream, 2);
 }
 
 void LCD_SetPage(const unsigned short Start, const unsigned short End) {
+	unsigned char bStream[2];
 	LCD_WriteCmd(0x2B);
-	LCD_WriteData((unsigned char*)&Start, 2);
-	LCD_WriteData((unsigned char*)&End, 2);
+	
+	bStream[0] = (Start & 0xFF00) >> 8;
+	bStream[1] = (Start & 0x00FF);
+	LCD_WriteData(bStream, 2);
+	
+	bStream[0] = (End & 0xFF00) >> 8;
+	bStream[1] = (End & 0x00FF);
+	LCD_WriteData(bStream, 2);
 }
 
-void LCD_Test() {
+void LCD_Init() {
 	int i;
+	
+	LCD_RST = 0;
+	LCD_RST = 1;
 	
 	LCD_WriteCmd(LCD_CODE_PWRA[0]); // Power Control A
 	LCD_WriteData(LCD_CODE_PWRA + 1, SIZE_CODE_PWRA - 1);
@@ -107,4 +124,8 @@ void LCD_Test() {
 	LCD_WriteCmd(0x11); // Exit Sleep
 	for(i = 0; i < 20000; i++) { i++; }
 	LCD_WriteCmd(0x29); // Display on
+	
+	LCD_SetColumn(0, LCD_COLS);
+	LCD_SetPage(0, LCD_ROWS);
+	LCD_WriteBlock(LCD_COLOR_BLACK, SIZE_COLOR, LCD_AREA);
 }
