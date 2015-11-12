@@ -1,4 +1,31 @@
+#include "../Shared/Controller.h"
+#include "../Shared/GPIO.h"
 #include "LCD.h"
+
+coord LCD_GetXY() {
+	coord val;
+	int read;
+	// Write CB => S A[2:0] Mode 000
+	// Note: CB - X => 0xD0, Y => 0x90
+	
+	// Write CB, followed by 2 bytes of 0 so we can read 2 bytes from TFT
+	while(!(SSI0->SR & 0x1)); // Wait for TFE = 1
+	SSI0->DR = 0xD0;
+	SSI0->DR = 0;
+	SSI0->DR = 0;
+	
+	// Read null Byte
+	// Read X C[11:0] X[2:0]
+	read = SSI0->DR;
+	read = SSI0->DR;
+	read = read << 8;
+	read |= SSI0->DR;
+	
+	// Read X C[11:0] X[2:0]
+	
+	
+	return val;
+}
 
 void LCD_WaitChip() {
 	const static int delay = 100000;
@@ -77,7 +104,6 @@ void LCD_FillRegion(const Region r) {
 }
 
 void LCD_Init() {
-	int i;
 	Region r = {
 		0, LCD_COLS,
 		0, LCD_ROWS,
