@@ -44,71 +44,118 @@ const short ROW_INNER_3YF = ROW_OUTER_3YF - PADR_INNER;
 //---------------------------------------------------------------------------------------+
 
 void fillRed() {
-	LCD_SetColumn(COL_OUTER_Y0, COL_OUTER_YF);
-	LCD_SetPage(ROW_OUTER_1Y0, ROW_OUTER_1YF);
-	LCD_WriteBlock(LCD_COLOR_RED, SIZE_COLOR, AREA_OUTER);
-	GPIOA->DATA |= 0x8;
+	const static Region r = {
+		COL_INNER_Y0,
+		COL_INNER_YF,
+		ROW_INNER_1Y0,
+		ROW_INNER_1YF,
+		LCD_COLOR_RED
+	};
+	LCD_FillRegion(r);
+	GPIOA->DATA &= ~0x8;
 }
 
 void unfillRed() {
-	LCD_SetColumn(COL_INNER_Y0, COL_INNER_YF);
-	LCD_SetPage(ROW_INNER_1Y0, ROW_INNER_1YF);
-	LCD_WriteBlock(LCD_COLOR_BLACK, SIZE_COLOR, AREA_INNER);
-	GPIOA->DATA |= !(!GPIOA->DATA | 0x8);
+	const static Region r = {
+		COL_INNER_Y0,
+		COL_INNER_YF,
+		ROW_INNER_1Y0,
+		ROW_INNER_1YF,
+		LCD_COLOR_BLACK
+	};
+	LCD_FillRegion(r);
+	GPIOA->DATA |= 0x8;
 }
 
 void fillGreen() {
-	LCD_SetColumn(COL_OUTER_Y0, COL_OUTER_YF);
-	LCD_SetPage(ROW_OUTER_2Y0, ROW_OUTER_2YF);
-	LCD_WriteBlock(LCD_COLOR_GREEN, SIZE_COLOR, AREA_OUTER);
-	GPIOA->DATA |= 0x10;
+	const static Region r = {
+		COL_INNER_Y0,
+		COL_INNER_YF,
+		ROW_INNER_2Y0,
+		ROW_INNER_2YF,
+		LCD_COLOR_GREEN
+	};
+	LCD_FillRegion(r);
+	GPIOA->DATA &= ~0x10;
 }
 
 void unfillGreen() {
-	LCD_SetColumn(COL_INNER_Y0, COL_INNER_YF);
-	LCD_SetPage(ROW_INNER_2Y0, ROW_INNER_2YF);
-	LCD_WriteBlock(LCD_COLOR_BLACK, SIZE_COLOR, AREA_INNER);
-	GPIOA->DATA |= !(!GPIOA->DATA | 0x10);
+	const static Region r = {
+		COL_INNER_Y0,
+		COL_INNER_YF,
+		ROW_INNER_2Y0,
+		ROW_INNER_2YF,
+		LCD_COLOR_BLACK
+	};
+	LCD_FillRegion(r);
+	GPIOA->DATA |= 0x10;
 }
 
 void fillYellow() {
-	LCD_SetColumn(COL_OUTER_Y0, COL_OUTER_YF);
-	LCD_SetPage(ROW_OUTER_3Y0, ROW_OUTER_3YF);
-	LCD_WriteBlock(LCD_COLOR_YELLOW, SIZE_COLOR, AREA_OUTER);
-	GPIOA->DATA |= 0x20;
+	const static Region r = {
+		COL_INNER_Y0,
+		COL_INNER_YF,
+		ROW_INNER_3Y0,
+		ROW_INNER_3YF,
+		LCD_COLOR_YELLOW
+	};
+	LCD_FillRegion(r);
+	GPIOA->DATA &= ~0x20;
 }
 
 void unfillYellow() {
-	LCD_SetColumn(COL_INNER_Y0, COL_INNER_YF);
-	LCD_SetPage(ROW_INNER_3Y0, ROW_INNER_3YF);
-	LCD_WriteBlock(LCD_COLOR_BLACK, SIZE_COLOR, AREA_INNER);
-	GPIOA->DATA |= !(!GPIOA->DATA | 0x20);
+	const static Region r = {
+		COL_INNER_Y0,
+		COL_INNER_YF,
+		ROW_INNER_3Y0,
+		ROW_INNER_3YF,
+		LCD_COLOR_BLACK
+	};
+	LCD_FillRegion(r);
+	GPIOA->DATA |= 0x20;
 }
 
 void exec() {
+	unsigned int i;
+	Region r;
+	r.ColumnStart = COL_OUTER_Y0;
+	r.ColumnEnd = COL_OUTER_YF;
+	
 	// Fill in the outer boxes
-	LCD_SetColumn(COL_OUTER_Y0, COL_OUTER_YF);
+	r.PageStart = ROW_OUTER_1Y0;
+	r.PageEnd = ROW_OUTER_1YF;
+	r.Color = LCD_COLOR_RED;
+	LCD_FillRegion(r);
 	
-	LCD_SetPage(ROW_OUTER_1Y0, ROW_OUTER_1YF);
-	LCD_WriteBlock(LCD_COLOR_RED, SIZE_COLOR, AREA_OUTER);
+	r.PageStart = ROW_OUTER_2Y0;
+	r.PageEnd = ROW_OUTER_2YF;
+	r.Color = LCD_COLOR_GREEN;
+	LCD_FillRegion(r);
 	
-	LCD_SetPage(ROW_OUTER_2Y0, ROW_OUTER_2YF);
-	LCD_WriteBlock(LCD_COLOR_GREEN, SIZE_COLOR, AREA_OUTER);
+	r.PageStart = ROW_OUTER_3Y0;
+	r.PageEnd = ROW_OUTER_3YF;
+	r.Color = LCD_COLOR_YELLOW;
+	LCD_FillRegion(r);
 	
-	LCD_SetPage(ROW_OUTER_3Y0, ROW_OUTER_3YF);
-	LCD_WriteBlock(LCD_COLOR_YELLOW, SIZE_COLOR, AREA_OUTER);
+	// Fill in the inner boxes with black
+	unfillRed();
+	unfillGreen();
+	unfillYellow();
 	
-	// Fill in the inner boxes
-	LCD_SetColumn(COL_INNER_Y0, COL_INNER_YF);
-	
-	LCD_SetPage(ROW_INNER_1Y0, ROW_INNER_1YF);
-	LCD_WriteBlock(LCD_COLOR_BLACK, SIZE_COLOR, AREA_INNER);
-	
-	LCD_SetPage(ROW_INNER_2Y0, ROW_INNER_2YF);
-	LCD_WriteBlock(LCD_COLOR_BLACK, SIZE_COLOR, AREA_INNER);
-	
-	LCD_SetPage(ROW_INNER_3Y0, ROW_INNER_3YF);
-	LCD_WriteBlock(LCD_COLOR_BLACK, SIZE_COLOR, AREA_INNER);
+	while (0) {
+		fillRed();
+		for(i = 0; i < 2483648; ++i){};
+		unfillRed();
+		for(i = 0; i < 2483648; ++i){};
+		fillGreen();
+		for(i = 0; i < 2483648; ++i){};
+		unfillGreen();
+		for(i = 0; i < 2483648; ++i){};
+		fillYellow();
+		for(i = 0; i < 2483648; ++i){};
+		unfillYellow();
+		for(i = 0; i < 2483648; ++i){};
+	}
 }
 
 //---------------------------------------------------------------------------------------+
@@ -119,12 +166,11 @@ void init() {
 	//RCGC2->bit0 = 1; // Enable port A
 	//RCGC2->bit1 = 1; // Enable port B
 	//RCGC2->bit3 = 1; // Enable port D
-	
 	SYSCTL->RCGC2 = 0xB;
 	GPIO.PortD->LOCK.word = GPIO_UNLOCK;
 	
-	GPIO.PortA->DEN.bit2 = 1;
-	GPIO.PortA->DIR.bit2 = 1;
+	GPIO.PortA->DEN.byte[0] = 0x3C;
+	GPIO.PortA->DIR.byte[0] = 0x3C;
 	
 	GPIO.PortB->DEN.byte[0] = 0xFF;
 	GPIO.PortB->DIR.byte[0] = 0xFF;
@@ -144,16 +190,3 @@ int main() {
 	exec();
 	return 0;
 }
-
-	fillRed();
-	for(int i = 0; i < 100000; ++i){};
-	unfillRed();
-	for(int i = 0; i < 100000; ++i){};
-	fillYellow();
-	for(int i = 0; i < 100000; ++i){};
-	unfillYellow();
-	for(int i = 0; i < 100000; ++i){};
-	fillGreen();
-	for(int i = 0; i < 100000; ++i){};
-	unfillGreen();
-	for(int i = 0; i < 100000; ++i){};

@@ -21,7 +21,6 @@ void LCD_WriteData(const unsigned char* data, const int len) {
 }
 void LCD_WriteBlock(const unsigned char* data, const int len, const int n) {
 	int i, j;
-	for(i = 0; i < 100000; i++) { i++; }
 	LCD_WriteCmd(0x2C);
 	LCD_CSX = 0; // CSX "LCD, pay attention!"
 	LCD_DCX = 1; // DCX Data
@@ -60,9 +59,21 @@ void LCD_SetPage(const unsigned short Start, const unsigned short End) {
 	bStream[1] = (End & 0x00FF);
 	LCD_WriteData(bStream, 2);
 }
+void LCD_FillRegion(const Region r) {
+	int i;
+	LCD_SetColumn(r.ColumnStart, r.ColumnEnd);
+	LCD_SetPage(r.PageStart, r.PageEnd);
+	for(i = 0; i < 100000; i++) { i++; } // give the controller time to configure the page
+	LCD_WriteBlock(r.Color, SIZE_COLOR, (r.ColumnEnd - r.ColumnStart) * (r.PageEnd - r.PageStart));
+}
 
 void LCD_Init() {
 	int i;
+	Region r = {
+		0, LCD_COLS,
+		0, LCD_ROWS,
+		LCD_COLOR_BLACK
+	};
 	
 	LCD_RST = 0;
 	LCD_RST = 1;
@@ -125,7 +136,5 @@ void LCD_Init() {
 	for(i = 0; i < 20000; i++) { i++; }
 	LCD_WriteCmd(0x29); // Display on
 	
-	LCD_SetColumn(0, LCD_COLS);
-	LCD_SetPage(0, LCD_ROWS);
-	LCD_WriteBlock(LCD_COLOR_BLACK, SIZE_COLOR, LCD_AREA);
+	LCD_FillRegion(r);
 }

@@ -57,6 +57,10 @@ extern code LCD_CODE_SGM1[SIZE_CODE_SGM1];
 static const short LCD_ROWS = 320;
 static const short LCD_COLS = 240;
 static const int LCD_AREA = LCD_ROWS * LCD_COLS;//76800;//LCD_ROWS * (int)LCD_COLS;
+typedef struct {
+	unsigned short ColumnStart, ColumnEnd, PageStart, PageEnd;
+	code* Color;
+} Region;
 
 //---------------------------------------------------------------------------------------+
 // Driver Functions                                                                      |
@@ -67,6 +71,7 @@ void LCD_WriteBlock(const unsigned char*, const int, const int);
 
 void LCD_SetColumn(const unsigned short, const unsigned short);
 void LCD_SetPage(const unsigned short, const unsigned short);
+void LCD_FillRegion(const Region);
 
 void LCD_Init(void);
 
