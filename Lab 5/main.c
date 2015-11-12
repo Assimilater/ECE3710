@@ -42,8 +42,50 @@ const short ROW_INNER_3YF = ROW_OUTER_3YF - PADR_INNER;
 //---------------------------------------------------------------------------------------+
 // Any program logic                                                                     |
 //---------------------------------------------------------------------------------------+
+
+void fillRed() {
+	LCD_SetColumn(COL_OUTER_Y0, COL_OUTER_YF);
+	LCD_SetPage(ROW_OUTER_1Y0, ROW_OUTER_1YF);
+	LCD_WriteBlock(LCD_COLOR_RED, SIZE_COLOR, AREA_OUTER);
+	GPIOA->DATA |= 0x8;
+}
+
+void unfillRed() {
+	LCD_SetColumn(COL_INNER_Y0, COL_INNER_YF);
+	LCD_SetPage(ROW_INNER_1Y0, ROW_INNER_1YF);
+	LCD_WriteBlock(LCD_COLOR_BLACK, SIZE_COLOR, AREA_INNER);
+	GPIOA->DATA |= !(!GPIOA->DATA | 0x8);
+}
+
+void fillGreen() {
+	LCD_SetColumn(COL_OUTER_Y0, COL_OUTER_YF);
+	LCD_SetPage(ROW_OUTER_2Y0, ROW_OUTER_2YF);
+	LCD_WriteBlock(LCD_COLOR_GREEN, SIZE_COLOR, AREA_OUTER);
+	GPIOA->DATA |= 0x10;
+}
+
+void unfillGreen() {
+	LCD_SetColumn(COL_INNER_Y0, COL_INNER_YF);
+	LCD_SetPage(ROW_INNER_2Y0, ROW_INNER_2YF);
+	LCD_WriteBlock(LCD_COLOR_BLACK, SIZE_COLOR, AREA_INNER);
+	GPIOA->DATA |= !(!GPIOA->DATA | 0x10);
+}
+
+void fillYellow() {
+	LCD_SetColumn(COL_OUTER_Y0, COL_OUTER_YF);
+	LCD_SetPage(ROW_OUTER_3Y0, ROW_OUTER_3YF);
+	LCD_WriteBlock(LCD_COLOR_YELLOW, SIZE_COLOR, AREA_OUTER);
+	GPIOA->DATA |= 0x20;
+}
+
+void unfillYellow() {
+	LCD_SetColumn(COL_INNER_Y0, COL_INNER_YF);
+	LCD_SetPage(ROW_INNER_3Y0, ROW_INNER_3YF);
+	LCD_WriteBlock(LCD_COLOR_BLACK, SIZE_COLOR, AREA_INNER);
+	GPIOA->DATA |= !(!GPIOA->DATA | 0x20);
+}
+
 void exec() {
-	//return;
 	// Fill in the outer boxes
 	LCD_SetColumn(COL_OUTER_Y0, COL_OUTER_YF);
 	
@@ -102,3 +144,16 @@ int main() {
 	exec();
 	return 0;
 }
+
+	fillRed();
+	for(int i = 0; i < 100000; ++i){};
+	unfillRed();
+	for(int i = 0; i < 100000; ++i){};
+	fillYellow();
+	for(int i = 0; i < 100000; ++i){};
+	unfillYellow();
+	for(int i = 0; i < 100000; ++i){};
+	fillGreen();
+	for(int i = 0; i < 100000; ++i){};
+	unfillGreen();
+	for(int i = 0; i < 100000; ++i){};
