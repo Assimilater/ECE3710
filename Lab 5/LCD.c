@@ -13,6 +13,7 @@ void LCD_WriteCmd(const unsigned char cmd) {
 	LCD_RDX = 1; // Set Read high
 	GPIO.PortB->DATA.byte[0] = cmd;
 	LCD_WRX = 1; // WRX read on +edge
+	LCD_CSX = 1; // "We're done, LCD"
 }
 void LCD_WriteData(const unsigned char* data, const int len) {
 	int i;
@@ -24,6 +25,7 @@ void LCD_WriteData(const unsigned char* data, const int len) {
 		GPIO.PortB->DATA.byte[0] = data[i];
 		LCD_WRX = 1; // WRX read on +edge
 	}
+	LCD_CSX = 1; // "We're done, LCD"
 }
 void LCD_WriteBlock(const unsigned char* data, const int len, const int n) {
 	int i, j;
@@ -38,6 +40,7 @@ void LCD_WriteBlock(const unsigned char* data, const int len, const int n) {
 			LCD_WRX = 1; // WRX read on +edge
 		}
 	}
+	LCD_CSX = 1; // "We're done, LCD"
 }
 
 void LCD_SetColumn(const unsigned short Start, const unsigned short End) {
