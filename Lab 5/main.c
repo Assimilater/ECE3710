@@ -117,7 +117,7 @@ void unfillYellow() {
 //---------------------------------------------------------------------------------------+
 // Touchscreen SPI handlers                                                              |
 //---------------------------------------------------------------------------------------+
-int sample_cnt = 0;
+unsigned int sample_cnt = 0;
 void GPIOA_Handler() {
 	// User is pressing down
 	GPIO.PortA->ICR.bit6 = 1;
@@ -132,7 +132,7 @@ void GPIOA_Handler() {
 
 void SysTick_Handler() {
 	static const int SIZE = 10;
-	static char data[SIZE];
+	static coord data[SIZE];
 	
 	if (GPIO.PortA->DATA.bit6) {
 		// User let go
@@ -147,7 +147,7 @@ void SysTick_Handler() {
 		GPIO.PortA->IM.bit6 = 1;
 	} else {
 		// User is pressing down
-		data[sample_cnt % SIZE] = 0; // Get value from SPI?
+		data[sample_cnt % SIZE] = LCD_GetXY(); // Get value from SPI?
 	}
 }
 
@@ -215,7 +215,11 @@ void init() {
 	
 	GPIO.PortA->DEN.byte[0] = 0xFC;
 	GPIO.PortA->AFSEL.byte[0] = 0x3C;
-	GPIO.PortA->PUR.byte[0] = 0x3C;
+	
+	//GPIO.PortA->DIR.byte[0] = 0xFF;
+	//GPIO.PortA->DATA.bit3 = 0;
+	//GPIO.PortA->DATA.bit3 = 1;
+	//return;
 	
 	GPIO.PortB->DEN.byte[0] = 0xFF;
 	GPIO.PortB->DIR.byte[0] = 0xFF;
@@ -232,9 +236,10 @@ void init() {
 	
 	// Configure SSI
 	SSI0->CR1 = 0;
-	SSI0->CC = 0;
-	// Set CPSR Register
-	// Set CR0 - Set SCR, SPH, SP0, FRF, DSS
+	SSI0->CC = 0x5;
+	SSI0->CPSR = 0x2;
+	SSI0->CR0 = 0x707;
+	SSI0->ICR |= 0x2;
 	
 	// Configure interrupts
 	GPIO.PortA->IM.word = 0;
