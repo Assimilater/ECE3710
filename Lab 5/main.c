@@ -239,7 +239,7 @@ void init() {
 	SSI0->CC = 0x5;
 	SSI0->CPSR = 0x2;
 	SSI0->CR0 = 0x707;
-	SSI0->ICR |= 0x2;
+	SSI0->CR1 |= 0x2;
 	
 	// Configure interrupts
 	GPIO.PortA->IM.word = 0;
