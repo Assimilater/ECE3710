@@ -217,10 +217,13 @@ void init() {
 	GPIO.PortA->AFSEL.byte[0] = 0x3C;
 	GPIO.PortA->DIR.bit7 = 1;
 	
-	//GPIO.PortA->DIR.byte[0] = 0xFF;
-	//GPIO.PortA->DATA.bit3 = 0;
-	//GPIO.PortA->DATA.bit3 = 1;
-	//return;
+	// Pull up and pull down configuration necessary to avoid electromagnetic interference between SSI pins
+	GPIO.PortA->PDR.bit2 = 1; // Clock
+	GPIO.PortA->PUR.bit3 = 1; // FSS
+	GPIO.PortA->PUR.bit4 = 1; // Rx
+	GPIO.PortA->PDR.bit5 = 1; // TX
+	GPIO.PortA->PUR.bit6 = 1; // Pen Interrupt
+	GPIO.PortA->PUR.bit7 = 1; // Custom FSS (no pulsing between bytes of 3-byte transmission)
 	
 	GPIO.PortB->DEN.byte[0] = 0xFF;
 	GPIO.PortB->DIR.byte[0] = 0xFF;
