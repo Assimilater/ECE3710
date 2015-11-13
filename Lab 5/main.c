@@ -236,11 +236,25 @@ void init() {
 	NVIC_ST_RELOAD_R = 16000; // 1ms
 	
 	// Configure SSI
+//	SSI0->CR1 = 0;
+//	SSI0->CC = 0x5;
+//	SSI0->CPSR = 0x2;
+//	SSI0->CR0 = 0x707;
+//	SSI0->CR1 |= 0x2;
+	
+	// Configure SSI
+	//freescale
 	SSI0->CR1 = 0;
-	SSI0->CC = 0x5;
-	SSI0->CPSR = 0x2;
+	SSI0->CC = 0x0;
+	SSI0->CPSR = 0xA;
 	SSI0->CR0 = 0x707;
 	SSI0->CR1 |= 0x2;
+	//microwire
+//	SSI0->CR1 = 0;
+//	SSI0->CC = 0x0;
+//	SSI0->CPSR = 0xA;
+//	SSI0->CR0 = 0x627;
+//	SSI0->CR1 |= 0x2;
 	
 	// Configure interrupts
 	GPIO.PortA->IM.word = 0;
