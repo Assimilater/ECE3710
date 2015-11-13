@@ -12,18 +12,14 @@ coord LCD_GetXY() {
 	TP_CSX = 0;
 	while(!(SSI0->SR & 0x1)); // Wait for TFE = 1
 	SSI0->DR = 0xD0;
-//	for(i=0; i<0xFFF; i++);	//wait for rx FIFO
-
 	SSI0->DR = 0;
 	SSI0->DR = 0;
 	
-	read = SSI0->SR;
-	while(SSI0->SR & 0x10); // Wait for BSY == 0
-	read = SSI0->SR;
 	// Read null Byte
 	// Read X C[11:0] X[2:0]
-	read = SSI0->DR;
-	read = SSI0->DR;
+	while(SSI0->SR & 0x10); // Wait for BSY == 0
+	read = SSI0->SR;
+	read = SSI0->SR;
 	read = read << 8;
 	read |= SSI0->DR;
 	
