@@ -4,7 +4,7 @@
 
 coord LCD_GetXY() {
 	coord val;
-	int read;
+	int read, i;
 	// Write CB => S A[2:0] Mode 000
 	// Note: CB - X => 0xD0, Y => 0x90
 	
@@ -12,6 +12,8 @@ coord LCD_GetXY() {
 	TP_CSX = 0;
 	while(!(SSI0->SR & 0x1)); // Wait for TFE = 1
 	SSI0->DR = 0xD0;
+//	for(i=0; i<0xFFF; i++);	//wait for rx FIFO
+
 	SSI0->DR = 0;
 	SSI0->DR = 0;
 	
