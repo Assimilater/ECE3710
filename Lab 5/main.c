@@ -215,6 +215,8 @@ void init() {
 	
 	GPIO.PortA->DEN.byte[0] = 0xFC;
 	GPIO.PortA->AFSEL.byte[0] = 0x3C;
+	GPIO.PortA->PUR.bit2 = 1;
+	GPIO.PortA->DIR.bit7 = 1;
 	
 	//GPIO.PortA->DIR.byte[0] = 0xFF;
 	//GPIO.PortA->DATA.bit3 = 0;

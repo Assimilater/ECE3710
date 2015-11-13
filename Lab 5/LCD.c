@@ -9,11 +9,15 @@ coord LCD_GetXY() {
 	// Note: CB - X => 0xD0, Y => 0x90
 	
 	// Write CB, followed by 2 bytes of 0 so we can read 2 bytes from TFT
+	TP_CSX = 0;
 	while(!(SSI0->SR & 0x1)); // Wait for TFE = 1
 	SSI0->DR = 0xD0;
 	SSI0->DR = 0;
 	SSI0->DR = 0;
 	
+	read = SSI0->SR;
+	while(SSI0->SR & 0x10); // Wait for BSY == 0
+	read = SSI0->SR;
 	// Read null Byte
 	// Read X C[11:0] X[2:0]
 	read = SSI0->DR;
@@ -23,7 +27,7 @@ coord LCD_GetXY() {
 	
 	// Read X C[11:0] X[2:0]
 	
-	
+	TP_CSX = 1;
 	return val;
 }
 
@@ -109,6 +113,9 @@ void LCD_Init() {
 		0, LCD_ROWS,
 		LCD_COLOR_BLACK
 	};
+	
+	TP_CSX = 1;
+
 	
 	LCD_RST = 0;
 	LCD_RST = 1;
