@@ -51,15 +51,22 @@ void init() {
 	// enable clocks
 	SYSCTL->RCGCTIMER = 0x7; // Enable timers 0, 1, 2
 	SYSCTL->RCGCADC = 0x1; // enable ADC0
-	SYSCTL->RCGCGPIO = 0x8; // Enable port D
+	SYSCTL->RCGCGPIO = 0xA; // Enable ports B and D
+	SYSCTL->RCGCI2C = 0x1; // Enable I2C0
 	GPIO.PortD->LOCK.word = GPIO_UNLOCK;
 	
 	//config PD
-	//PD0 is AIN7
+	//PD0 is AIN7/SS0 for ADC0
 	GPIO.PortD->AFSEL.word = 0x1; // enable AF for PD0
 	GPIO.PortD->DEN.bit0 = 0; // Set PD as analog input
 	GPIO.PortD->AMSEL.word = 0x1; // disable isolation for PD0 for analog
 	GPIO.PortD->ADCCTL.word = 0x1; // PD0 triggers ADC
+	
+	//config PB
+	//PB2 is I2CSCL, PB3 is I2CSDA
+	GPIO.PortB->AFSEL.word = 0xC; // enable AF for PB2,3
+	GPIO.PortB->DEN.word = 0xC; // PB2,3
+	GPIO.PortB->PCTL.word = 0x3300; //See Pg.1351
 	
 	//config ADC
 	ADC0->ACTSS = 0; // Disable ADC0
@@ -73,7 +80,7 @@ void init() {
 	TIMER0->CFG = 0; //32-bit
 	TIMER0->TAMR = 0x2; //periodic mode
 	TIMER0->TAILR = 0x9C40; //Reload value 2ms for 20 MHz clock
-	TIMER0->CTL = 0x21; //enable
+	TIMER0->CTL = 0x21; //enable Timer and ADC trigger
 	
 	TIMER1->CTL = 0; //disable
 	TIMER1->CFG = 0; //32-bit
