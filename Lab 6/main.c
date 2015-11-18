@@ -2,7 +2,7 @@
 #include "../Shared/GPIO.h"
 #include "../Shared/bool.h"
 
-void ADC0_Handler() {
+void ADC0SS0_Handler() {
 	ADC0->ISC = 0x1; // acknowledge/clear interrupt
 	TIMER0->ICR = 0x1; // clears the timer expiration flag
 	//VOLTAGE = ADC0_SSFIFO0_R; //store conversion into global variable VOLTAGE
@@ -68,14 +68,15 @@ void init() {
 	ADC0->IM = 0x1; // enable interrupts for SS0
 	ADC0->ACTSS = 0x1; // enable SS0 in ADC0
 	
-	NVIC_EN0_R = 0x4000; //enable interrupts for ADC0 SS0
-	
 	//GPTM0
 	TIMER0->CTL = 0; //disable
 	TIMER0->CFG = 0; //32-bit
 	TIMER0->TAMR = 0x2; //periodic mode
 	TIMER0->TAILR = 0x9C40; //Reload value 2ms for 20 MHz clock
-	TIMER0->CTL = 1; //enable
+	TIMER0->CTL = 0x21; //enable
+	
+	ADC0->ISC = 0x1; // acknowledge/clear interrupt
+	NVIC_EN0_R = 0x4000; //enable interrupts for ADC0 SS0
 }
 
 //---------------------------------------------------------------------------------------+
