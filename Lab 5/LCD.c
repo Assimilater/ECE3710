@@ -15,8 +15,6 @@ coord LCD_GetXY() {
 	SSI0->DR = 0;
 	SSI0->DR = 0;
 	
-	// Read null Byte
-	// Read X C[11:0] X[2:0]
 	while(SSI0->SR & 0x10); // Wait for BSY == 0
 	read = SSI0->SR;
 	read = SSI0->SR;
@@ -24,6 +22,8 @@ coord LCD_GetXY() {
 	read |= SSI0->DR;
 	
 	// Read X C[11:0] X[2:0]
+	read = read >> 3;
+	read &= 0xFFF;
 	
 	TP_CSX = 1;
 	return val;
@@ -113,7 +113,6 @@ void LCD_Init() {
 	};
 	
 	TP_CSX = 1;
-
 	
 	LCD_RST = 0;
 	LCD_RST = 1;
