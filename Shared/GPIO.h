@@ -26,6 +26,7 @@ typedef struct {
 	REG DEN; //0x51C
 	REG LOCK; //0x520
 	REG CR; //0x524
+	REG AMSEL; // 0x528
 } GPIOPort;
 
 typedef struct {
