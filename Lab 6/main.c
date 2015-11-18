@@ -17,6 +17,8 @@ void ADC0SS0_Handler() {
 void TIMER1A_Handler() {
 	// Update systick freq. using data from ADC0SS0 handler
 	
+	// Update DAC Timer
+	
 	voltage = 0;
 	i = 0;
 }
