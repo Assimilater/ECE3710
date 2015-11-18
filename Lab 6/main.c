@@ -75,6 +75,12 @@ void init() {
 	TIMER0->TAILR = 0x9C40; //Reload value 2ms for 20 MHz clock
 	TIMER0->CTL = 0x21; //enable
 	
+	TIMER1->CTL = 0; //disable
+	TIMER1->CFG = 0; //32-bit
+	TIMER1->TAMR = 0x2; //periodic mode
+	TIMER1->TAILR = 0x989680; //Reload value 500ms for 20 MHz clock
+	TIMER1->CTL = 1; //enable
+
 	ADC0->ISC = 0x1; // acknowledge/clear interrupt
 	NVIC_EN0_R = 0x4000; //enable interrupts for ADC0 SS0
 }
