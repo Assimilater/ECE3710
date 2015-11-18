@@ -41,15 +41,11 @@ PLL_Validate
 void init() {
 	useXTAL();
 	
-	//SYSCTL_RCGC1_R |= 0x10000; // GPTM0
+	// enable clocks
 	SYSCTL->RCGCTIMER = 0x7; // Enable timers 0, 1, 2
-	//SYSCTL_RCGC2_R |= 0x8; // port D
-	SYSCTL->RCGCGPIO = 0x1B;
-	//SYSCTL_RCGC0_R |= 0x10000; //ADC0
 	SYSCTL->RCGCADC = 0x1; // enable ADC0
-	//SYSCTL->RCGCSSI = 0x1;
-	//GPIO.PortD->LOCK.word = GPIO_UNLOCK;
-		// enable clocks
+	SYSCTL->RCGCGPIO = 0x8; // Enable port D
+	GPIO.PortD->LOCK.word = GPIO_UNLOCK;
 	
 	//config PD
 	//PD0 is AIN7
@@ -73,7 +69,6 @@ void init() {
 	TIMER0->TAMR = 0x2; //periodic mode
 	TIMER0->TAILR = 0x9C40; //Reload value 2ms for 20 MHz clock
 	TIMER0->CTL = 1; //enable
-
 }
 
 //---------------------------------------------------------------------------------------+
