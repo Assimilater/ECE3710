@@ -2,6 +2,13 @@
 #include "../Shared/GPIO.h"
 #include "../Shared/bool.h"
 
+void ADC0_Handler() {
+	ADC0->ISC = 0x1; // acknowledge/clear interrupt
+	TIMER0->ICR = 0x1; // clears the timer expiration flag
+	//VOLTAGE = ADC0_SSFIFO0_R; //store conversion into global variable VOLTAGE
+	ADC0->SSFIFO0; //conversion from SS0
+}
+
 //---------------------------------------------------------------------------------------+
 // Program initialization logic                                                          |
 //---------------------------------------------------------------------------------------+
