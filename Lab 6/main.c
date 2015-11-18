@@ -9,6 +9,10 @@ void ADC0SS0_Handler() {
 	ADC0->SSFIFO0; //conversion from SS0
 }
 
+void SYSTICK_Handler() {
+	// Update Timer C freq. using data from ADC0SS0 handler
+}
+
 //---------------------------------------------------------------------------------------+
 // Program initialization logic                                                          |
 //---------------------------------------------------------------------------------------+
@@ -58,15 +62,20 @@ void init() {
 	//config PD
 	//PD0 is AIN7/SS0 for ADC0
 	GPIO.PortD->AFSEL.word = 0x1; // enable AF for PD0
-	GPIO.PortD->DEN.bit0 = 0; // Set PD as analog input
+	//GPIO.PortD->DEN.bit0 = 0; // Set PD as analog input
 	GPIO.PortD->AMSEL.word = 0x1; // disable isolation for PD0 for analog
 	GPIO.PortD->ADCCTL.word = 0x1; // PD0 triggers ADC
 	
 	//config PB
 	//PB2 is I2CSCL, PB3 is I2CSDA
 	GPIO.PortB->AFSEL.word = 0xC; // enable AF for PB2,3
-	GPIO.PortB->DEN.word = 0xC; // PB2,3
-	GPIO.PortB->PCTL.word = 0x3300; //See Pg.1351
+	//GPIO.PortB->DEN.word = 0xC; // PB2,3
+	GPIO.PortB->ODR.bit3 = 1;
+	GPIO.PortB->PCTL.word = 0x3300; // See Pg.1351
+	
+	//config I2C
+	I2C0->MCR = 0x10; // initialize I2C
+	I2C0->MTPR = 0x1; // TPR = 20MHz/(2*(SCL_LP[6] + SCL_HP[4])*SCL_CLK[400000]) - 1 = 1.5
 	
 	//config ADC
 	ADC0->ACTSS = 0; // Disable ADC0
@@ -76,18 +85,22 @@ void init() {
 	ADC0->ACTSS = 0x1; // enable SS0 in ADC0
 	
 	//GPTM0
-	TIMER0->CTL = 0; //disable
-	TIMER0->CFG = 0; //32-bit
-	TIMER0->TAMR = 0x2; //periodic mode
-	TIMER0->TAILR = 0x9C40; //Reload value 2ms for 20 MHz clock
-	TIMER0->CTL = 0x21; //enable Timer and ADC trigger
+	TIMER0->CTL = 0; // disable
+	TIMER0->CFG = 0; // 32-bit
+	TIMER0->TAMR = 0x2; // periodic mode
+	TIMER0->TAILR = 0x9C40; // Reload value 2ms for 20 MHz clock
+	TIMER0->CTL = 0x21; // enable Timer and ADC trigger
 	
-	TIMER1->CTL = 0; //disable
-	TIMER1->CFG = 0; //32-bit
-	TIMER1->TAMR = 0x2; //periodic mode
-	TIMER1->TAILR = 0x989680; //Reload value 500ms for 20 MHz clock
-	TIMER1->CTL = 1; //enable
-
+	TIMER1->CTL = 0; // disable
+	TIMER1->CFG = 0; // 32-bit
+	TIMER1->TAMR = 0x2; // periodic mode
+	TIMER1->TAILR = ; // 
+	TIMER1->CTL = 1; // enable
+	
+	//SysTick
+	SysTick->LOAD = 0x989680; // Reload value 500ms for 20 MHz clock
+	SysTick->CTRL = 0x7; // Use sysclk, interrupts, and enable
+	
 	ADC0->ISC = 0x1; // acknowledge/clear interrupt
 	NVIC_EN0_R = 0x4000; //enable interrupts for ADC0 SS0
 }
