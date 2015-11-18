@@ -2,15 +2,27 @@
 #include "../Shared/GPIO.h"
 #include "../Shared/bool.h"
 
+int voltage = 0;
+int i = 0;
+
 void ADC0SS0_Handler() {
 	ADC0->ISC = 0x1; // acknowledge/clear interrupt
 	TIMER0->ICR = 0x1; // clears the timer expiration flag
 	//VOLTAGE = ADC0_SSFIFO0_R; //store conversion into global variable VOLTAGE
 	ADC0->SSFIFO0; //conversion from SS0
+	voltage = (voltage*i + ADC0->SSFIFO0)/(1+i);
+	++i;
 }
 
-void SYSTICK_Handler() {
-	// Update Timer C freq. using data from ADC0SS0 handler
+void TIMER1A_Handler() {
+	// Update systick freq. using data from ADC0SS0 handler
+	
+	voltage = 0;
+	i = 0;
+}
+
+void SysTick_Handler() {
+	
 }
 
 //---------------------------------------------------------------------------------------+
@@ -94,12 +106,13 @@ void init() {
 	TIMER1->CTL = 0; // disable
 	TIMER1->CFG = 0; // 32-bit
 	TIMER1->TAMR = 0x2; // periodic mode
-	TIMER1->TAILR = ; // 
+	TIMER1->TAILR = 0x989680; // Reload value 500ms for 20 MHz clock
+	TIMER1->IMR = 0x1; // Enable interrupts on time-out	
 	TIMER1->CTL = 1; // enable
 	
 	//SysTick
-	SysTick->LOAD = 0x989680; // Reload value 500ms for 20 MHz clock
-	SysTick->CTRL = 0x7; // Use sysclk, interrupts, and enable
+	//SysTick->LOAD =;
+	//SysTick->CTRL =;
 	
 	ADC0->ISC = 0x1; // acknowledge/clear interrupt
 	NVIC_EN0_R = 0x4000; //enable interrupts for ADC0 SS0
