@@ -85,5 +85,4 @@ int main() {
 	init();
 	exec();
 	while (1);
-	return 1;
 }
