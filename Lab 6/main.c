@@ -2,29 +2,35 @@
 #include "../Shared/GPIO.h"
 #include "../Shared/bool.h"
 
+static const double SIN[40] = {
+	0,
+	1,
+	0,
+	-1,
+	0
+};
+
 int voltage = 0;
-int i = 0;
+int adc_scnt = 0;
 
 void ADC0SS0_Handler() {
 	ADC0->ISC = 0x1; // acknowledge/clear interrupt
 	TIMER0->ICR = 0x1; // clears the timer expiration flag
-	//VOLTAGE = ADC0_SSFIFO0_R; //store conversion into global variable VOLTAGE
-	ADC0->SSFIFO0; //conversion from SS0
-	voltage = (voltage*i + ADC0->SSFIFO0)/(1+i);
-	++i;
+	voltage = ((voltage * adc_scnt) + ADC0->SSFIFO0) / (adc_scnt + 1); // update moving average for voltage based on sample
+	++adc_scnt;
 }
 
 void TIMER1A_Handler() {
-	// Update systick freq. using data from ADC0SS0 handler
+	TIMER1->ICR = 0x1;
 	
+	// Update systick freq. using data from ADC0SS0 handler
 	// Update DAC Timer
 	
-	voltage = 0;
-	i = 0;
+	voltage = adc_scnt = 0;
 }
 
 void SysTick_Handler() {
-	
+	// Send to I2C to update output voltage attached to speakers
 }
 
 //---------------------------------------------------------------------------------------+
@@ -38,10 +44,13 @@ void exec() {
 // Translation of code written in assembly before to configure for 20MHz                 |
 //---------------------------------------------------------------------------------------+
 void useXTAL() {
+	SYSCTL->RCC = 0x04C00D40;
+	while (!(SYSCTL->RIS & 0x40));
+	SYSCTL->RCC &= ~0x800;
 	/** Equivalent Assembly
 		; Configure SysClk				; SYSDIV(0x9), BYPASS(0b1), XTAL(0x15)
 		LDR R0, =SYSCTL					; OSCSRC(0b00), MOSCDIS(0b0)
-		LDR R1, =0x04C00D40				; (0000)(0 100)(11 00) (0000) (00 00)(11 01)(01 00) (0000)
+		LDR R1, =0x04C00D40				; (0000)(0 100)(11 00) (0000) (0000)(1 101)(01 00) (0000)
 		STR R1, [R0, #SYS_RCC]			; Bypass the PLL so the PLL can be validated before use
 		
 PLL_Validate
@@ -54,10 +63,6 @@ PLL_Validate
 		AND R1, R2
 		STR R1, [R0, #SYS_RCC]
 	**/
-	
-	SYSCTL->RCC = 0x04C00D40;
-	while (!(SYSCTL->RIS & 0x40));
-	SYSCTL->RCC &= ~0x800;
 }
 
 //---------------------------------------------------------------------------------------+
@@ -117,7 +122,7 @@ void init() {
 	//SysTick->CTRL =;
 	
 	ADC0->ISC = 0x1; // acknowledge/clear interrupt
-	NVIC_EN0_R = 0x4000; //enable interrupts for ADC0 SS0
+	NVIC_EN0_R = 0x204000; //enable interrupts for ADC0-SS0, and GPTM1
 }
 
 //---------------------------------------------------------------------------------------+
