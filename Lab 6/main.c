@@ -2,18 +2,32 @@
 #include "../Shared/GPIO.h"
 #include "../Shared/bool.h"
 
-static const double SIN[40] = {
-	0,
-	1,
-	0,
-	-1,
-	0
+/** Generation of SIN table:
+#include <iostream> // cout
+#include <math.h> // sin
+#define PI 3.14159265358979323846264
+
+int main() {
+	for (int n = 0; n < 40; ++n) {
+		std::cout << sin(2 * n * PI / 40) << std::endl;
+	}
+	system("pause");
+	return 0;
+}
+*/
+#define LOOKUP_SIZE 40
+const double SIN[LOOKUP_SIZE] = {
+	0,0,0,0,0,0,0,0,
+	1,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	-1,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0
 };
 
 unsigned int voltage = 0;
 unsigned int adc_scnt = 0;
 
-const unsigned int MAX_FREQUENCY =;
+const unsigned int MAX_FREQUENCY = 400;
 const unsigned char MAX_VOLTAGE = 5;
 void ADC0SS0_Handler() {
 	ADC0->ISC = 0x1; // acknowledge/clear interrupt
@@ -37,6 +51,9 @@ void TIMER1A_Handler() {
 
 void SysTick_Handler() {
 	// Send to I2C to update output voltage attached to speakers
+	static unsigned int i;
+	double a = SIN[++i];
+	i %= LOOKUP_SIZE;
 }
 
 //---------------------------------------------------------------------------------------+
