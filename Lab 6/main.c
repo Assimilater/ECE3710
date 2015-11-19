@@ -10,9 +10,11 @@ static const double SIN[40] = {
 	0
 };
 
-int voltage = 0;
-int adc_scnt = 0;
+unsigned int voltage = 0;
+unsigned int adc_scnt = 0;
 
+const unsigned int MAX_FREQUENCY =;
+const unsigned char MAX_VOLTAGE = 5;
 void ADC0SS0_Handler() {
 	ADC0->ISC = 0x1; // acknowledge/clear interrupt
 	TIMER0->ICR = 0x1; // clears the timer expiration flag
@@ -24,6 +26,10 @@ void TIMER1A_Handler() {
 	TIMER1->ICR = 0x1;
 	
 	// Update systick freq. using data from ADC0SS0 handler
+	SysTick->CTRL = 0;
+	SysTick->LOAD = MAX_FREQUENCY * (voltage / MAX_VOLTAGE);
+	SysTick->VAL = 1;
+	SysTick->CTRL = 0x7;
 	// Update DAC Timer
 	
 	voltage = adc_scnt = 0;
