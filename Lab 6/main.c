@@ -120,6 +120,7 @@ void init() {
 	//config ADC
 	ADC0->ACTSS = 0; // Disable ADC0
 	ADC0->EMUX = 0x5; // Timer triggers interrupt for sequencer0
+	ADC0->SSMUX0 = 0x7; // set AIN7 for first sample
 	ADC0->SSCTL0 = 0x6; // one sample sequence
 	ADC0->IM = 0x1; // enable interrupts for SS0
 	ADC0->ACTSS = 0x1; // enable SS0 in ADC0
