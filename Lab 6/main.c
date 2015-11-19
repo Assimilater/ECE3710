@@ -23,8 +23,8 @@ const float SIN[LOOKUP_SIZE] = {
 };
 
 // 100 - 1000 Hz sinusoid
-const unsigned int MAX_RELOAD = 0x1388; // 1000 Hz
-const unsigned int MIN_RELOAD = 0x0F4; // 100 Hz
+const unsigned int MAX_RELOAD = 0x1388; // 100 Hz * 40 sin samples / hz
+const unsigned int MIN_RELOAD = 0x1F4; // 1000 Hz * 40 sin samples / hz
 const unsigned short MAX_VOLTAGE = 0xFFF;
 
 unsigned int voltage = 0;
@@ -112,7 +112,7 @@ void init() {
 	useXTAL();
 	
 	// enable clocks
-	SYSCTL->RCGCTIMER = 0x7; // Enable timers 0, 1, 2
+	SYSCTL->RCGCTIMER = 0x3; // Enable timers 0, 1
 	SYSCTL->RCGCADC = 0x1; // enable ADC0
 	SYSCTL->RCGCGPIO = 0xA; // Enable ports B and D
 	SYSCTL->RCGCI2C = 0x1; // Enable I2C0
@@ -155,7 +155,7 @@ void init() {
 	TIMER1->CFG = 0; // 32-bit
 	TIMER1->TAMR = 0x2; // periodic mode
 	TIMER1->TAILR = 0x989680; // Reload value 500ms for 20 MHz clock
-	TIMER1->IMR = 0x1; // Enable interrupts on time-out	
+	TIMER1->IMR = 0x1; // Enable interrupts on time-out
 	TIMER1->CTL = 1; // enable
 	
 	//SysTick
