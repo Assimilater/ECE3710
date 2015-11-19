@@ -24,7 +24,7 @@ const float SIN[LOOKUP_SIZE] = {
 
 // 100 - 1000 Hz sinusoid
 const unsigned int MAX_RELOAD = 0x1388; // 100 Hz * 40 sin samples / hz
-const unsigned int MIN_RELOAD = 0x1F4; // 1000 Hz * 40 sin samples / hz
+const unsigned int MIN_RELOAD = 0x9C4; // 200 Hz * 40 sin samples / hz
 const unsigned short MAX_VOLTAGE = 0xFFF;
 
 unsigned int voltage = 0;
