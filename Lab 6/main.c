@@ -102,7 +102,7 @@ void init() {
 	//config PD
 	//PD0 is AIN7/SS0 for ADC0
 	GPIO.PortD->AFSEL.word = 0x1; // enable AF for PD0
-	//GPIO.PortD->DEN.bit0 = 0; // Set PD as analog input
+	GPIO.PortD->DEN.bit0 = 0; // Set PD as analog input
 	GPIO.PortD->AMSEL.word = 0x1; // disable isolation for PD0 for analog
 	GPIO.PortD->ADCCTL.word = 0x1; // PD0 triggers ADC
 	
