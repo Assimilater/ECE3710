@@ -15,43 +15,62 @@ int main() {
 }
 */
 #define LOOKUP_SIZE 40
-const double SIN[LOOKUP_SIZE] = {
+const float SIN[LOOKUP_SIZE] = {
 	0, 0.156434, 0.309017, 0.45399, 0.587785, 0.707107, 0.809017, 0.891007, 0.951057, 0.987688,
 	1, 0.987688, 0.951057, 0.891007, 0.809017, 0.707107, 0.587785, 0.45399, 0.309017, 0.156434,
 	0, -0.156434, -0.309017, -0.45399, -0.587785, -0.707107, -0.809017, -0.891007, -0.951057, -0.987688,
 	-1, -0.987688, -0.951057, -0.891007, -0.809017, -0.707107, -0.587785, -0.45399, -0.309017, -0.156434
 };
 
+// 100 - 1000 Hz sinusoid
+const unsigned int MAX_RELOAD = 0x1388; // 1000 Hz
+const unsigned int MIN_RELOAD = 0x0F4; // 100 Hz
+const unsigned short MAX_VOLTAGE = 0xFFF;
+
 unsigned int voltage = 0;
 unsigned int adc_scnt = 0;
-
-const unsigned int MAX_FREQUENCY = 400;
-const unsigned short MAX_VOLTAGE = 0xAFF;
 void ADC0SS0_Handler() {
 	ADC0->ISC = 0x1; // acknowledge/clear interrupt
 	TIMER0->ICR = 0x1; // clears the timer expiration flag
 	voltage = ((voltage * adc_scnt) + ADC0->SSFIFO0) / (adc_scnt + 1); // update moving average for voltage based on sample
 	++adc_scnt;
 }
-
 void TIMER1A_Handler() {
 	TIMER1->ICR = 0x1;
-	
 	// Update systick freq. using data from ADC0SS0 handler
-	SysTick->CTRL = 0;
-	SysTick->LOAD = MAX_FREQUENCY * (voltage / MAX_VOLTAGE);
-	SysTick->VAL = 1;
-	SysTick->CTRL = 0x7;
-	// Update DAC Timer
-	
+	NVIC_ST_RELOAD_R = (((MAX_RELOAD - MIN_RELOAD) * voltage) / MAX_VOLTAGE) + MIN_RELOAD;
 	voltage = adc_scnt = 0;
 }
 
 void SysTick_Handler() {
-	// Send to I2C to update output voltage attached to speakers
 	static unsigned int i;
-	double a = SIN[++i];
+	unsigned short data;
+	unsigned char byte0, byte1;
+	
+	// Lookup a value of sin from the table
+	float sin_val = SIN[i++];
 	i %= LOOKUP_SIZE;
+	
+	// get range between 0-1 and scale by max value 0xFFF
+	data = 0xFFF * (sin_val + 1) / 2;
+	byte0 = (data >> 8);
+	byte1 = data & 0xFF;
+	
+	// DAC Datasheet -> send: Address, 0x0D, 0xDD
+	do {
+		I2C0->MSA = 0xC4; // 11 00 01 0 R
+		I2C0->MDR = byte0;
+		while (I2C0->MCS & (1 << 6)); // Bus busy bit
+		
+		I2C0->MCS = 0x3;
+		while (I2C0->MCS & (1 << 0)); // busy bit
+		
+		I2C0->MDR = byte1;
+		I2C0->MCS = 0x5;
+		
+		while (I2C0->MCS & (1 << 6)); // Bus busy bit
+	} while(I2C0->MCS & (1 << 1));
+	I2C0->MCS = 0x0;
 }
 
 //---------------------------------------------------------------------------------------+
@@ -109,13 +128,13 @@ void init() {
 	//config PB
 	//PB2 is I2CSCL, PB3 is I2CSDA
 	GPIO.PortB->AFSEL.word = 0xC; // enable AF for PB2,3
-	//GPIO.PortB->DEN.word = 0xC; // PB2,3
+	GPIO.PortB->DEN.word = 0xC; // PB2,3
 	GPIO.PortB->ODR.bit3 = 1;
 	GPIO.PortB->PCTL.word = 0x3300; // See Pg.1351
 	
 	//config I2C
 	I2C0->MCR = 0x10; // initialize I2C
-	I2C0->MTPR = 0x1; // TPR = 20MHz/(2*(SCL_LP[6] + SCL_HP[4])*SCL_CLK[400000]) - 1 = 1.5
+	I2C0->MTPR = 0x2; // TPR = 20MHz/(2*(SCL_LP[6] + SCL_HP[4])*SCL_CLK[400000]) - 1 = 1.5
 	
 	//config ADC
 	ADC0->ACTSS = 0; // Disable ADC0
@@ -140,8 +159,11 @@ void init() {
 	TIMER1->CTL = 1; // enable
 	
 	//SysTick
-	//SysTick->LOAD =;
-	//SysTick->CTRL =;
+	SCB->SHP[11] = (unsigned char) 0xF0; // Set priority for systick ridiculously low
+	SysTick->CTRL = 0x0;
+	SysTick->VAL = 1;
+	NVIC_ST_RELOAD_R = 0xFFFFFFFF;
+	SysTick->CTRL = 0x7;
 	
 	ADC0->ISC = 0x1; // acknowledge/clear interrupt
 	NVIC_EN0_R = 0x204000; //enable interrupts for ADC0-SS0, and GPTM1
