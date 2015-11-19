@@ -38,7 +38,7 @@ void ADC0SS0_Handler() {
 void TIMER1A_Handler() {
 	TIMER1->ICR = 0x1;
 	// Update systick freq. using data from ADC0SS0 handler
-	NVIC_ST_RELOAD_R = (((MAX_RELOAD - MIN_RELOAD) * voltage) / MAX_VOLTAGE) + MIN_RELOAD;
+	SysTick->LOAD = (((MAX_RELOAD - MIN_RELOAD) * voltage) / MAX_VOLTAGE) + MIN_RELOAD;
 	voltage = adc_scnt = 0;
 }
 
