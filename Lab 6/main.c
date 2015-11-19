@@ -26,7 +26,7 @@ unsigned int voltage = 0;
 unsigned int adc_scnt = 0;
 
 const unsigned int MAX_FREQUENCY = 400;
-const unsigned char MAX_VOLTAGE = 5;
+const unsigned short MAX_VOLTAGE = 0xAFF;
 void ADC0SS0_Handler() {
 	ADC0->ISC = 0x1; // acknowledge/clear interrupt
 	TIMER0->ICR = 0x1; // clears the timer expiration flag
