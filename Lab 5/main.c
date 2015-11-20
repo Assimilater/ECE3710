@@ -147,27 +147,6 @@ void SysTick_Handler() {
 		// Enable GPIOA interrupts
 		GPIO.PortA->ICR.bit6 = 1;
 		GPIO.PortA->IM.bit6 = 1;
-
-void flash() {
-	unsigned int i;
-	while (1) {
-		fillRed();
-		for(i = 0; i < 2483648; ++i);
-		
-		unfillRed();
-		for(i = 0; i < 2483648; ++i);
-		
-		fillGreen();
-		for(i = 0; i < 2483648; ++i);
-		
-		unfillGreen();
-		for(i = 0; i < 2483648; ++i);
-		
-		fillYellow();
-		for(i = 0; i < 2483648; ++i);
-		
-		unfillYellow();
-		for(i = 0; i < 2483648; ++i);
 	}
 }
 
