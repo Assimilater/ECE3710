@@ -133,7 +133,10 @@ void SysTick_Handler() {
 	static const int SIZE = 10;
 	static coord data[SIZE];
 	
-	if (GPIO.PortA->DATA.bit6) {
+	if (!GPIO.PortA->DATA.bit6) {
+		// User is pressing down
+		LCD_GetXY(&data[sample_cnt % SIZE]); // Get data from touchscreen SPI
+	} else {
 		// User let go
 		
 		// Do the fill/unfill operation
@@ -144,11 +147,6 @@ void SysTick_Handler() {
 		// Enable GPIOA interrupts
 		GPIO.PortA->ICR.bit6 = 1;
 		GPIO.PortA->IM.bit6 = 1;
-	} else {
-		// User is pressing down
-		data[sample_cnt % SIZE] = LCD_GetXY(); // Get value from SPI?
-	}
-}
 
 void flash() {
 	unsigned int i;
