@@ -68,7 +68,7 @@ typedef struct {
 //---------------------------------------------------------------------------------------+
 // Driver Functions                                                                      |
 //---------------------------------------------------------------------------------------+
-coord LCD_GetXY(void);
+void LCD_GetXY(coord*);
 void LCD_WaitChip(void);
 void LCD_WriteCmd(const unsigned char);
 void LCD_WriteData(const unsigned char*, const int);

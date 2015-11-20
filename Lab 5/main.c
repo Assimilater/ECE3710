@@ -1,7 +1,6 @@
-#include "../Shared/Controller.h"
-#include "../Shared/GPIO.h"
 #include "../Shared/bool.h"
-#include "LCD.h"
+#include "../Shared/Controller.h"
+#include "../Shared/LCD.h"
 
 //---------------------------------------------------------------------------------------+
 // Precalculated constants for the dimensions of our boxes                               |
@@ -277,9 +276,7 @@ void init() {
 // No program logic should be contained here                                             |
 //---------------------------------------------------------------------------------------+
 int main() {
-	unsigned int i;
 	init();
 	exec();
-	while (1) { ++i; }
-	return 1;
+	while (1);
 }
