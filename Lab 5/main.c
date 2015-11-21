@@ -208,8 +208,8 @@ void init() {
 	// Pull up and pull down configuration necessary to avoid electromagnetic interference between SSI pins
 	//GPIO.PortA->PDR.bit2 = 1; // Clock
 	//GPIO.PortA->PUR.bit3 = 1; // FSS
-	GPIO.PortA->PDR.bit4 = 1; // Rx
-	GPIO.PortA->PDR.bit5 = 1; // TX
+	GPIO.PortA->PUR.bit4 = 1; // Rx
+	GPIO.PortA->PUR.bit5 = 1; // TX
 	//GPIO.PortA->PUR.bit6 = 1; // Pen Interrupt
 	//GPIO.PortA->PUR.bit7 = 1; // Custom FSS (no pulsing between bytes of 3-byte transmission)
 	
@@ -223,30 +223,16 @@ void init() {
 	GPIO.PortE->DEN.byte[0] = 0xFF;
 	GPIO.PortE->DIR.byte[0] = 0xFF;
 	
-	// Configure Systick
-	NVIC_ST_RELOAD_R = 16000; // 1ms
-	
-	// Configure SSI
-	// Freescale
+	// Configure SSI Freescale
 	SSI0->CR1 = 0;
 	SSI0->CC = 0x5;
 	SSI0->CPSR = 0xA;
 	SSI0->CR0 = 0x307;
 	SSI0->CR1 |= 0x2;
 	
-	// Slower freescale
-//	SSI0->CR1 = 0;
-//	SSI0->CC = 0x0;
-//	SSI0->CPSR = 0xA;
-//	SSI0->CR0 = 0x707;
-//	SSI0->CR1 |= 0x2;
-
-	// Microwire
-//	SSI0->CR1 = 0;
-//	SSI0->CC = 0x0;
-//	SSI0->CPSR = 0xA;
-//	SSI0->CR0 = 0x627;
-//	SSI0->CR1 |= 0x2;
+	// Configure Systick
+	SysTick->LOAD = 16000; // 1ms
+	NVIC_EN0_R = 0x1;
 	
 	// Configure interrupts
 	GPIO.PortA->IM.word = 0;
@@ -255,8 +241,6 @@ void init() {
 	GPIO.PortA->IEV.bit6 = 0;
 	GPIO.PortA->ICR.bit6 = 1;
 	GPIO.PortA->IM.bit6 = 1;
-	
-	NVIC_EN0_R = 0x1;
 	
 	LCD_Init();
 }
