@@ -130,15 +130,25 @@ void GPIOA_Handler() {
 }
 
 void SysTick_Handler() {
-	static const int SIZE = 10;
+	static const unsigned int SIZE = 10;
 	static coord data[SIZE];
-	
+	static coord average;
+	static unsigned int i;
+	static unsigned int n;
 	
 	if (!GPIO.PortA->DATA.bit6) {
 		// User is pressing down
 		LCD_GetXY(&data[sample_cnt++ % SIZE]); // Get data from touchscreen SPI
 	} else {
-		// User let go
+		// User let go, get the average
+		average.col = average.page = 0;
+		n = SIZE > sample_cnt ? sample_cnt : SIZE;
+		for (i = 0; i < n; ++i) {
+			average.col += data[i].col;
+			average.page += data[i].page;
+		}
+		average.col /= n;
+		average.page /= n;
 		
 		// Do the fill/unfill operation
 		
