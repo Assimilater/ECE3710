@@ -141,16 +141,19 @@ void SysTick_Handler() {
 		LCD_GetXY(&data[sample_cnt++ % SIZE]); // Get data from touchscreen SPI
 	} else {
 		// User let go, get the average
-		average.col = average.page = 0;
 		n = SIZE > sample_cnt ? sample_cnt : SIZE;
-		for (i = 0; i < n; ++i) {
-			average.col += data[i].col;
-			average.page += data[i].page;
-		}
-		average.col /= n;
-		average.page /= n;
 		
-		// Do the fill/unfill operation
+		if (n > 0) {
+			average.col = average.page = 0;
+			for (i = 0; i < n; ++i) {
+				average.col += data[i].col;
+				average.page += data[i].page;
+			}
+			average.col /= n;
+			average.page /= n;
+			
+			// Do the fill/unfill operation
+		}
 		
 		// Disable Systick interrups
 		SysTick->CTRL = 0x0;
