@@ -5,41 +5,31 @@
 void LCD_GetXY(coord* val) {
 	// CB Format => S A[2:0] Mode 000
 	unsigned short read;
-	
 	TP_CSX = 0;
-	// Write CB, followed by 2 bytes of 0 so we can read 2 bytes from TFT
+	
 	while(!(SSI0->SR & 0x1)); // Wait for TFE = 1
 	SSI0->DR = 0xD0; // X
+	SSI0->DR = 0; // Give the TFT time to write both byes before issuing new command
+	SSI0->DR = 0x90; // Y
 	SSI0->DR = 0;
-	SSI0->DR = 0;
+	SSI0->DR = 0; // Second byte of null so we can receive both bytes pertaining to y
 	
 	while(SSI0->SR & 0x10); // Wait for BSY == 0
 	read = SSI0->SR; // Read null byte
-	read = SSI0->SR; // Read first data byte
+	read = SSI0->SR; // Read first x-data byte
 	read = read << 8;
-	read |= SSI0->DR; // Read second data byte
+	read |= SSI0->DR; // Read second x-data byte
 	
-	// Read X C[11:0] X[2:0]
+	// Read = X C[11:0] X[2:0] (where X is don't care)
 	read = read >> 3;
 	read &= 0xFFF;
 	val->col = read;
 	
-	TP_CSX = 1;
-	TP_CSX = 0;
-	
-	// Write CB, followed by 2 bytes of 0 so we can read 2 bytes from TFT
-	while(!(SSI0->SR & 0x1)); // Wait for TFE = 1
-	SSI0->DR = 0x90; // Y
-	SSI0->DR = 0;
-	SSI0->DR = 0;
-	
-	while(SSI0->SR & 0x10); // Wait for BSY == 0
-	read = SSI0->SR; // Read null byte
-	read = SSI0->SR; // Read first data byte
+	read = SSI0->SR; // Read first y-data byte
 	read = read << 8;
-	read |= SSI0->DR; // Read second data byte
+	read |= SSI0->DR; // Read second y-data byte
 	
-	// Read X C[11:0] X[2:0]
+	// Read = X C[11:0] X[2:0] (where X is don't care)
 	read = read >> 3;
 	read &= 0xFFF;
 	val->page = read;
