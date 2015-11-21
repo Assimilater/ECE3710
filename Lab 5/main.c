@@ -126,7 +126,7 @@ void GPIOA_Handler() {
 	GPIO.PortA->IM.bit6 = 0;
 	
 	// Enable SysTick interrupts
-	NVIC_ST_CTRL_R |= 0x3;
+	SysTick->CTRL = 0x3;
 }
 
 void SysTick_Handler() {
@@ -142,7 +142,7 @@ void SysTick_Handler() {
 		// Do the fill/unfill operation
 		
 		// Disable Systick interrups
-		NVIC_ST_CTRL_R &= ~0x3;
+		SysTick->CTRL = 0x0;
 		
 		// Enable GPIOA interrupts
 		GPIO.PortA->ICR.bit6 = 1;
