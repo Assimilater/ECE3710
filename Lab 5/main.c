@@ -133,9 +133,10 @@ void SysTick_Handler() {
 	static const int SIZE = 10;
 	static coord data[SIZE];
 	
+	
 	if (!GPIO.PortA->DATA.bit6) {
 		// User is pressing down
-		LCD_GetXY(&data[sample_cnt % SIZE]); // Get data from touchscreen SPI
+		LCD_GetXY(&data[sample_cnt++ % SIZE]); // Get data from touchscreen SPI
 	} else {
 		// User let go
 		
