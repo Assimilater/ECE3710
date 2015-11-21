@@ -15,8 +15,8 @@ void LCD_GetXY(coord* val) {
 	SSI0->DR = 0; // Second byte of null so we can receive both bytes pertaining to y
 	
 	while(SSI0->SR & 0x10); // Wait for BSY == 0
-	read = SSI0->SR; // Read null byte
-	read = SSI0->SR; // Read first x-data byte
+	read = SSI0->DR; // Read null byte
+	read = SSI0->DR; // Read first x-data byte
 	read = read << 8;
 	read |= SSI0->DR; // Read second x-data byte
 	
@@ -25,7 +25,7 @@ void LCD_GetXY(coord* val) {
 	read &= 0xFFF;
 	val->col = read;
 	
-	read = SSI0->SR; // Read first y-data byte
+	read = SSI0->DR; // Read first y-data byte
 	read = read << 8;
 	read |= SSI0->DR; // Read second y-data byte
 	
