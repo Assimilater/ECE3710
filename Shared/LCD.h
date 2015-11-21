@@ -62,7 +62,7 @@ typedef struct {
 	code* Color;
 } Region;
 typedef struct {
-	unsigned short x, y;
+	unsigned short col, page;
 } coord;
 
 //---------------------------------------------------------------------------------------+

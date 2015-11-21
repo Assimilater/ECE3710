@@ -197,8 +197,8 @@ void init() {
 	// Pull up and pull down configuration necessary to avoid electromagnetic interference between SSI pins
 	//GPIO.PortA->PDR.bit2 = 1; // Clock
 	//GPIO.PortA->PUR.bit3 = 1; // FSS
-	GPIO.PortA->PUR.bit4 = 1; // Rx
-	GPIO.PortA->PUR.bit5 = 1; // TX
+	GPIO.PortA->PDR.bit4 = 1; // Rx
+	GPIO.PortA->PDR.bit5 = 1; // TX
 	//GPIO.PortA->PUR.bit6 = 1; // Pen Interrupt
 	//GPIO.PortA->PUR.bit7 = 1; // Custom FSS (no pulsing between bytes of 3-byte transmission)
 	
@@ -219,8 +219,8 @@ void init() {
 	// Freescale
 	SSI0->CR1 = 0;
 	SSI0->CC = 0x5;
-	SSI0->CPSR = 0x2;
-	SSI0->CR0 = 0x707;
+	SSI0->CPSR = 0xA;
+	SSI0->CR0 = 0x307;
 	SSI0->CR1 |= 0x2;
 	
 	// Slower freescale
