@@ -180,6 +180,15 @@ void SysTick_Handler() {
 			average.page /= n;
 			
 			// Do the fill/unfill operation
+			if ((COL_OUTER_Y0 < col) && (col < COL_OUTER_YF)) {
+				if ((ROW_OUTER_1Y0 < page) && (page < ROW_OUTER_1YF)) {
+					toggleRed();
+				} else if ((ROW_OUTER_2Y0 < page) && (page < ROW_OUTER_2YF)) {
+					toggleGreen();
+				} else if ((ROW_OUTER_3Y0 < page) && (page < ROW_OUTER_3YF)) {
+					toggleYellow();
+				}
+			}
 		}
 		
 		// Enable GPIOA interrupts
