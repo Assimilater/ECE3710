@@ -3,12 +3,12 @@
 #include "LCD.h"
 
 void LCD_GetXY(coord* val) {
-	// CB Format => S A[2:0] Mode 000
 	unsigned short read, read0, read1, read2, read3, read4;
 	while (SSI0->SR & 0x4) { read = SSI0->DR; } // Clear the buffer, just in case
 	TP_CSX = 0;
 	
 	while(!(SSI0->SR & 0x1)); // Wait for TFE = 1
+	// CB Format => S A[2:0] Mode 000
 	SSI0->DR = 0xD0; // X
 	SSI0->DR = 0; // Give the TFT time to write both byes before issuing new command
 	SSI0->DR = 0x90; // Y
