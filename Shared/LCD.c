@@ -3,12 +3,11 @@
 #include "LCD.h"
 
 void LCD_GetXY(coord* val) {
-	unsigned short read, read0, read1, read2, read3, read4;
-	while (SSI0->SR & 0x4) { read = SSI0->DR; } // Clear the buffer, just in case
+	unsigned short read0, read1, read2, read3, read4;
+	while (SSI0->SR & 0x4) { read0 = SSI0->DR; } // Clear the buffer, just in case
 	TP_CSX = 0;
 	
 	while(!(SSI0->SR & 0x1)); // Wait for TFE = 1
-	// CB Format => S A[2:0] Mode 000
 	SSI0->DR = 0xD0; // X
 	SSI0->DR = 0; // Give the TFT time to write both byes before issuing new command
 	SSI0->DR = 0x90; // Y
@@ -23,16 +22,8 @@ void LCD_GetXY(coord* val) {
 	read4 = SSI0->DR; // Read second y-data byte
 	
 	// Read = X C[11:0] X[2:0] (where X is don't care)
-	read = read1 << 8 | read2;
-	read = read >> 3;
-	read &= 0xFFF;
-	val->col = read;
-	
-	// Read = X C[11:0] X[2:0] (where X is don't care)
-	read = read3 << 8 | read4;
-	read = read >> 3;
-	read &= 0xFFF;
-	val->page = read;
+	val->col  = ((read1 << 8 | read2) >> 3) & 0xFFF;
+	val->page = ((read3 << 8 | read4) >> 3) & 0xFFF;
 	
 	TP_CSX = 1;
 }
