@@ -154,11 +154,10 @@ void GPIOA_Handler() {
 }
 
 void SysTick_Handler() {
-	static const unsigned int SIZE = 10;
+	static const unsigned int SIZE = 100;
 	static coord data[SIZE];
-	static coord average;
-	static unsigned int i;
-	static unsigned int n;
+	static unsigned long col, page;
+	static unsigned int i, n;
 	
 	if (!GPIO.PortA->DATA.bit6) {
 		// User is pressing down
@@ -171,13 +170,16 @@ void SysTick_Handler() {
 		n = SIZE > sample_cnt ? sample_cnt : SIZE;
 		
 		if (n > 0) {
-			average.col = average.page = 0;
+			// Average
+			col = page = 0;
 			for (i = 0; i < n; ++i) {
-				average.col += data[i].col;
-				average.page += data[i].page;
+				//if (data[i].col > col) { col = data[i].col; }
+				//if (data[i].page > page) { page = data[i].page; }
+				col += data[i].col;
+				page += data[i].page;
 			}
-			average.col /= n;
-			average.page /= n;
+			col /= n;
+			page /= n;
 			
 			// Do the fill/unfill operation
 			if ((COL_OUTER_Y0 < col) && (col < COL_OUTER_YF)) {
