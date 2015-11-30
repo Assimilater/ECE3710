@@ -155,9 +155,8 @@ void GPIOA_Handler() {
 
 void SysTick_Handler() {
 	static const unsigned int SIZE = 100;
+	static unsigned int i, n, col, page;
 	static coord data[SIZE];
-	static unsigned long col, page;
-	static unsigned int i, n;
 	
 	if (!GPIO.PortA->DATA.bit6) {
 		// User is pressing down
