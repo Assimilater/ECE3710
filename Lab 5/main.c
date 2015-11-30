@@ -181,6 +181,10 @@ void SysTick_Handler() {
 			col /= n;
 			page /= n;
 			
+			// Scale to range in pixels
+			col = (col * LCD_COLS) / TOUCH_MAX_COL;
+			page = (page * LCD_ROWS) / TOUCH_MAX_ROW;
+			
 			// Do the fill/unfill operation
 			if ((COL_OUTER_Y0 < col) && (col < COL_OUTER_YF)) {
 				if ((ROW_OUTER_1Y0 < page) && (page < ROW_OUTER_1YF)) {
