@@ -220,12 +220,12 @@ void init() {
 	GPIO.PortE->DEN.byte[0] = 0xFF;
 	GPIO.PortE->DIR.byte[0] = 0xFF;
 	
-	// Configure SSI Freescale
-	SSI0->CR1 = 0;
-	SSI0->CC = 0x5;
-	SSI0->CPSR = 0xA;
-	SSI0->CR0 = 0x307;
-	SSI0->CR1 |= 0x2;
+	// Configure SSI Freescale (SPH = 0, SPO = 0)
+	SSI0->CR1 = 0; // Disable
+	SSI0->CC = 0x5; // Use PIOsc for the clock
+	SSI0->CPSR = 0xA; // Clock divisor = 10
+	SSI0->CR0 = 0x307; // SCR = 3 (clock divisor), SPH = 0, SPO = 0, FRF = 0 (freescale), DSS = 7 (8-bit data)
+	SSI0->CR1 |= 0x2; // Enable
 	
 	// Configure Systick
 	SysTick->LOAD = 16000; // 1ms
