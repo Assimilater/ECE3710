@@ -54,13 +54,17 @@ extern code LCD_CODE_SGM1[SIZE_CODE_SGM1];
 //---------------------------------------------------------------------------------------+
 // LCD Global Constants                                                                  |
 //---------------------------------------------------------------------------------------+
-static const short LCD_ROWS = 320;
-static const short LCD_COLS = 240;
-static const int LCD_AREA = LCD_ROWS * LCD_COLS;
+static const unsigned short TOUCH_MAX_COL = 0xEDF;
+static const unsigned short TOUCH_MAX_ROW = 0xFFF;
+static const unsigned short LCD_COLS = 240;
+static const unsigned short LCD_ROWS = 320;
+static const unsigned int LCD_AREA = LCD_COLS * LCD_ROWS;
+
 typedef struct {
 	unsigned short ColumnStart, ColumnEnd, PageStart, PageEnd;
 	code* Color;
 } Region;
+
 typedef struct {
 	unsigned short col, page;
 } coord;
