@@ -52,7 +52,6 @@ void fillRed() {
 	LCD_FillRegion(r);
 	GPIO.PortE->DATA.bit3 = 0; // PA &= ~0x8;
 }
-
 void unfillRed() {
 	const static Region r = {
 		COL_INNER_Y0,
@@ -63,6 +62,15 @@ void unfillRed() {
 	};
 	LCD_FillRegion(r);
 	GPIO.PortE->DATA.bit3 = 1;
+}
+void toggleRed() {
+	static bool status = true;
+	status = !status;
+	if (status) {
+		fillRed();
+	} else {
+		unfillRed();
+	}
 }
 
 void fillGreen() {
@@ -76,7 +84,6 @@ void fillGreen() {
 	LCD_FillRegion(r);
 	GPIO.PortE->DATA.bit4 = 0; // PA &= ~0x10
 }
-
 void unfillGreen() {
 	const static Region r = {
 		COL_INNER_Y0,
@@ -87,6 +94,15 @@ void unfillGreen() {
 	};
 	LCD_FillRegion(r);
 	GPIO.PortE->DATA.bit4 = 1;
+}
+void toggleGreen() {
+	static bool status = true;
+	status = !status;
+	if (status) {
+		fillGreen();
+	} else {
+		unfillGreen();
+	}
 }
 
 void fillYellow() {
@@ -100,7 +116,6 @@ void fillYellow() {
 	LCD_FillRegion(r);
 	GPIO.PortE->DATA.bit5 = 0; // PA &= ~0x20
 }
-
 void unfillYellow() {
 	const static Region r = {
 		COL_INNER_Y0,
@@ -111,6 +126,15 @@ void unfillYellow() {
 	};
 	LCD_FillRegion(r);
 	GPIO.PortE->DATA.bit5 = 1;
+}
+void toggleYellow() {
+	static bool status = true;
+	status = !status;
+	if (status) {
+		fillYellow();
+	} else {
+		unfillYellow();
+	}
 }
 
 //---------------------------------------------------------------------------------------+
@@ -189,9 +213,9 @@ void exec() {
 	LCD_FillRegion(r);
 	
 	// Fill in the inner boxes with black
-	unfillRed();
-	unfillGreen();
-	unfillYellow();
+	toggleRed();
+	toggleGreen();
+	toggleYellow();
 }
 
 //---------------------------------------------------------------------------------------+
