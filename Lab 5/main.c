@@ -164,6 +164,9 @@ void SysTick_Handler() {
 		// User is pressing down
 		LCD_GetXY(&data[sample_cnt++ % SIZE]); // Get data from touchscreen SPI
 	} else {
+		// Disable Systick interrups
+		SysTick->CTRL = 0x0;
+		
 		// User let go, get the average
 		n = SIZE > sample_cnt ? sample_cnt : SIZE;
 		
@@ -178,9 +181,6 @@ void SysTick_Handler() {
 			
 			// Do the fill/unfill operation
 		}
-		
-		// Disable Systick interrups
-		SysTick->CTRL = 0x0;
 		
 		// Enable GPIOA interrupts
 		GPIO.PortA->ICR.bit6 = 1;
