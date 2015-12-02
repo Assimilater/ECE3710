@@ -246,7 +246,7 @@ void init() {
 	
 	// Pull up configuration necessary to avoid electromagnetic interference between SSI pins
 	GPIO.PortA->PUR.bit4 = 1; // Rx
-	GPIO.PortA->PUR.bit5 = 1; // TX
+	GPIO.PortA->PUR.bit5 = 1; // Tx
 	
 	GPIO.PortB->DEN.byte[0] = 0xFF;
 	GPIO.PortB->DIR.byte[0] = 0xFF;
