@@ -177,6 +177,10 @@ void LCD_FillRegion(const Region r) {
 	LCD_WriteBlock(r.Color, SIZE_COLOR, (r.ColumnEnd - r.ColumnStart) * (r.PageEnd - r.PageStart));
 }
 
+void LCD_WriteText(const TextRegion r) {
+	
+}
+
 //---------------------------------------------------------------------------------------+
 // Initialization codes provided by lecture notes, then start the screen all black       |
 //---------------------------------------------------------------------------------------+

@@ -52,12 +52,11 @@ const FontList* fonts() {
 //---------------------------------------------------------------------------------------+
 // Small helper function: takes an ascii char and returns a pointer to font data for it  |
 //---------------------------------------------------------------------------------------+
-const unsigned char* font_get(const font* font, char val) {
-	if (val < ' ' || val > '~') {
-		val = 0; // use space for unknown characters (ie extended ascii)
-	} else {
-		val -= ' ';
-	}
-	
-	return font->root[val];
+const font_letter font_get(const font* font, char val) {
+	return (font_letter){
+		font->width, font->height,
+		(val < ' ' || val > '~')
+			? font->root[0] // use space for unknown characters (ie extended ascii)
+			: font->root[val - ' ']
+	};
 }

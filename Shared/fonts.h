@@ -7,6 +7,11 @@ typedef struct {
 } font;
 
 typedef struct {
+	unsigned char width, height;
+	const unsigned char* letter;
+} font_letter;
+
+typedef struct {
 	font Ubuntu;
 	font Terminus;
 	font Small;
@@ -16,6 +21,6 @@ typedef struct {
 } FontList;
 
 const FontList* fonts(void);
-const unsigned char* font_get(const font*, char);
+const font_letter font_get(const font*, char);
 
 #endif
