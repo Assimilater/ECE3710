@@ -149,16 +149,12 @@ void GPIOA_Handler() {
 
 void SysTick_Handler() {
 	static coord data;
-	
-	SysTick->CTRL = 0x0; // Disable Systick interrups
-	if (!GPIO.PortA->DATA.bit6) {
-		// User is pressing down, collect a sample xy coordinate
-		LCD_GetXY(TOUCH_POLL, &data); // Get data from touchscreen SPI
-		SysTick->CTRL = 0x3; // Enable SysTick interrupts now that we're done with SPI
+	if (!GPIO.PortA->DATA.bit6) { // User is pressing down, collect sample
+		LCD_GetXY(TOUCH_POLL, &data);
 	} else {
-		// User let go, get the average
-		if (LCD_GetXY(TOUCH_GET, &data)) {
-			// Do the fill/unfill operation if in bounds
+		SysTick->CTRL = 0x0; // Disable Systick interrups
+		
+		if (LCD_GetXY(TOUCH_GET, &data)) { // User let go, get the average from samples
 			if ((COL_OUTER_Y0 < data.col) && (data.col < COL_OUTER_YF)) {
 				if ((ROW_OUTER_1Y0 < data.page) && (data.page < ROW_OUTER_1YF)) {
 					toggleRed();
@@ -235,7 +231,7 @@ void init() {
 	// Configure SSI Freescale (SPH = 0, SPO = 0)
 	SSI0->CR1 = 0; // Disable
 	SSI0->CC = 0x5; // Use PIOsc for the clock
-	SSI0->CPSR = 0xA; // Clock divisor = 10
+	SSI0->CPSR = 0x2; // Clock divisor = 2 (the minimum, or fastest we can make this divisor)
 	SSI0->CR0 = 0x307; // SCR = 3 (clock divisor), SPH = 0, SPO = 0, FRF = 0 (freescale), DSS = 7 (8-bit data)
 	SSI0->CR1 |= 0x2; // Enable
 	
