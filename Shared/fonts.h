@@ -1,9 +1,10 @@
 #ifndef __FONTS_H__
 #define __FONTS_H__
 
-//typedef struct {
-//	
-//} Font;
+typedef struct {
+	unsigned char x, y;
+	char* val;
+} font;
 
 //typedef struct {
 //	Font* Ubuntu;

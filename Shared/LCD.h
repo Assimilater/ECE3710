@@ -66,6 +66,14 @@ typedef struct {
 } Region;
 
 typedef struct {
+	unsigned short x, y;
+	code* BackColor;
+	code* Color;
+	char* Text;
+	font* Font;
+} TextRegion;
+
+typedef struct {
 	unsigned short col, page;
 } coord;
 
