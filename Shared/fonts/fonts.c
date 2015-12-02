@@ -1,4 +1,4 @@
-#include "fonts.h"
+#include "../fonts.h"
 #include "Ubuntu.h"
 #include "TerminusFont.h"
 #include "SmallFont.h"
