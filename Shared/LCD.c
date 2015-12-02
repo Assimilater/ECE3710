@@ -2,6 +2,9 @@
 #include "../Shared/GPIO.h"
 #include "LCD.h"
 
+//---------------------------------------------------------------------------------------+
+// Uses SPI to interact witht the touchscreen chip and retrieve coordinates              |
+//---------------------------------------------------------------------------------------+
 void LCD_GetXY(coord* val) {
 	unsigned short read0, read1, read2, read3, read4;
 	while (SSI0->SR & 0x4) { read0 = SSI0->DR; } // Clear the buffer, just in case
@@ -28,12 +31,18 @@ void LCD_GetXY(coord* val) {
 	TP_CSX = 1;
 }
 
+//---------------------------------------------------------------------------------------+
+// A busy wait that should provide the LCD adequate time to respond to commands          |
+//---------------------------------------------------------------------------------------+
 void LCD_WaitChip() {
 	const static int delay = 100000;
 	int i = 0;
 	for (; i < delay; ++i);
 }
 
+//---------------------------------------------------------------------------------------+
+// Writes a command code to the LCD                                                      |
+//---------------------------------------------------------------------------------------+
 void LCD_WriteCmd(const unsigned char cmd) {
 	LCD_CSX = 0; // CSX "LCD, pay attention!"
 	LCD_DCX = 0; // DCX cmd
@@ -43,6 +52,10 @@ void LCD_WriteCmd(const unsigned char cmd) {
 	LCD_WRX = 1; // WRX read on +edge
 	LCD_CSX = 1; // "We're done, LCD"
 }
+
+//---------------------------------------------------------------------------------------+
+// Writes a data stream of arbitrary size to the LCD (high screen refresh speeds)        |
+//---------------------------------------------------------------------------------------+
 void LCD_WriteData(const unsigned char* data, const int len) {
 	int i;
 	LCD_CSX = 0; // CSX "LCD, pay attention!"
@@ -55,6 +68,10 @@ void LCD_WriteData(const unsigned char* data, const int len) {
 	}
 	LCD_CSX = 1; // "We're done, LCD"
 }
+
+//---------------------------------------------------------------------------------------+
+// Primarily used by FillRegion when the same data stream needs repeated sends           |
+//---------------------------------------------------------------------------------------+
 void LCD_WriteBlock(const unsigned char* data, const int len, const int n) {
 	int i, j;
 	LCD_WriteCmd(0x2C);
@@ -71,6 +88,9 @@ void LCD_WriteBlock(const unsigned char* data, const int len, const int n) {
 	LCD_CSX = 1; // "We're done, LCD"
 }
 
+//---------------------------------------------------------------------------------------+
+// Sets column bounds on the LCD                                                         |
+//---------------------------------------------------------------------------------------+
 void LCD_SetColumn(const unsigned short Start, const unsigned short End) {
 	unsigned char bStream[2];
 	LCD_WriteCmd(0x2A);
@@ -84,6 +104,9 @@ void LCD_SetColumn(const unsigned short Start, const unsigned short End) {
 	LCD_WriteData(bStream, 2);
 }
 
+//---------------------------------------------------------------------------------------+
+// Sets page bounds on the LCD                                                           |
+//---------------------------------------------------------------------------------------+
 void LCD_SetPage(const unsigned short Start, const unsigned short End) {
 	unsigned char bStream[2];
 	LCD_WriteCmd(0x2B);
@@ -96,6 +119,10 @@ void LCD_SetPage(const unsigned short Start, const unsigned short End) {
 	bStream[1] = (End & 0x00FF);
 	LCD_WriteData(bStream, 2);
 }
+
+//---------------------------------------------------------------------------------------+
+// Fills an area on the LCD to a solid color                                             |
+//---------------------------------------------------------------------------------------+
 void LCD_FillRegion(const Region r) {
 	LCD_SetColumn(r.ColumnStart, r.ColumnEnd);
 	LCD_SetPage(r.PageStart, r.PageEnd);
@@ -104,6 +131,9 @@ void LCD_FillRegion(const Region r) {
 	LCD_WriteBlock(r.Color, SIZE_COLOR, (r.ColumnEnd - r.ColumnStart) * (r.PageEnd - r.PageStart));
 }
 
+//---------------------------------------------------------------------------------------+
+// Initialization codes provided by lecture notes, then start the screen all black       |
+//---------------------------------------------------------------------------------------+
 void LCD_Init() {
 	Region r = {
 		0, LCD_COLS,
