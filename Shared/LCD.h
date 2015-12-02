@@ -5,6 +5,7 @@
 // Inlucded dependencies                                                                 |
 //---------------------------------------------------------------------------------------+
 #include "LCD_Codes.h"
+#include "../Shared/bool.h"
 
 //---------------------------------------------------------------------------------------+
 // Color Codes For The LCD                                                               |
@@ -54,8 +55,6 @@ extern code LCD_CODE_SGM1[SIZE_CODE_SGM1];
 //---------------------------------------------------------------------------------------+
 // LCD Global Constants                                                                  |
 //---------------------------------------------------------------------------------------+
-static const unsigned short TOUCH_MAX_COL = 0xEDF;
-static const unsigned short TOUCH_MAX_ROW = 0xFFF;
 static const unsigned short LCD_COLS = 240;
 static const unsigned short LCD_ROWS = 320;
 static const unsigned int LCD_AREA = LCD_COLS * LCD_ROWS;
@@ -69,10 +68,16 @@ typedef struct {
 	unsigned short col, page;
 } coord;
 
+typedef enum {
+	TOUCH_RESET,
+	TOUCH_POLL,
+	TOUCH_GET,
+} SAMPLE_MODE;
+
 //---------------------------------------------------------------------------------------+
 // Driver Functions                                                                      |
 //---------------------------------------------------------------------------------------+
-void LCD_GetXY(coord*);
+bool LCD_GetXY(SAMPLE_MODE, coord*);
 void LCD_WaitChip(void);
 void LCD_WriteCmd(const unsigned char);
 void LCD_WriteData(const unsigned char*, const int);

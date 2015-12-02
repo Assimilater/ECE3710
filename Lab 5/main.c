@@ -140,57 +140,31 @@ void toggleYellow() {
 //---------------------------------------------------------------------------------------+
 // Touchscreen SPI handlers                                                              |
 //---------------------------------------------------------------------------------------+
-unsigned int sample_cnt = 0;
 void GPIOA_Handler() {
-	// User is pressing down
-	GPIO.PortA->ICR.bit6 = 1;
-	sample_cnt = 0;
-	
-	// Disable GPIOA interrupts
-	GPIO.PortA->IM.bit6 = 0;
-	
-	// Enable SysTick interrupts
-	SysTick->CTRL = 0x3;
+	// The screen is touched, for debouncing just start a timed sampler
+	GPIO.PortA->ICR.bit6 = 1; // Clear the interrupt
+	GPIO.PortA->IM.bit6 = 0; // Disable GPIOA interrupts
+	SysTick->CTRL = 0x3; // Enable SysTick interrupts
 }
 
 void SysTick_Handler() {
-	static const unsigned int SIZE = 100;
-	static unsigned int i, n, col, page;
-	static coord data[SIZE];
+	static coord data;
 	
+	SysTick->CTRL = 0x0; // Disable Systick interrups
 	if (!GPIO.PortA->DATA.bit6) {
-		// User is pressing down
-		LCD_GetXY(&data[sample_cnt++ % SIZE]); // Get data from touchscreen SPI
+		// User is pressing down, collect a sample xy coordinate
+		LCD_GetXY(TOUCH_POLL, &data); // Get data from touchscreen SPI
+		SysTick->CTRL = 0x3; // Enable SysTick interrupts now that we're done with SPI
 	} else {
-		// Disable Systick interrups
-		SysTick->CTRL = 0x0;
-		
 		// User let go, get the average
-		n = SIZE > sample_cnt ? sample_cnt : SIZE;
-		
-		if (n > 0) {
-			// Average
-			col = page = 0;
-			for (i = 0; i < n; ++i) {
-				//if (data[i].col > col) { col = data[i].col; }
-				//if (data[i].page > page) { page = data[i].page; }
-				col += data[i].col;
-				page += data[i].page;
-			}
-			col /= n;
-			page /= n;
-			
-			// Scale to range in pixels
-			col = (col * LCD_COLS) / TOUCH_MAX_COL;
-			page = (page * LCD_ROWS) / TOUCH_MAX_ROW;
-			
-			// Do the fill/unfill operation
-			if ((COL_OUTER_Y0 < col) && (col < COL_OUTER_YF)) {
-				if ((ROW_OUTER_1Y0 < page) && (page < ROW_OUTER_1YF)) {
+		if (LCD_GetXY(TOUCH_GET, &data)) {
+			// Do the fill/unfill operation if in bounds
+			if ((COL_OUTER_Y0 < data.col) && (data.col < COL_OUTER_YF)) {
+				if ((ROW_OUTER_1Y0 < data.page) && (data.page < ROW_OUTER_1YF)) {
 					toggleRed();
-				} else if ((ROW_OUTER_2Y0 < page) && (page < ROW_OUTER_2YF)) {
+				} else if ((ROW_OUTER_2Y0 < data.page) && (data.page < ROW_OUTER_2YF)) {
 					toggleGreen();
-				} else if ((ROW_OUTER_3Y0 < page) && (page < ROW_OUTER_3YF)) {
+				} else if ((ROW_OUTER_3Y0 < data.page) && (data.page < ROW_OUTER_3YF)) {
 					toggleYellow();
 				}
 			}

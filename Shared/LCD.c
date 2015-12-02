@@ -5,30 +5,76 @@
 //---------------------------------------------------------------------------------------+
 // Uses SPI to interact witht the touchscreen chip and retrieve coordinates              |
 //---------------------------------------------------------------------------------------+
-void LCD_GetXY(coord* val) {
+bool LCD_GetXY(SAMPLE_MODE mode, coord* val) {
+	// Vars used for all modes
+	static const unsigned short TOUCH_MAX_COL = 0xEDF;
+	static const unsigned short TOUCH_MAX_ROW = 0xFFF;
+	static const unsigned int SAMPLE_SIZE = 100;
+	static coord data[SAMPLE_SIZE];
+	
+	// Vars used for poll
 	unsigned short read0, read1, read2, read3, read4;
-	while (SSI0->SR & 0x4) { read0 = SSI0->DR; } // Clear the buffer, just in case
-	TP_CSX = 0;
+	coord* poll;
 	
-	while(!(SSI0->SR & 0x1)); // Wait for TFE = 1
-	SSI0->DR = 0xD0; // X
-	SSI0->DR = 0; // Give the TFT time to write both byes before issuing new command
-	SSI0->DR = 0x90; // Y
-	SSI0->DR = 0;
-	SSI0->DR = 0; // Second byte of null so we can receive both bytes pertaining to y
+	// Vars used for get (averaging)
+	static unsigned int sample = 0;
+	unsigned int i, n, col, page;
 	
-	while(SSI0->SR & 0x10); // Wait for BSY == 0
-	read0 = SSI0->DR; // Read null byte
-	read1 = SSI0->DR; // Read first x-data byte
-	read2 = SSI0->DR; // Read second x-data byte
-	read3 = SSI0->DR; // Read first y-data byte
-	read4 = SSI0->DR; // Read second y-data byte
-	
-	// Read = X C[11:0] X[2:0] (where X is don't care)
-	val->col  = ((read1 << 8 | read2) >> 3) & 0xFFF;
-	val->page = ((read3 << 8 | read4) >> 3) & 0xFFF;
-	
-	TP_CSX = 1;
+	if (mode == TOUCH_RESET) {
+		sample = 0; // Resets the sampling
+	} else if (mode == TOUCH_GET) {
+		//---------------------------------------------------------------------------------------+
+		// Calculates the average from the sample and returns scaled coord based on LCD size     |
+		//---------------------------------------------------------------------------------------+
+		n = sample < SAMPLE_SIZE ? sample : SAMPLE_SIZE;
+		sample = 0; // Reset the count now that we've grabbed a value
+		if (!n) { return false; } // Report there is no data to average
+		
+		// Perform the average
+		col = page = 0;
+		for (i = 0; i < n; ++i) {
+			col += data[i].col;
+			page += data[i].page;
+		}
+		col /= n;
+		page /= n;
+		
+		// Scale to range in pixels
+		col = (col * LCD_COLS) / TOUCH_MAX_COL;
+		page = (page * LCD_ROWS) / TOUCH_MAX_ROW;
+		
+		// Update the caller with the proper coordinate
+		val->col = col;
+		val->page = page;
+	} else if (mode == TOUCH_POLL) {
+		//---------------------------------------------------------------------------------------+
+		// Uses SPI to interact with the touchscreen chip and retrieve coordinates               |
+		//---------------------------------------------------------------------------------------+
+		while (SSI0->SR & 0x4) { read0 = SSI0->DR; } // Clear the buffer, just in case
+		poll = &data[sample++ % SAMPLE_SIZE]; // 
+		TP_CSX = 0;
+		
+		while(!(SSI0->SR & 0x1)); // Wait for TFE = 1
+		SSI0->DR = 0xD0; // X
+		SSI0->DR = 0; // Give the TFT time to write both byes before issuing new command
+		SSI0->DR = 0x90; // Y
+		SSI0->DR = 0;
+		SSI0->DR = 0; // Second byte of null so we can receive both bytes pertaining to y
+		
+		while(SSI0->SR & 0x10); // Wait for BSY == 0
+		read0 = SSI0->DR; // Read null byte
+		read1 = SSI0->DR; // Read first x-data byte
+		read2 = SSI0->DR; // Read second x-data byte
+		read3 = SSI0->DR; // Read first y-data byte
+		read4 = SSI0->DR; // Read second y-data byte
+		
+		// Read = X C[11:0] X[2:0] (where X is don't care)
+		poll->col  = ((read1 << 8 | read2) >> 3) & 0xFFF;
+		poll->page = ((read3 << 8 | read4) >> 3) & 0xFFF;
+		
+		TP_CSX = 1;
+	} else { return false; } // Unrecognized command
+	return true; // Inidicate success
 }
 
 //---------------------------------------------------------------------------------------+
