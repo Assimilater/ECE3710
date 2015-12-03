@@ -1,7 +1,6 @@
 #include "../Shared/Controller.h"
 #include "../Shared/GPIO.h"
 #include "LCD.h"
-#include <stdlib.h> // free
 
 //---------------------------------------------------------------------------------------+
 // Uses SPI to interact witht the touchscreen chip and retrieve coordinates              |
@@ -182,7 +181,8 @@ void LCD_FillRegion(const Region r) {
 // In this case it is best to just inline LCD_WriteData                                  |
 //---------------------------------------------------------------------------------------+
 void LCD_WriteText(const TextRegion r) {
-	int row, letter, col, temp, bitmask;
+  char temp;
+	int row, letter, col, bitmask;
 	text t = font_get(r.Font, r.Text);
 	
 	// We're writing horizontally (x is page-wise)
@@ -192,9 +192,9 @@ void LCD_WriteText(const TextRegion r) {
 	
 	// Inline from LCD_WriteData
 	LCD_WriteCmd(0x2C); // See LCD_WriteBlock
-	LCD_CSX = 0; // CSX "LCD, pay attention!"
-	LCD_DCX = 1; // DCX Data
-	LCD_RDX = 1; // Set Read high
+//	LCD_CSX = 0; // CSX "LCD, pay attention!"
+//	LCD_DCX = 1; // DCX Data
+//	LCD_RDX = 1; // Set Read high
 	
 	for (row = 0; row < r.Font->height; ++row) {
 		for (letter = 0; letter < t.n; ++letter) {
@@ -203,32 +203,41 @@ void LCD_WriteText(const TextRegion r) {
 				temp = t.s[letter][row * r.Font->width + col];
 				for (bitmask = 1; bitmask < 0x100; bitmask = bitmask << 1) {
 					if (temp & bitmask) {
-						//LCD_WriteData(r.Color, SIZE_COLOR);
-						LCD_WRX = 0; // WRX
-						GPIO.PortB->DATA.byte[0] = r.Color[0];
-						LCD_WRX = 1; // WRX read on +edge
-						
-						__nop(); __nop(); __nop(); // making up for the absence of loop structures
-						LCD_WRX = 0; // WRX
-						GPIO.PortB->DATA.byte[0] = r.Color[1];
-						LCD_WRX = 1; // WRX read on +edge
+						LCD_WriteData(r.Color, SIZE_COLOR);
+						// Inline from LCD_WriteData
+//						LCD_WRX = 0; // WRX
+//						GPIO.PortB->DATA.byte[0] = r.Color[0];
+//						LCD_WRX = 1; // WRX read on +edge
+//						
+//						// Making up for the absence of loop structures
+//						__nop(); __nop(); __nop();  __nop();
+//						
+//						// Inline from LCD_WriteData
+//						LCD_WRX = 0; // WRX
+//						GPIO.PortB->DATA.byte[0] = r.Color[1];
+//						LCD_WRX = 1; // WRX read on +edge
 					} else {
-						//LCD_WriteData(r.BackColor, SIZE_COLOR);
-						LCD_WRX = 0; // WRX
-						GPIO.PortB->DATA.byte[0] = r.BackColor[0];
-						LCD_WRX = 1; // WRX read on +edge
-						
-						__nop(); __nop(); __nop(); // making up for the absence of loop structures
-						LCD_WRX = 0; // WRX
-						GPIO.PortB->DATA.byte[0] = r.BackColor[1];
-						LCD_WRX = 1; // WRX read on +edge
+						LCD_WriteData(r.BackColor, SIZE_COLOR);
+						// Inline from LCD_WriteData
+//						LCD_WRX = 0; // WRX
+//						GPIO.PortB->DATA.byte[0] = r.BackColor[0];
+//						LCD_WRX = 1; // WRX read on +edge
+//						
+//						// Making up for the absence of loop structures
+//						__nop(); __nop(); __nop();  __nop();
+//						
+//						// Inline from LCD_WriteData
+//						LCD_WRX = 0; // WRX
+//						GPIO.PortB->DATA.byte[0] = r.BackColor[1];
+//						LCD_WRX = 1; // WRX read on +edge
 					}
 				}
 			}
 		}
 	}
 	
-	free(t.s); // font_get dynamically allocates memory for s
+	// Inline from LCD_WriteData
+//	LCD_CSX = 1; // "We're done, LCD"
 }
 
 //---------------------------------------------------------------------------------------+
@@ -240,6 +249,11 @@ void LCD_Init() {
 		0, LCD_ROWS,
 		LCD_COLOR_BLACK
 	};
+	
+	LCD_RST = 0;
+	LCD_WaitChip(); // Give the LCD time to reset
+	LCD_RST = 1;
+  LCD_WaitChip(); // Give the LCD time to reset
 	
 	TP_CSX = 1;
 	
