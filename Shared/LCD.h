@@ -50,6 +50,7 @@ extern code LCD_CODE_SGM1[SIZE_CODE_SGM1];
 #define LCD_DCX BAND_GPIO_PD3
 #define LCD_WRX BAND_GPIO_PD6
 #define LCD_RDX BAND_GPIO_PD7
+#define LCD_RST BAND_GPIO_PE2
 #define TP_CSX BAND_GPIO_PA7
 
 //---------------------------------------------------------------------------------------+
@@ -69,7 +70,7 @@ typedef struct {
 	code* BackColor;
 	code* Color;
 	char* Text;
-	font* Font;
+	const font* Font;
 } TextRegion;
 
 typedef struct {
@@ -90,6 +91,7 @@ void LCD_WaitChip(void);
 void LCD_WriteCmd(const unsigned char);
 void LCD_WriteData(const unsigned char*, const int);
 void LCD_WriteBlock(const unsigned char*, const int, const int);
+void LCD_WriteText(const TextRegion);
 
 void LCD_SetColumn(const unsigned short, const unsigned short);
 void LCD_SetPage(const unsigned short, const unsigned short);

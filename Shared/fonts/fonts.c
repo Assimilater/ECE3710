@@ -5,6 +5,8 @@
 #include "font8x8_basic.h"
 #include "font8x8.h"
 #include "BigFont.h"
+#include <string.h> // strlen
+#include <stdlib.h> // malloc
 
 //---------------------------------------------------------------------------------------+
 // My implementation of the singleton for accessing fonts                                |
@@ -50,13 +52,20 @@ const FontList* fonts() {
 }
 
 //---------------------------------------------------------------------------------------+
-// Small helper function: takes an ascii char and returns a pointer to font data for it  |
+// Transform c-string into array of pointers to font characters                          |
 //---------------------------------------------------------------------------------------+
-const font_letter font_get(const font* font, char val) {
-	return (font_letter){
-		font->width, font->height,
-		(val < ' ' || val > '~')
+text font_get(const font* font, const char* val) {
+	int i;
+	char c;
+	text d;
+	
+	d.n = strlen(val);
+	d.s = malloc(sizeof(unsigned char*) * d.n);
+	for (i = 0; i < d.n; ++i) {
+		c = val[i];
+		d.s[i] = (c < ' ' || c > '~')
 			? font->root[0] // use space for unknown characters (ie extended ascii)
-			: font->root[val - ' ']
-	};
+			: font->root[c - ' '];
+	}
+	return d;
 }
