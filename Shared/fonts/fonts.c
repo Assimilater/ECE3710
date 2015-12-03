@@ -6,7 +6,7 @@
 #include "font8x8.h"
 #include "BigFont.h"
 #include <string.h> // strlen
-#include <stdlib.h> // malloc
+//#include <stdlib.h> // malloc
 
 //---------------------------------------------------------------------------------------+
 // My implementation of the singleton for accessing fonts                                |
@@ -60,7 +60,8 @@ text font_get(const font* font, const char* val) {
 	text d;
 	
 	d.n = strlen(val);
-	d.s = malloc(sizeof(unsigned char*) * d.n);
+  if (d.n > 100) { d.n = 100; } // Rather than use dynamic memory, max out the size to 100
+	//d.s = malloc(sizeof(unsigned char*) * d.n);
 	for (i = 0; i < d.n; ++i) {
 		c = val[i];
 		d.s[i] = (c < ' ' || c > '~')
