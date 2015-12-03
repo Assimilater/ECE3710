@@ -69,7 +69,7 @@ typedef struct {
 	code* BackColor;
 	code* Color;
 	char* Text;
-	font* Font;
+	const font* Font;
 } TextRegion;
 
 typedef struct {
@@ -90,6 +90,7 @@ void LCD_WaitChip(void);
 void LCD_WriteCmd(const unsigned char);
 void LCD_WriteData(const unsigned char*, const int);
 void LCD_WriteBlock(const unsigned char*, const int, const int);
+void LCD_WriteText(const TextRegion);
 
 void LCD_SetColumn(const unsigned short, const unsigned short);
 void LCD_SetPage(const unsigned short, const unsigned short);

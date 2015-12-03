@@ -177,6 +177,8 @@ void SysTick_Handler() {
 //---------------------------------------------------------------------------------------+
 void exec() {
 	Region r;
+	TextRegion t;
+	
 	r.ColumnStart = COL_OUTER_Y0;
 	r.ColumnEnd = COL_OUTER_YF;
 	
@@ -200,6 +202,14 @@ void exec() {
 	toggleRed();
 	toggleGreen();
 	toggleYellow();
+	
+	t.x = 50;
+	t.y = 50;
+	t.Text = "";
+	t.Font = &fonts()->Basic_8x8;
+	t.BackColor = LCD_COLOR_GREEN;
+	t.Color = LCD_COLOR_BLACK;
+	LCD_WriteText(t);
 }
 
 //---------------------------------------------------------------------------------------+

@@ -172,11 +172,14 @@ void LCD_SetPage(const unsigned short Start, const unsigned short End) {
 void LCD_FillRegion(const Region r) {
 	LCD_SetColumn(r.ColumnStart, r.ColumnEnd);
 	LCD_SetPage(r.PageStart, r.PageEnd);
-	
 	LCD_WaitChip(); // give the controller time to configure the page
+	
 	LCD_WriteBlock(r.Color, SIZE_COLOR, (r.ColumnEnd - r.ColumnStart) * (r.PageEnd - r.PageStart));
 }
 
+//---------------------------------------------------------------------------------------+
+// In this case it is best to just inline LCD_WriteData                                  |
+//---------------------------------------------------------------------------------------+
 void LCD_WriteText(const TextRegion r) {
 	
 }
