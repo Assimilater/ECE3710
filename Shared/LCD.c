@@ -193,9 +193,6 @@ void LCD_Init() {
 	
 	TP_CSX = 1;
 	
-	LCD_RST = 0;
-	LCD_RST = 1;
-	
 	LCD_WriteCmd(LCD_CODE_PWRA[0]); // Power Control A
 	LCD_WriteData(LCD_CODE_PWRA + 1, SIZE_CODE_PWRA - 1);
 	
