@@ -151,10 +151,22 @@ void GPIOA_Handler() {
 void GPIOE_Handler() {
 	if(GPIO.PortE->RIS.bit0)
 	{
+		//Read from ISP
+		
+		//Parse Data?? Probably not
+		
+		//Write to PC
+		
 		GPIO.PortE->ICR.bit0 = 1;
 	}
 	if(GPIO.PortE->RIS.bit1)
 	{
+		//Read from PC
+		
+		//Parse Data
+		
+		//write to ISP
+		
 		GPIO.PortE->ICR.bit1 = 1;
 	}
 }

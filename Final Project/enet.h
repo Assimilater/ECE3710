@@ -8,4 +8,9 @@
 #define NET_PC_CS BAND_GPIO_PE0
 #define NET_ISP_CS BAND_GPIO_PE1
 
+
+void NET_READDATA(void);
+void NET_PARSEDATA(void);
+void NET_WRITEDATA(void);
+
 #endif
