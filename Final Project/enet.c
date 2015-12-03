@@ -5,7 +5,7 @@
 
 void NET_READDATA()
 {
-	
+	//starts at PG.18 in data sheet
 	//Address Phase
 	SSI0->DR = 0x00;
 	SSI0->DR = 0x00; //both bytes are specifying an address. Don't know what to do here yet
