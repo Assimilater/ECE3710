@@ -76,7 +76,7 @@ void GPIOA_Handler() {
 void GPIOE_Handler() {
 	if(GPIO.PortE->RIS.bit0) {
 		//Read from ISP
-		
+		//NET_READDATA(give ISP CS if possible);
 		//Parse Data?? Probably not
 		
 		//Write to PC
@@ -85,7 +85,7 @@ void GPIOE_Handler() {
 	}
 	if(GPIO.PortE->RIS.bit1) {
 		//Read from PC
-		
+		//NET_READDATA(give PC CS if possible);
 		//Parse Data
 		
 		//write to ISP
