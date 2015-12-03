@@ -41,3 +41,9 @@ void NET_WRITEDATA() {
 	
 	//After putting data in a socket's tx buffer a SEND command must be given through the socket command register
 }
+
+void NET_Init() {
+	NET_PC_CS = 1;
+	NET_ISP_CS = 1;
+	
+}

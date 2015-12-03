@@ -64,15 +64,8 @@ void updateBlock() {
 }
 
 //---------------------------------------------------------------------------------------+
-// Touchscreen SPI handlers                                                              |
+// Ethernet SPI handlers                                                                 |
 //---------------------------------------------------------------------------------------+
-void GPIOA_Handler() {
-	// The screen is touched, for debouncing just start a timed sampler
-	GPIO.PortA->ICR.bit6 = 1; // Clear the interrupt
-	GPIO.PortA->IM.bit6 = 0; // Disable GPIOA interrupts
-	SysTick->CTRL = 0x3; // Enable SysTick interrupts
-}
-
 void GPIOE_Handler() {
 	if(GPIO.PortE->RIS.bit0) {
 		//Read from ISP
@@ -94,13 +87,23 @@ void GPIOE_Handler() {
 	}
 }
 
+//---------------------------------------------------------------------------------------+
+// Touchscreen SPI handlers                                                              |
+//---------------------------------------------------------------------------------------+
+void GPIOA_Handler() {
+	// The screen is touched, for debouncing just start a timed sampler
+	GPIO.PortA->ICR.bit6 = 1; // Clear the interrupt
+	GPIO.PortA->IM.bit6 = 0; // Disable GPIOA interrupts
+	SysTick->CTRL = 0x3; // Enable SysTick interrupts
+}
+
 void SysTick_Handler() {
 	static coord data;
+	SysTick->CTRL = 0x0; // Disable Systick interrups
 	if (!GPIO.PortA->DATA.bit6) { // User is pressing down, collect sample
 		LCD_GetXY(TOUCH_POLL, &data);
+		SysTick->CTRL = 0x3; // Enable SysTick interrupts
 	} else {
-		SysTick->CTRL = 0x0; // Disable Systick interrups
-		
 		if (LCD_GetXY(TOUCH_GET, &data)) { // User let go, get the average from samples
 			if ((COL_OUTER_Y0 < data.col) && (data.col < COL_OUTER_YF)) {
 				if ((ROW_OUTER_Y0 < data.page) && (data.page < ROW_OUTER_YF)) {
@@ -212,6 +215,7 @@ void init() {
 	GPIO.PortE->ICR.bit1 = 1;
 	GPIO.PortE->IM.bit1 = 1;
 	
+	NET_Init();
 	LCD_Init();
 }
 
