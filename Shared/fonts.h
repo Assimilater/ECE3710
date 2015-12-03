@@ -2,13 +2,13 @@
 #define __FONTS_H__
 
 typedef struct {
-	unsigned char** root;
+	unsigned char* root;
 	unsigned char width, height;
 } font;
 
 typedef struct {
 	unsigned int n;
-	unsigned char** s;
+	unsigned char* s[100];
 } text;
 	
 typedef struct {
