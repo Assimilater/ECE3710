@@ -14,10 +14,21 @@ void NET_WriteCmd (short address, char control)
 
 void NET_READDATA()
 {
-	NET_WriteCmd(0x0017,0x01); //Socket Interrput Register, read 1 byte
+	char read;
+	//CS goes low
 	
+	NET_WriteCmd(0x0017,0x01); //Socket Interrupt Register, read 1 byte
 	//Data Phase
-	SSI0->DR;
+	read = SSI0->DR;
+	//CS goes high
+	
+	//check what socket
+	
+	//cs goes low
+	//NET_WriteCmd();
+	//read
+	//cs goes high
+	
 }
 
 void NET_PARSEDATA()
@@ -31,4 +42,6 @@ void NET_WRITEDATA()
 	
 	//Data Phase
 	//Write
+	
+	//After putting data in a socket's tx buffer a SEND command must be given through the socket command register
 }
