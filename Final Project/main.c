@@ -148,28 +148,26 @@ void GPIOA_Handler() {
 	SysTick->CTRL = 0x3; // Enable SysTick interrupts
 }
 
-void GPIOE_Handler() {
-	if(GPIO.PortE->RIS.bit0)
-	{
-		//Read from ISP
-		
-		//Parse Data?? Probably not
-		
-		//Write to PC
-		
-		GPIO.PortE->ICR.bit0 = 1;
-	}
-	if(GPIO.PortE->RIS.bit1)
-	{
-		//Read from PC
-		
-		//Parse Data
-		
-		//write to ISP
-		
-		GPIO.PortE->ICR.bit1 = 1;
-	}
-}
+//void GPIOE_Handler() {
+//	if(GPIO.PortE->RIS.bit0) {
+//		//Read from ISP
+//		
+//		//Parse Data?? Probably not
+//		
+//		//Write to PC
+//		
+//		GPIO.PortE->ICR.bit0 = 1;
+//	}
+//	if(GPIO.PortE->RIS.bit1) {
+//		//Read from PC
+//		
+//		//Parse Data
+//		
+//		//write to ISP
+//		
+//		GPIO.PortE->ICR.bit1 = 1;
+//	}
+//}
 
 void SysTick_Handler() {
 	static coord data;
@@ -281,16 +279,16 @@ void init() {
 	GPIO.PortA->ICR.bit6 = 1;
 	GPIO.PortA->IM.bit6 = 1;
 	
-	GPIO.PortE->IM.word = 0;
-	GPIO.PortE->IS.word = 0;
-	GPIO.PortE->IBE.bit0 = 0;
-	GPIO.PortE->IEV.bit0 = 0; //Falling Edge triggers interuppt
-	GPIO.PortE->ICR.bit0 = 1;
-	GPIO.PortE->IM.bit0 = 1;
-	GPIO.PortE->IBE.bit1 = 0;
-	GPIO.PortE->IEV.bit1 = 0; //Falling Edge triggers interuppt
-	GPIO.PortE->ICR.bit1 = 1;
-	GPIO.PortE->IM.bit1 = 1;
+//	GPIO.PortE->IM.word = 0;
+//	GPIO.PortE->IS.word = 0;
+//	GPIO.PortE->IBE.bit0 = 0;
+//	GPIO.PortE->IEV.bit0 = 0; //Falling Edge triggers interuppt
+//	GPIO.PortE->ICR.bit0 = 1;
+//	GPIO.PortE->IM.bit0 = 1;
+//	GPIO.PortE->IBE.bit1 = 0;
+//	GPIO.PortE->IEV.bit1 = 0; //Falling Edge triggers interuppt
+//	GPIO.PortE->ICR.bit1 = 1;
+//	GPIO.PortE->IM.bit1 = 1;
 	
 	LCD_Init();
 }
