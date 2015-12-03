@@ -6,135 +6,60 @@
 //---------------------------------------------------------------------------------------+
 // Precalculated constants for the dimensions of our boxes                               |
 //---------------------------------------------------------------------------------------+
-const short LENGTH_INNER = 70;
 const short LENGTH_OUTER = 80;
+const short LENGTH_INNER = 70;
 
-const short AREA_OUTER = LENGTH_OUTER * LENGTH_OUTER;
-const short AREA_INNER = LENGTH_INNER * LENGTH_INNER;
+const short ROW_OUTER_Y0 = 25;
+const short ROW_INNER_Y0 = 30;
+const short COL_OUTER_Y0 = 80;
+const short COL_INNER_Y0 = 85;
 
-const short PADC_OUTER = (LCD_COLS - LENGTH_OUTER) / 2;
-const short PADC_INNER = (LCD_COLS - LENGTH_INNER) / 2;
-
-const short PADR_OUTER = (LCD_ROWS - (3 * LENGTH_OUTER)) / 4;
-const short PADR_INNER = (LENGTH_OUTER - LENGTH_INNER) / 2;
-
-const short COL_OUTER_Y0 = PADC_OUTER;
-const short COL_INNER_Y0 = PADC_INNER;
-
+const short ROW_OUTER_YF = ROW_OUTER_Y0 + LENGTH_OUTER;
+const short ROW_INNER_YF = ROW_INNER_Y0 + LENGTH_INNER;
 const short COL_OUTER_YF = COL_OUTER_Y0 + LENGTH_OUTER;
 const short COL_INNER_YF = COL_INNER_Y0 + LENGTH_INNER;
 
-const short ROW_OUTER_1Y0 = PADR_OUTER;
-const short ROW_INNER_1Y0 = ROW_OUTER_1Y0 + PADR_INNER;
-const short ROW_OUTER_1YF = PADR_OUTER + LENGTH_OUTER;
-const short ROW_INNER_1YF = ROW_OUTER_1YF - PADR_INNER;
+//---------------------------------------------------------------------------------------+
+// Status variables                                                                      |
+//---------------------------------------------------------------------------------------+
+typedef enum { DISABLED = 0, ENABLED = 1 } State;
+State enable = DISABLED;
 
-const short ROW_OUTER_2Y0 = PADR_OUTER * 2 + LENGTH_OUTER;
-const short ROW_INNER_2Y0 = ROW_OUTER_2Y0 + PADR_INNER;
-const short ROW_OUTER_2YF = PADR_OUTER * 2 + LENGTH_OUTER * 2;
-const short ROW_INNER_2YF = ROW_OUTER_2YF - PADR_INNER;
-
-const short ROW_OUTER_3Y0 = PADR_OUTER * 3 + LENGTH_OUTER * 2;
-const short ROW_INNER_3Y0 = ROW_OUTER_3Y0 + PADR_INNER;
-const short ROW_OUTER_3YF = PADR_OUTER * 3 + LENGTH_OUTER * 3;
-const short ROW_INNER_3YF = ROW_OUTER_3YF - PADR_INNER;
+char blocked_s[8] = "0000000";
+unsigned int block = 0;
+TextRegion blocked_r;
+TextRegion status_r;
 
 //---------------------------------------------------------------------------------------+
 // Helper functions to easily manage the boxes after initialization                      |
 //---------------------------------------------------------------------------------------+
-void fillRed() {
-	const static Region r = {
-		COL_INNER_Y0,
-		COL_INNER_YF,
-		ROW_INNER_1Y0,
-		ROW_INNER_1YF,
-		LCD_COLOR_RED
+void toggleStatus() {
+	static Region button_r = {
+		COL_INNER_Y0, COL_INNER_YF,
+		ROW_INNER_Y0, ROW_INNER_YF
 	};
-	LCD_FillRegion(r);
-	GPIO.PortE->DATA.bit3 = 0; // PA &= ~0x8;
-}
-void unfillRed() {
-	const static Region r = {
-		COL_INNER_Y0,
-		COL_INNER_YF,
-		ROW_INNER_1Y0,
-		ROW_INNER_1YF,
-		LCD_COLOR_BLACK
-	};
-	LCD_FillRegion(r);
-	GPIO.PortE->DATA.bit3 = 1;
-}
-void toggleRed() {
-	static bool status = true;
-	status = !status;
-	if (status) {
-		fillRed();
+	
+	if (enable) {
+		enable = DISABLED;
+		button_r.Color = LCD_COLOR_RED;
+		status_r.Color = LCD_COLOR_RED;
+		status_r.Text = "Status: Disabled";
 	} else {
-		unfillRed();
+		enable = ENABLED;
+		button_r.Color = LCD_COLOR_GREEN;
+		status_r.Color = LCD_COLOR_GREEN;
+		status_r.Text = "Status:  Enabled";
 	}
+	LCD_FillRegion(button_r);
+	LCD_WriteText(status_r);
 }
 
-void fillGreen() {
-	const static Region r = {
-		COL_INNER_Y0,
-		COL_INNER_YF,
-		ROW_INNER_2Y0,
-		ROW_INNER_2YF,
-		LCD_COLOR_GREEN
-	};
-	LCD_FillRegion(r);
-	GPIO.PortE->DATA.bit4 = 0; // PA &= ~0x10
-}
-void unfillGreen() {
-	const static Region r = {
-		COL_INNER_Y0,
-		COL_INNER_YF,
-		ROW_INNER_2Y0,
-		ROW_INNER_2YF,
-		LCD_COLOR_BLACK
-	};
-	LCD_FillRegion(r);
-	GPIO.PortE->DATA.bit4 = 1;
-}
-void toggleGreen() {
-	static bool status = true;
-	status = !status;
-	if (status) {
-		fillGreen();
-	} else {
-		unfillGreen();
-	}
-}
-
-void fillYellow() {
-	const static Region r = {
-		COL_INNER_Y0,
-		COL_INNER_YF,
-		ROW_INNER_3Y0,
-		ROW_INNER_3YF,
-		LCD_COLOR_YELLOW
-	};
-	LCD_FillRegion(r);
-	GPIO.PortE->DATA.bit5 = 0; // PA &= ~0x20
-}
-void unfillYellow() {
-	const static Region r = {
-		COL_INNER_Y0,
-		COL_INNER_YF,
-		ROW_INNER_3Y0,
-		ROW_INNER_3YF,
-		LCD_COLOR_BLACK
-	};
-	LCD_FillRegion(r);
-	GPIO.PortE->DATA.bit5 = 1;
-}
-void toggleYellow() {
-	static bool status = true;
-	status = !status;
-	if (status) {
-		fillYellow();
-	} else {
-		unfillYellow();
+void updateBlock() {
+	unsigned int i = 7, t = block, mod;
+	while (i > 0) {
+		mod = t % 10;
+		blocked_s[--i] = '0' + mod;
+		t /= 10;
 	}
 }
 
@@ -178,12 +103,8 @@ void SysTick_Handler() {
 		
 		if (LCD_GetXY(TOUCH_GET, &data)) { // User let go, get the average from samples
 			if ((COL_OUTER_Y0 < data.col) && (data.col < COL_OUTER_YF)) {
-				if ((ROW_OUTER_1Y0 < data.page) && (data.page < ROW_OUTER_1YF)) {
-					toggleRed();
-				} else if ((ROW_OUTER_2Y0 < data.page) && (data.page < ROW_OUTER_2YF)) {
-					toggleGreen();
-				} else if ((ROW_OUTER_3Y0 < data.page) && (data.page < ROW_OUTER_3YF)) {
-					toggleYellow();
+				if ((ROW_OUTER_Y0 < data.page) && (data.page < ROW_OUTER_YF)) {
+					toggleStatus();
 				}
 			}
 		}
@@ -198,40 +119,40 @@ void SysTick_Handler() {
 // Program initialization logic                                                          |
 //---------------------------------------------------------------------------------------+
 void exec() {
-	Region r;
-	TextRegion t;
+	Region button_r = {
+		COL_OUTER_Y0, COL_OUTER_YF,
+		ROW_OUTER_Y0, ROW_OUTER_YF,
+		LCD_COLOR_BLUE
+	};
+	LCD_FillRegion(button_r); // Fill in the outer box
 	
-	r.ColumnStart = COL_OUTER_Y0;
-	r.ColumnEnd = COL_OUTER_YF;
+	// Write the static text
+	blocked_r.y = 95;
+	blocked_r.x = ROW_OUTER_YF + 5;
+	blocked_r.Font = &fonts()->Big;
+	blocked_r.Text = "Pages Blocked";
+	blocked_r.BackColor = LCD_COLOR_BLACK;
+	blocked_r.Color = LCD_COLOR_YELLOW;
+	LCD_WriteText(blocked_r);
 	
-	// Fill in the outer boxes
-	r.PageStart = ROW_OUTER_1Y0;
-	r.PageEnd = ROW_OUTER_1YF;
-	r.Color = LCD_COLOR_RED;
-	LCD_FillRegion(r);
+	// Setup for the dynamic text
+	blocked_r.y = 120;
+	blocked_r.x = ROW_OUTER_YF + 25;
+	blocked_r.Font = &fonts()->Ubuntu;
+	blocked_r.Text = blocked_s;
 	
-	r.PageStart = ROW_OUTER_2Y0;
-	r.PageEnd = ROW_OUTER_2YF;
-	r.Color = LCD_COLOR_GREEN;
-	LCD_FillRegion(r);
+	// Write initial value for dynamic text
+	updateBlock();
+	LCD_WriteText(blocked_r);
 	
-	r.PageStart = ROW_OUTER_3Y0;
-	r.PageEnd = ROW_OUTER_3YF;
-	r.Color = LCD_COLOR_YELLOW;
-	LCD_FillRegion(r);
+	// Setup status text (also dynamic)
+	status_r.x = 25;
+	status_r.y = 175;
+	status_r.Font = &fonts()->Big;
+	status_r.BackColor = LCD_COLOR_BLACK;
 	
-	// Fill in the inner boxes with black
-	toggleRed();
-	toggleGreen();
-	toggleYellow();
-	
-	t.x = 50;
-	t.y = 50;
-	t.Text = "";
-	t.Font = &fonts()->Basic_8x8;
-	t.BackColor = LCD_COLOR_GREEN;
-	t.Color = LCD_COLOR_BLACK;
-	LCD_WriteText(t);
+	// Start the filter as enabled
+	toggleStatus();
 }
 
 //---------------------------------------------------------------------------------------+

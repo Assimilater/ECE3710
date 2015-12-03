@@ -67,10 +67,10 @@ typedef struct {
 
 typedef struct {
 	unsigned short x, y;
+	const font* Font;
 	code* BackColor;
 	code* Color;
 	char* Text;
-	const font* Font;
 } TextRegion;
 
 typedef struct {
