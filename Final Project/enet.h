@@ -27,7 +27,7 @@ typedef union {
 typedef struct {
 	net_offset Address;
 	ControlByte Control;
-	bytestream Data;
+	byte* Data;
 	bytelength N;
 } NET_Frame;
 

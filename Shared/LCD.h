@@ -5,6 +5,7 @@
 // Inlucded dependencies                                                                 |
 //---------------------------------------------------------------------------------------+
 #include "LCD_Codes.h"
+#include "../Shared/embedded_t.h"
 #include "../Shared/fonts.h"
 #include "../Shared/bool.h"
 
@@ -62,14 +63,14 @@ static const unsigned int LCD_AREA = LCD_COLS * LCD_ROWS;
 
 typedef struct {
 	unsigned short ColumnStart, ColumnEnd, PageStart, PageEnd;
-	const bytestream Color;
+	const byte* Color;
 } Region;
 
 typedef struct {
 	unsigned short x, y;
 	const font* Font;
-	const bytestream BackColor;
-	const bytestream Color;
+	const byte* BackColor;
+	const byte* Color;
 	char* Text;
 } TextRegion;
 
@@ -89,8 +90,8 @@ typedef enum {
 bool LCD_GetXY(SAMPLE_MODE, coord*);
 void LCD_WaitChip(void);
 void LCD_WriteCmd(const byte);
-void LCD_WriteData(const bytestream, const int);
-void LCD_WriteBlock(const bytestream, const int, const int);
+void LCD_WriteData(const byte*, const int);
+void LCD_WriteBlock(const byte*, const int, const int);
 void LCD_WriteText(const TextRegion);
 
 void LCD_SetColumn(const unsigned short, const unsigned short);

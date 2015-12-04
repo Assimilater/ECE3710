@@ -3,13 +3,13 @@
 
 #include "embedded_t.h"
 typedef struct {
-	bytestream root;
+	byte* root;
 	byte width, height;
 } font;
 
 typedef struct {
 	unsigned int n;
-	bytestream s[100];
+	byte* s[100];
 } text;
 	
 typedef struct {

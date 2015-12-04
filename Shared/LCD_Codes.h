@@ -1,9 +1,6 @@
 #ifndef __TFTM032_CODES_H__
 #define __TFTM032_CODES_H__
 
-#include "embedded_t.h"
-typedef const byte code;
-
 //---------------------------------------------------------------------------------------+
 // A collection of code sizes to keep the extern definition the same                     |
 //---------------------------------------------------------------------------------------+

@@ -1,4 +1,5 @@
 #include "LCD_Codes.h"
+#include "embedded_t.h"
 
 //---------------------------------------------------------------------------------------+
 // Command Codes For The LCD                                                             |
@@ -26,12 +27,12 @@ const byte LCD_CODE_SGM1[SIZE_CODE_SGM1] = {0xE1, 0x00, 0x0E, 0x14, 0x03, 0x11, 
 //---------------------------------------------------------------------------------------+
 // Color Codes For The LCD                                                               |
 //---------------------------------------------------------------------------------------+
-const byte LCD_COLOR_WHITE	[SIZE_COLOR] = {0xFF, 0xFF};
-const byte LCD_COLOR_BLACK	[SIZE_COLOR] = {0x00, 0x01};
+const byte LCD_COLOR_WHITE		[SIZE_COLOR] = {0xFF, 0xFF};
+const byte LCD_COLOR_BLACK		[SIZE_COLOR] = {0x00, 0x01};
 const byte LCD_COLOR_GREY		[SIZE_COLOR] = {0xF7, 0xDE};
 const byte LCD_COLOR_BLUE		[SIZE_COLOR] = {0x00, 0x1F};
 const byte LCD_COLOR_RED		[SIZE_COLOR] = {0xF8, 0x00};
 const byte LCD_COLOR_MAGENTA	[SIZE_COLOR] = {0xF8, 0x1F};
-const byte LCD_COLOR_GREEN	[SIZE_COLOR] = {0x07, 0xE0};
+const byte LCD_COLOR_GREEN		[SIZE_COLOR] = {0x07, 0xE0};
 const byte LCD_COLOR_CYAN		[SIZE_COLOR] = {0x7F, 0xFF};
-const byte LCD_COLOR_YELLOW	[SIZE_COLOR] = {0xFF, 0xE0};
+const byte LCD_COLOR_YELLOW		[SIZE_COLOR] = {0xFF, 0xE0};

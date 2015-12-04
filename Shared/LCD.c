@@ -102,7 +102,7 @@ void LCD_WriteCmd(const byte cmd) {
 //---------------------------------------------------------------------------------------+
 // Writes a data stream of arbitrary size to the LCD (high screen refresh speeds)        |
 //---------------------------------------------------------------------------------------+
-void LCD_WriteData(const bytestream data, const int len) {
+void LCD_WriteData(const byte* data, const int len) {
 	int i;
 	LCD_CSX = 0; // CSX "LCD, pay attention!"
 	LCD_DCX = 1; // DCX Data
@@ -118,7 +118,7 @@ void LCD_WriteData(const bytestream data, const int len) {
 //---------------------------------------------------------------------------------------+
 // Primarily used by FillRegion when the same data stream needs repeated sends           |
 //---------------------------------------------------------------------------------------+
-void LCD_WriteBlock(const bytestream data, const int len, const int n) {
+void LCD_WriteBlock(const byte* data, const int len, const int n) {
 	int i, j;
 	LCD_WriteCmd(0x2C);
 	LCD_CSX = 0; // CSX "LCD, pay attention!"
