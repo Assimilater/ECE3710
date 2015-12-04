@@ -8,7 +8,7 @@ typedef struct {
 } font;
 
 typedef struct {
-	unsigned int n;
+	uint n;
 	byte* s[100];
 } text;
 	

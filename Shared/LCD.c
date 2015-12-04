@@ -9,7 +9,7 @@ bool LCD_GetXY(SAMPLE_MODE mode, coord* val) {
 	// Vars used for all modes
 	static const unsigned short TOUCH_MAX_COL = 0xEDF;
 	static const unsigned short TOUCH_MAX_ROW = 0xFFF;
-	static const unsigned int SAMPLE_SIZE = 100;
+	static const uint SAMPLE_SIZE = 100;
 	static coord data[SAMPLE_SIZE];
 	
 	// Vars used for poll
@@ -17,8 +17,8 @@ bool LCD_GetXY(SAMPLE_MODE mode, coord* val) {
 	coord* poll;
 	
 	// Vars used for get (averaging)
-	static unsigned int sample = 0;
-	unsigned int i, n, col, page;
+	static uint sample = 0;
+	uint i, n, col, page;
 	
 	if (mode == TOUCH_RESET) {
 		sample = 0; // Resets the sampling

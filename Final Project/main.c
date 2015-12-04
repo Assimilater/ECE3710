@@ -25,8 +25,8 @@ const short COL_INNER_YF = COL_INNER_Y0 + LENGTH_INNER;
 typedef enum { FILTER_DISABLED = 0, FILTER_ENABLED = 1 } State;
 State enable = FILTER_DISABLED;
 
+uint block = 0;
 char blocked_s[8] = "0000000";
-unsigned int block = 0;
 TextRegion blocked_r;
 TextRegion status_r;
 
@@ -55,7 +55,7 @@ void toggleStatus() {
 }
 
 void reportBlock() {
-	unsigned int i = 7, t = ++block, mod;
+	uint i = 7, t = ++block, mod;
 	while (i > 0) {
 		mod = t % 10;
 		blocked_s[--i] = '0' + mod;

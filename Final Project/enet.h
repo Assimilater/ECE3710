@@ -27,7 +27,7 @@ typedef struct {
 	net_offset Address;
 	ControlByte Control;
 	byte* Data;
-	bytelength N;
+	uint N;
 } NET_Frame;
 
 //---------------------------------------------------------------------------------------+
