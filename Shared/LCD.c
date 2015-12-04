@@ -51,7 +51,7 @@ bool LCD_GetXY(SAMPLE_MODE mode, coord* val) {
 		// Uses SPI to interact with the touchscreen chip and retrieve coordinates               |
 		//---------------------------------------------------------------------------------------+
 		while (SSI0->SR & 0x4) { read0 = SSI0->DR; } // Clear the buffer, just in case
-		poll = &data[sample++ % SAMPLE_SIZE]; // 
+		poll = &data[sample++ % SAMPLE_SIZE]; // Select which sample to write data to
 		TP_CSX = 0;
 		
 		while(!(SSI0->SR & 0x1)); // Wait for TFE = 1
