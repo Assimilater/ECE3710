@@ -55,7 +55,7 @@ void NET_SPI_Write(byte*, NET_Frame*);
 //---------------------------------------------------------------------------------------+
 // Converts address into bytestream, does input validation, helper prep and delegation   |
 //---------------------------------------------------------------------------------------+
-void NET_SPI(NET_CHIP_SELECT chip, NET_Frame* frame) {
+bool NET_SPI(NET_CHIP_SELECT chip, NET_Frame* frame) {
 	byte address[2];
 	
 	// Clear the buffer, just in case
@@ -66,6 +66,18 @@ void NET_SPI(NET_CHIP_SELECT chip, NET_Frame* frame) {
 	// Safety percautions
 	if (frame->Control.reg == NET_COMMON_R) {
 		frame->Control.socket = 0;
+	}
+	if (frame->Control.op == NET_F1B_M) {
+		if (frame->N > 1) { frame->N = 1; }
+		else if (frame->N < 1) { return false; }
+	}
+	if (frame->Control.op == NET_F2B_M) {
+		if (frame->N > 2) { frame->N = 2; }
+		else if (frame->N < 2) { return false; }
+	}
+	if (frame->Control.op == NET_F4B_M) {
+		if (frame->N > 2) { frame->N = 2; }
+		else if (frame->N < 2) { return false; }
 	}
 	
 	// Type conversion
@@ -78,6 +90,8 @@ void NET_SPI(NET_CHIP_SELECT chip, NET_Frame* frame) {
 	} else {
 		NET_SPI_Server(address, frame);
 	}
+	
+	return true;
 }
 
 //---------------------------------------------------------------------------------------+
