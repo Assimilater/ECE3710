@@ -44,8 +44,8 @@ void NET_Init(void);
 //---------------------------------------------------------------------------------------+
 // Signal Definitions                                                                    |
 //---------------------------------------------------------------------------------------+
-#define NET_CS_CPC BAND_GPIO_PE2 // Attached computer (client pc)
 #define NET_CS_ISP BAND_GPIO_PE1 // Internet Service Provider (server)
+#define NET_CS_CPC BAND_GPIO_PE2 // Attached computer (client pc)
 
 //---------------------------------------------------------------------------------------+
 // Register Offset Addresses                                                             |

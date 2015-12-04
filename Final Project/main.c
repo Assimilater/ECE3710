@@ -65,43 +65,20 @@ void reportBlock() {
 }
 
 //---------------------------------------------------------------------------------------+
-// Ethernet SPI handlers                                                                 |
+// Define Interrupt Singals                                                              |
 //---------------------------------------------------------------------------------------+
-void GPIOE_Handler() {
-	if(GPIO.PortE->RIS.bit0) {
-		//Read from ISP
-		//NET_READDATA(give ISP CS if possible);
-		//Parse Data?? Probably not
-		
-		//Write to PC
-		
-		GPIO.PortE->ICR.bit0 = 1;
-	}
-	if(GPIO.PortE->RIS.bit1) {
-		//Read from PC
-		//NET_READDATA(give PC CS if possible);
-		//Parse Data
-		
-		//write to ISP
-		
-		GPIO.PortE->ICR.bit1 = 1;
-	}
-}
+#define INT_TOUCH		BAND_GPIO_PE3
+#define INT_NET_ISP		BAND_GPIO_PE4
+#define INT_NET_CPC		BAND_GPIO_PE5
 
 //---------------------------------------------------------------------------------------+
-// Touchscreen SPI handlers                                                              |
+// Time based sampling of touchscreen with atomic SPI blocker                            |
 //---------------------------------------------------------------------------------------+
-void GPIOA_Handler() {
-	// The screen is touched, for debouncing just start a timed sampler
-	GPIO.PortA->ICR.bit6 = 1; // Clear the interrupt
-	GPIO.PortA->IM.bit6 = 0; // Disable GPIOA interrupts
-	SysTick->CTRL = 0x3; // Enable SysTick interrupts
-}
-
+volatile bool atomic_touch = false;
 void SysTick_Handler() {
 	static coord data;
 	SysTick->CTRL = 0x0; // Disable Systick interrups
-	if (!GPIO.PortA->DATA.bit6) { // User is pressing down, collect sample
+	if (!INT_TOUCH) { // User is pressing down, collect sample
 		LCD_GetXY(TOUCH_POLL, &data);
 		SysTick->CTRL = 0x3; // Enable SysTick interrupts
 	} else {
@@ -113,9 +90,63 @@ void SysTick_Handler() {
 			}
 		}
 		
-		// Enable GPIOA interrupts
-		GPIO.PortA->ICR.bit6 = 1;
-		GPIO.PortA->IM.bit6 = 1;
+		// Signal that touch interaction is over
+		atomic_touch = false;
+	}
+}
+
+//---------------------------------------------------------------------------------------+
+// Uses a timer to sample; so data is averaged over a longer time and touch is debounced |
+// This function is blocking, so as to give priority to user input on the touchscreen    |
+// Because of interrupts, this acts like a multi-threaded portion of the application     |
+//---------------------------------------------------------------------------------------+
+void Touch_Handler() {
+	atomic_touch = true;
+	SysTick->CTRL = 0x3; // Enable SysTick interrupts
+	while (atomic_touch); // Wait for touch interaction to finish
+}
+
+void NET_ISP_Handler() {
+	//Read from ISP
+	//NET_READDATA(give ISP CS if possible);
+	
+	//Write to PC
+}
+
+void NET_CPC_Handler() {
+	//Read from PC
+	//NET_READDATA(give PC CS if possible);
+	//Parse Data
+	
+	//write to ISP
+}
+
+//---------------------------------------------------------------------------------------+
+// Real interrups create the need for atomic use of SPI, so instead use a busy wait      |
+//---------------------------------------------------------------------------------------+
+void Busy_Interrupts() {
+	byte i_touch, i_net_isp, i_net_cpc;
+	i_touch = i_net_isp = i_net_cpc = 1;
+	
+	while(1) {
+		if (i_touch != INT_TOUCH) {
+			i_touch = INT_TOUCH;
+			if (i_touch == 0) {
+				Touch_Handler();
+			}
+		}
+		if (i_net_isp != INT_NET_ISP) {
+			i_net_isp = INT_NET_ISP;
+			if (i_net_isp == 0) {
+				NET_ISP_Handler();
+			}
+		}
+		if (i_net_cpc != INT_NET_CPC) {
+			i_net_cpc = INT_NET_CPC;
+			if (i_net_cpc == 0) {
+				NET_CPC_Handler();
+			}
+		}
 	}
 }
 
@@ -156,6 +187,9 @@ void exec() {
 	
 	// Start the filter as enabled
 	toggleStatus();
+	
+	// Our program is a busy wait on interrupt conditions
+	Busy_Interrupts();
 }
 
 //---------------------------------------------------------------------------------------+
@@ -164,62 +198,46 @@ void exec() {
 void init() {
 	SYSCTL->RCGCGPIO = 0x1B;
 	SYSCTL->RCGCSSI = 0x1;
-	GPIO.PortD->LOCK.word = GPIO_UNLOCK;
+	GPIO.PortD->LOCK.word = GPIO_UNLOCK; // Port D needs to be unlcoked
 	
+	// PA[2:5] => SPI
 	GPIO.PortA->DEN.byte[0] = 0xFC;
 	GPIO.PortA->AFSEL.byte[0] = 0x3C;
-	GPIO.PortA->DIR.bit7 = 1;
+	GPIO.PortA->DIR.bit7 = 1; // External Reset
+	// Port A -> Pin 6 is NC
 	
 	// Pull up configuration necessary to avoid electromagnetic interference between SSI pins
 	GPIO.PortA->PUR.bit4 = 1; // Rx
 	GPIO.PortA->PUR.bit5 = 1; // Tx
 	
+	// PB[0:7] is the LCD Data Bus
 	GPIO.PortB->DEN.byte[0] = 0xFF;
 	GPIO.PortB->DIR.byte[0] = 0xFF;
 	
+	// PD[0:1] is shared with PB[6:7] (for reasons beyond my comprehension)
+	// PD[2:3,6:7] is used for LCD communication signals
 	GPIO.PortD->CR.byte[0] = 0xFF;
 	GPIO.PortD->DEN.byte[0] = 0xFF;
 	GPIO.PortD->DIR.byte[0] = 0xFF;
 	
+	// PE[0:2] => CS Pins (output)
+	// PE[3:5] => SPI Interrupt Pins (input)
 	GPIO.PortE->DEN.byte[0] = 0xFF;
-	GPIO.PortE->DIR.byte[0] = 0xFF;
+	GPIO.PortE->DIR.byte[0] = 0x07;
 	
 	// Configure SSI Freescale (SPH = 0, SPO = 0)
 	SSI0->CR1 = 0; // Disable
 	SSI0->CC = 0x5; // Use PIOsc for the clock
 	SSI0->CPSR = 0x2; // Clock divisor = 2 (the minimum, or fastest we can make this divisor)
-	SSI0->CR0 = 0x307; // SCR = 3 (clock divisor), SPH = 0, SPO = 0, FRF = 0 (freescale), DSS = 7 (8-bit data)
+	SSI0->CR0 = 0x307; // SCR = 3 (divisor), SPH = 0, SPO = 0, FRF = 0 (freescale), DSS = 7 (8-bit data)
 	SSI0->CR1 |= 0x2; // Enable
 	
 	// Configure Systick
 	SysTick->LOAD = 16000; // 1ms
 	NVIC_EN0_R = 0x1;
 	
-	// Port A -> Touchscreen interrupts
-	GPIO.PortA->IM.word = 0;
-	GPIO.PortA->IS.word = 0;
-	
-	GPIO.PortA->IBE.bit6 = 0;
-	GPIO.PortA->IEV.bit6 = 0; //Falling Edge triggers interuppt
-	GPIO.PortA->ICR.bit6 = 1;
-	GPIO.PortA->IM.bit6 = 1;
-	
-	// Port E -> Ethernet interrupts
-	GPIO.PortE->IM.word = 0;
-	GPIO.PortE->IS.word = 0;
-	
-	GPIO.PortE->IBE.bit0 = 0;
-	GPIO.PortE->IEV.bit0 = 0; //Falling Edge triggers interuppt
-	GPIO.PortE->ICR.bit0 = 1;
-	GPIO.PortE->IM.bit0 = 1;
-	
-	GPIO.PortE->IBE.bit1 = 0;
-	GPIO.PortE->IEV.bit1 = 0; //Falling Edge triggers interuppt
-	GPIO.PortE->ICR.bit1 = 1;
-	GPIO.PortE->IM.bit1 = 1;
-	
-	NET_Init();
 	LCD_Init();
+	NET_Init();
 }
 
 //---------------------------------------------------------------------------------------+
