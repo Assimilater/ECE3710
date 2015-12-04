@@ -128,7 +128,7 @@ void Busy_Interrupts() {
 	byte i_touch, i_net_isp, i_net_cpc;
 	i_touch = i_net_isp = i_net_cpc = 1;
 	
-	while(1) {
+	while (1) {
 		if (i_touch != INT_TOUCH) {
 			i_touch = INT_TOUCH;
 			if (i_touch == 0) {

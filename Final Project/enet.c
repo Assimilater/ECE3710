@@ -59,8 +59,8 @@ bool NET_SPI(NET_CHIP_SELECT chip, NET_Frame* frame) {
 	byte address[2];
 	
 	// Clear the buffer, just in case
-	while(!(SSI0->SR & 0x1)); // Wait for TFE = 1
-	while(SSI0->SR & 0x10); // Wait for BSY == 0
+	while (!(SSI0->SR & 0x1)); // Wait for TFE = 1
+	while (SSI0->SR & 0x10); // Wait for BSY == 0
 	while (SSI0->SR & 0x4) { address[0] = SSI0->DR; }
 	
 	// Safety percautions
@@ -130,7 +130,7 @@ void NET_SPI_Read(byte* address, NET_Frame* frame) {
 	SSI0->DR = address[0];
 	SSI0->DR = address[1];
 	SSI0->DR = frame->Control.byte;
-	while(SSI0->SR & 0x10); // Wait for BSY == 0
+	while (SSI0->SR & 0x10); // Wait for BSY == 0
 	write = SSI0->DR;
 	write = SSI0->DR;
 	write = SSI0->DR;
@@ -142,7 +142,7 @@ void NET_SPI_Read(byte* address, NET_Frame* frame) {
 		for (j = 0; j < 8; ++j) {
 			SSI0->DR = write;
 		}
-		while(SSI0->SR & 0x10); // Wait for BSY == 0
+		while (SSI0->SR & 0x10); // Wait for BSY == 0
 		k = frame->N - i;
 		for (j = 0; j < 8; ++j) {
 			frame->Data[k + j] = SSI0->DR;
@@ -150,7 +150,7 @@ void NET_SPI_Read(byte* address, NET_Frame* frame) {
 	}
 	
 	// Read all remaining blocks
-	while(SSI0->SR & 0x10); // Wait for BSY == 0
+	while (SSI0->SR & 0x10); // Wait for BSY == 0
 	k = frame->N - i;
 	for (j = 0; j < i; ++j) {
 		frame->Data[k + j] = SSI0->DR;
@@ -175,8 +175,8 @@ void NET_SPI_Write(byte* address, NET_Frame* frame) {
 	}
 	
 	// Empty the FIFO buffer
-	while(SSI0->SR & 0x10); // Wait for BSY == 0
-	while(SSI0->SR & 0x4) { // While RNE == 1
+	while (SSI0->SR & 0x10); // Wait for BSY == 0
+	while (SSI0->SR & 0x4) { // While RNE == 1
 		i = SSI0->DR; // We're done with i, so read in don't care
 	}
 }

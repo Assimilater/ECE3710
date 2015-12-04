@@ -61,7 +61,7 @@ bool LCD_GetXY(SAMPLE_MODE mode, coord* val) {
 		SSI0->DR = 0;
 		SSI0->DR = 0; // Second byte of null so we can receive both bytes pertaining to y
 		
-		while(SSI0->SR & 0x10); // Wait for BSY == 0
+		while (SSI0->SR & 0x10); // Wait for BSY == 0
 		read0 = SSI0->DR; // Read null byte
 		read1 = SSI0->DR; // Read first x-data byte
 		read2 = SSI0->DR; // Read second x-data byte
@@ -178,7 +178,7 @@ void LCD_FillRegion(const Region r) {
 }
 
 //---------------------------------------------------------------------------------------+
-// In this case it is best to just inline LCD_WriteData                                  |
+// Writes text horizontally, with x-y referring the bottom left corner of the text       |
 //---------------------------------------------------------------------------------------+
 void LCD_WriteText(const TextRegion r) {
 	byte temp;
