@@ -7,7 +7,6 @@
 #include "LCD_Codes.h"
 #include "../Shared/embedded_t.h"
 #include "../Shared/fonts.h"
-#include "../Shared/bool.h"
 
 //---------------------------------------------------------------------------------------+
 // Color Codes For The LCD                                                               |
