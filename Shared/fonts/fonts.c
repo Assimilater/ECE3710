@@ -13,7 +13,7 @@
 //---------------------------------------------------------------------------------------+
 const FontList* fonts() {
 	static FontList list;
-	static char init = 0;
+	static byte init = 0;
 	if (!init) {
 		// Ubuntu
 		list.Ubuntu.root = (byte*) Ubuntu;

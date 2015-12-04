@@ -44,7 +44,7 @@ extern const byte LCD_CODE_SGM0[SIZE_CODE_SGM0];
 extern const byte LCD_CODE_SGM1[SIZE_CODE_SGM1];
 
 //---------------------------------------------------------------------------------------+
-// Register definitions specific to the LCD                                             |
+// Communication Signals for the LCD                                                     |
 //---------------------------------------------------------------------------------------+
 #define LCD_CSX BAND_GPIO_PD2
 #define LCD_DCX BAND_GPIO_PD3

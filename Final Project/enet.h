@@ -5,7 +5,7 @@
 // Include Dependencies                                                                  |
 //---------------------------------------------------------------------------------------+
 #include "../Shared/embedded_t.h"
-typedef unsigned short net_offset;
+typedef uint16 net_offset;
 
 //---------------------------------------------------------------------------------------+
 // Hepler Structs For Configuration                                                      |
@@ -20,7 +20,7 @@ typedef union {
 		bool write:1; // Default: Read (0)
 		NET_MODE op:2; // Default: NET_VAR_M
 	};
-	char byte;
+	byte byte;
 } ControlByte; // See section 2.2.2 in w550 datasheet
 
 typedef struct {
@@ -49,7 +49,7 @@ bool NET_SPI(NET_CHIP_SELECT, NET_Frame*);
 void NET_Init(void);
 
 //---------------------------------------------------------------------------------------+
-// Signal Definitions                                                                    |
+// Communication signals for the wiznet chips                                            |
 //---------------------------------------------------------------------------------------+
 #define NET_CS_ISP BAND_GPIO_PE1 // Internet Service Provider (server)
 #define NET_CS_CPC BAND_GPIO_PE2 // Attached computer (client pc)

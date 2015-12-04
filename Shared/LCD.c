@@ -181,7 +181,7 @@ void LCD_FillRegion(const Region r) {
 // In this case it is best to just inline LCD_WriteData                                  |
 //---------------------------------------------------------------------------------------+
 void LCD_WriteText(const TextRegion r) {
-	char temp;
+	byte temp;
 	int row, letter, col, bitmask;
 	text t = font_get(r.Font, r.Text);
 	
