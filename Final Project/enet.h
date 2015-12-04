@@ -5,26 +5,38 @@
 // Include Dependencies                                                                  |
 //---------------------------------------------------------------------------------------+
 #include "../Shared/embedded_t.h"
-typedef uint16 net_offset;
 
 //---------------------------------------------------------------------------------------+
 // Hepler Structs For Configuration                                                      |
 //---------------------------------------------------------------------------------------+
-typedef enum { NET_CHIP_CLIENT, NET_CHIP_SERVER } NET_CHIP_SELECT;
-typedef enum { NET_COMMON_R, NET_SOCKET_R, NET_TX_R, NET_RX_R } NET_REGISTER;
-typedef enum { NET_VAR_M, NET_F1B_M, NET_F2B_M, NET_F4B_M } NET_MODE;
+typedef enum {
+	NET_CHIP_CLIENT,
+	NET_CHIP_SERVER
+} NET_CHIP;
+typedef enum {
+	NET_REG_COMMON,
+	NET_REG_SOCKET,
+	NET_REG_TX,
+	NET_REG_RX
+} NET_REG;
+typedef enum {
+	NET_MODE_VAR,
+	NET_MODE_F1B,
+	NET_MODE_F2B,
+	NET_MODE_F4B
+} NET_MODE;
 typedef union {
 	struct {
 		int socket:3; // Note: Must be 0 if using common register
-		NET_REGISTER reg:2;
+		NET_REG reg:2;
 		bool write:1; // Default: Read (0)
-		NET_MODE op:2; // Default: NET_VAR_M
+		NET_MODE mode:2; // Default: NET_VAR_M
 	};
 	byte byte;
 } ControlByte; // See section 2.2.2 in w550 datasheet
 
 typedef struct {
-	net_offset Address;
+	uint16 Address;
 	ControlByte Control;
 	byte* Data;
 	uint N;
@@ -45,7 +57,7 @@ void NET_READDATA(void);
 void NET_PARSEDATA(void);
 void NET_WRITEDATA(void);
 
-bool NET_SPI(NET_CHIP_SELECT, NET_Frame*);
+bool NET_SPI(NET_CHIP, NET_Frame*);
 void NET_Init(void);
 
 //---------------------------------------------------------------------------------------+
@@ -57,7 +69,7 @@ void NET_Init(void);
 //---------------------------------------------------------------------------------------+
 // Register Offset Addresses                                                             |
 //---------------------------------------------------------------------------------------+
-#define NET_COMMON_MODE					(net_offset)0x0000;
-#define NET_SOCKET_MODE					(net_offset)0x0000;
+#define NET_COMMON_MODE					(uint16)0x0000;
+#define NET_SOCKET_MODE					(uint16)0x0000;
 
 #endif
