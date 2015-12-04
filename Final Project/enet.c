@@ -42,8 +42,23 @@ void NET_WRITEDATA() {
 	//After putting data in a socket's tx buffer a SEND command must be given through the socket command register
 }
 
+void NET_SPI(NET_CHIP_SELECT chip, NET_Frame frame) {
+	byte read;
+	// Safety percautions
+	if (frame.Control.reg == NET_COMMON_R) {
+		frame.Control.socket = 0;
+	}
+	
+	// Chip interaction
+	if (chip == NET_CHIP_CLIENT) {
+		
+	} else {
+		
+	}
+}
+
 void NET_Init() {
-	NET_PC_CS = 1;
+	NET_CPC_CS = 1;
 	NET_ISP_CS = 1;
 	
 }
