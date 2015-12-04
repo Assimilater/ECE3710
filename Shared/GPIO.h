@@ -1,6 +1,6 @@
 #ifndef _GPIO_H_
 #define _GPIO_H_
-#include "REG.h"
+#include "embedded_t.h"
 #include "TM4C123GH6PM.h"
 
 typedef struct {
