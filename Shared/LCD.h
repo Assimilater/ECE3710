@@ -11,37 +11,37 @@
 //---------------------------------------------------------------------------------------+
 // Color Codes For The LCD                                                               |
 //---------------------------------------------------------------------------------------+
-extern code LCD_COLOR_WHITE[SIZE_COLOR];
-extern code LCD_COLOR_BLACK[SIZE_COLOR];
-extern code LCD_COLOR_GREY[SIZE_COLOR];
-extern code LCD_COLOR_BLUE[SIZE_COLOR];
-extern code LCD_COLOR_RED[SIZE_COLOR];
-extern code LCD_COLOR_MAGENTA[SIZE_COLOR];
-extern code LCD_COLOR_GREEN[SIZE_COLOR];
-extern code LCD_COLOR_CYAN[SIZE_COLOR];
-extern code LCD_COLOR_YELLOW[SIZE_COLOR];
+extern const byte LCD_COLOR_WHITE[SIZE_COLOR];
+extern const byte LCD_COLOR_BLACK[SIZE_COLOR];
+extern const byte LCD_COLOR_GREY[SIZE_COLOR];
+extern const byte LCD_COLOR_BLUE[SIZE_COLOR];
+extern const byte LCD_COLOR_RED[SIZE_COLOR];
+extern const byte LCD_COLOR_MAGENTA[SIZE_COLOR];
+extern const byte LCD_COLOR_GREEN[SIZE_COLOR];
+extern const byte LCD_COLOR_CYAN[SIZE_COLOR];
+extern const byte LCD_COLOR_YELLOW[SIZE_COLOR];
 
 //---------------------------------------------------------------------------------------+
 // Command Codes For The LCD                                                             |
 //---------------------------------------------------------------------------------------+
-extern code LCD_CODE_PWRA[SIZE_CODE_PWRA];
-extern code LCD_CODE_PWRB[SIZE_CODE_PWRB];
-extern code LCD_CODE_DTCA[SIZE_CODE_DTCA];
-extern code LCD_CODE_DTCB[SIZE_CODE_DTCB];
-extern code LCD_CODE_PSQC[SIZE_CODE_PSQC];
-extern code LCD_CODE_PMRC[SIZE_CODE_PMRC];
-extern code LCD_CODE_PCL1[SIZE_CODE_PCL1];
-extern code LCD_CODE_PCL2[SIZE_CODE_PCL2];
-extern code LCD_CODE_VCM1[SIZE_CODE_VCM1];
-extern code LCD_CODE_VCM2[SIZE_CODE_VCM2];
-extern code LCD_CODE_MACL[SIZE_CODE_MACL];
-extern code LCD_CODE_PXFS[SIZE_CODE_PXFS];
-extern code LCD_CODE_FMCL[SIZE_CODE_FMCL];
-extern code LCD_CODE_DFCL[SIZE_CODE_DFCL];
-extern code LCD_CODE_3GFD[SIZE_CODE_3GFD];
-extern code LCD_CODE_GCSL[SIZE_CODE_GCSL];
-extern code LCD_CODE_SGM0[SIZE_CODE_SGM0];
-extern code LCD_CODE_SGM1[SIZE_CODE_SGM1];
+extern const byte LCD_CODE_PWRA[SIZE_CODE_PWRA];
+extern const byte LCD_CODE_PWRB[SIZE_CODE_PWRB];
+extern const byte LCD_CODE_DTCA[SIZE_CODE_DTCA];
+extern const byte LCD_CODE_DTCB[SIZE_CODE_DTCB];
+extern const byte LCD_CODE_PSQC[SIZE_CODE_PSQC];
+extern const byte LCD_CODE_PMRC[SIZE_CODE_PMRC];
+extern const byte LCD_CODE_PCL1[SIZE_CODE_PCL1];
+extern const byte LCD_CODE_PCL2[SIZE_CODE_PCL2];
+extern const byte LCD_CODE_VCM1[SIZE_CODE_VCM1];
+extern const byte LCD_CODE_VCM2[SIZE_CODE_VCM2];
+extern const byte LCD_CODE_MACL[SIZE_CODE_MACL];
+extern const byte LCD_CODE_PXFS[SIZE_CODE_PXFS];
+extern const byte LCD_CODE_FMCL[SIZE_CODE_FMCL];
+extern const byte LCD_CODE_DFCL[SIZE_CODE_DFCL];
+extern const byte LCD_CODE_3GFD[SIZE_CODE_3GFD];
+extern const byte LCD_CODE_GCSL[SIZE_CODE_GCSL];
+extern const byte LCD_CODE_SGM0[SIZE_CODE_SGM0];
+extern const byte LCD_CODE_SGM1[SIZE_CODE_SGM1];
 
 //---------------------------------------------------------------------------------------+
 // Register definitions specific to the LCD                                             |
@@ -62,14 +62,14 @@ static const unsigned int LCD_AREA = LCD_COLS * LCD_ROWS;
 
 typedef struct {
 	unsigned short ColumnStart, ColumnEnd, PageStart, PageEnd;
-	code* Color;
+	const bytestream Color;
 } Region;
 
 typedef struct {
 	unsigned short x, y;
 	const font* Font;
-	code* BackColor;
-	code* Color;
+	const bytestream BackColor;
+	const bytestream Color;
 	char* Text;
 } TextRegion;
 
@@ -88,9 +88,9 @@ typedef enum {
 //---------------------------------------------------------------------------------------+
 bool LCD_GetXY(SAMPLE_MODE, coord*);
 void LCD_WaitChip(void);
-void LCD_WriteCmd(const unsigned char);
-void LCD_WriteData(const unsigned char*, const int);
-void LCD_WriteBlock(const unsigned char*, const int, const int);
+void LCD_WriteCmd(const byte);
+void LCD_WriteData(const bytestream, const int);
+void LCD_WriteBlock(const bytestream, const int, const int);
 void LCD_WriteText(const TextRegion);
 
 void LCD_SetColumn(const unsigned short, const unsigned short);

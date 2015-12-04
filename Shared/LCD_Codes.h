@@ -1,7 +1,9 @@
 #ifndef __TFTM032_CODES_H__
 #define __TFTM032_CODES_H__
 
-typedef const unsigned char code;
+#include "embedded_t.h"
+typedef const byte code;
+
 //---------------------------------------------------------------------------------------+
 // A collection of code sizes to keep the extern definition the same                     |
 //---------------------------------------------------------------------------------------+

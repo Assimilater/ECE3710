@@ -1,14 +1,15 @@
 #ifndef __FONTS_H__
 #define __FONTS_H__
 
+#include "embedded_t.h"
 typedef struct {
-	unsigned char* root;
-	unsigned char width, height;
+	bytestream root;
+	byte width, height;
 } font;
 
 typedef struct {
 	unsigned int n;
-	unsigned char* s[100];
+	bytestream s[100];
 } text;
 	
 typedef struct {

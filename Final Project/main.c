@@ -22,8 +22,8 @@ const short COL_INNER_YF = COL_INNER_Y0 + LENGTH_INNER;
 //---------------------------------------------------------------------------------------+
 // Status variables                                                                      |
 //---------------------------------------------------------------------------------------+
-typedef enum { DISABLED = 0, ENABLED = 1 } State;
-State enable = DISABLED;
+typedef enum { FILTER_DISABLED = 0, FILTER_ENABLED = 1 } State;
+State enable = FILTER_DISABLED;
 
 char blocked_s[8] = "0000000";
 unsigned int block = 0;
@@ -31,7 +31,7 @@ TextRegion blocked_r;
 TextRegion status_r;
 
 //---------------------------------------------------------------------------------------+
-// Helper functions to easily manage the boxes after initialization                      |
+// Helper functions to easily manage the display after initialization                    |
 //---------------------------------------------------------------------------------------+
 void toggleStatus() {
 	static Region button_r = {
@@ -40,12 +40,12 @@ void toggleStatus() {
 	};
 	
 	if (enable) {
-		enable = DISABLED;
+		enable = FILTER_DISABLED;
 		button_r.Color = LCD_COLOR_RED;
 		status_r.Color = LCD_COLOR_RED;
 		status_r.Text = "Status: Disabled";
 	} else {
-		enable = ENABLED;
+		enable = FILTER_ENABLED;
 		button_r.Color = LCD_COLOR_GREEN;
 		status_r.Color = LCD_COLOR_GREEN;
 		status_r.Text = "Status:  Enabled";
@@ -54,13 +54,14 @@ void toggleStatus() {
 	LCD_WriteText(status_r);
 }
 
-void updateBlock() {
-	unsigned int i = 7, t = block, mod;
+void reportBlock() {
+	unsigned int i = 7, t = ++block, mod;
 	while (i > 0) {
 		mod = t % 10;
 		blocked_s[--i] = '0' + mod;
 		t /= 10;
 	}
+	LCD_WriteText(blocked_r);
 }
 
 //---------------------------------------------------------------------------------------+
@@ -145,7 +146,6 @@ void exec() {
 	blocked_r.Text = blocked_s;
 	
 	// Write initial value for dynamic text
-	updateBlock();
 	LCD_WriteText(blocked_r);
 	
 	// Setup status text (also dynamic)
@@ -195,21 +195,24 @@ void init() {
 	SysTick->LOAD = 16000; // 1ms
 	NVIC_EN0_R = 0x1;
 	
-	// Configure interrupts
+	// Port A -> Touchscreen interrupts
 	GPIO.PortA->IM.word = 0;
 	GPIO.PortA->IS.word = 0;
+	
 	GPIO.PortA->IBE.bit6 = 0;
-	GPIO.PortA->IEV.bit6 = 0;
+	GPIO.PortA->IEV.bit6 = 0; //Falling Edge triggers interuppt
 	GPIO.PortA->ICR.bit6 = 1;
 	GPIO.PortA->IM.bit6 = 1;
 	
 	// Port E -> Ethernet interrupts
 	GPIO.PortE->IM.word = 0;
 	GPIO.PortE->IS.word = 0;
+	
 	GPIO.PortE->IBE.bit0 = 0;
 	GPIO.PortE->IEV.bit0 = 0; //Falling Edge triggers interuppt
 	GPIO.PortE->ICR.bit0 = 1;
 	GPIO.PortE->IM.bit0 = 1;
+	
 	GPIO.PortE->IBE.bit1 = 0;
 	GPIO.PortE->IEV.bit1 = 0; //Falling Edge triggers interuppt
 	GPIO.PortE->ICR.bit1 = 1;
