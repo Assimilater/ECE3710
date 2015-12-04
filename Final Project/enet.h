@@ -17,8 +17,8 @@ typedef union {
 	struct {
 		int socket:3; // Note: Must be 0 if using common register
 		NET_REGISTER reg:2;
-		bool write:1; // Default Read (0)
-		NET_MODE op:2; // Default NET_VAR_M
+		bool write:1; // Default: Read (0)
+		NET_MODE op:2; // Default: NET_VAR_M
 	};
 	char byte;
 } ControlByte; // See section 2.2.2 in w550 datasheet
@@ -44,8 +44,8 @@ void NET_Init(void);
 //---------------------------------------------------------------------------------------+
 // Signal Definitions                                                                    |
 //---------------------------------------------------------------------------------------+
-#define NET_CPC_CS BAND_GPIO_PE2 // Attached computer (client pc)
-#define NET_ISP_CS BAND_GPIO_PE1 // Internet Service Provider (server)
+#define NET_CS_CPC BAND_GPIO_PE2 // Attached computer (client pc)
+#define NET_CS_ISP BAND_GPIO_PE1 // Internet Service Provider (server)
 
 //---------------------------------------------------------------------------------------+
 // Register Offset Addresses                                                             |
