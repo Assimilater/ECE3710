@@ -59,8 +59,9 @@ void NET_SPI(NET_CHIP_SELECT chip, NET_Frame* frame) {
 	byte address[2];
 	
 	// Clear the buffer, just in case
-	while (SSI0->SR & 0x4) { address[0] = SSI0->DR; }
 	while(!(SSI0->SR & 0x1)); // Wait for TFE = 1
+	while(SSI0->SR & 0x10); // Wait for BSY == 0
+	while (SSI0->SR & 0x4) { address[0] = SSI0->DR; }
 	
 	// Safety percautions
 	if (frame->Control.reg == NET_COMMON_R) {
