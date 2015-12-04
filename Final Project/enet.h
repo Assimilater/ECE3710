@@ -38,7 +38,7 @@ void NET_READDATA(void);
 void NET_PARSEDATA(void);
 void NET_WRITEDATA(void);
 
-void NET_SPI(NET_CHIP_SELECT, NET_Frame);
+void NET_SPI(NET_CHIP_SELECT, NET_Frame*);
 void NET_Init(void);
 
 //---------------------------------------------------------------------------------------+
