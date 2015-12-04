@@ -76,8 +76,8 @@ bool NET_SPI(NET_CHIP_SELECT chip, NET_Frame* frame) {
 		else if (frame->N < 2) { return false; }
 	}
 	if (frame->Control.op == NET_F4B_M) {
-		if (frame->N > 2) { frame->N = 2; }
-		else if (frame->N < 2) { return false; }
+		if (frame->N > 4) { frame->N = 4; }
+		else if (frame->N < 4) { return false; }
 	}
 	
 	// Type conversion
