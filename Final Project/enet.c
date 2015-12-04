@@ -95,7 +95,7 @@ bool NET_SPI(NET_CHIP_SELECT chip, NET_Frame* frame) {
 }
 
 //---------------------------------------------------------------------------------------+
-// Handles toggling the CS for the client and calls Read|Write                           |
+// Handles toggling the CS for the CLIENT and calls Read|Write                           |
 //---------------------------------------------------------------------------------------+
 void NET_SPI_Client(byte* address, NET_Frame* frame) {
 	NET_CS_CPC = 0;
@@ -107,7 +107,7 @@ void NET_SPI_Client(byte* address, NET_Frame* frame) {
 	NET_CS_CPC = 1;
 }
 //---------------------------------------------------------------------------------------+
-// Handles toggling the CS for the server and calls Read|Write                           |
+// Handles toggling the CS for the SERVER and calls Read|Write                           |
 //---------------------------------------------------------------------------------------+
 void NET_SPI_Server(byte* address, NET_Frame* frame) {
 	NET_CS_CPC = 1;
@@ -157,7 +157,7 @@ void NET_SPI_Read(byte* address, NET_Frame* frame) {
 	}
 }
 //---------------------------------------------------------------------------------------+
-// Writes frame->Data, reads into dummy variable                                         |
+// Reads dummy variable, writes into frame->Data                                         |
 //---------------------------------------------------------------------------------------+
 void NET_SPI_Write(byte* address, NET_Frame* frame) {
 	uint i;
