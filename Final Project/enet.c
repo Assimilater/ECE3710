@@ -212,24 +212,39 @@ void NET_Init() {
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
 	//subnet mask
-	frame.Address = 0x1;
-	frame.Data = addresses[0];
+	frame.Address = NET_COMMON_SUBN;
+	frame.Data = addresses[1];
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
-
+	//default gateway
+	frame.Address = NET_COMMON_GATEWAY;
+	frame.Data = addresses[2];
+	NET_SPI(NET_CHIP_SERVER, &frame);
 	
 	// MAC (physical)
-	frame.Address = 0x1;
+	frame.Address = NET_COMMON_MAC;
 	frame.Data = (byte*)address;
 	frame.N = 6;
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
 	
 	//CLIENT chip
-	//default gateway
-	frame.Address = 0x1;
-	frame.Data = addresses[0];
-	NET_SPI(NET_CHIP_SERVER, &frame);	
+	//ip address
+	frame.Address = NET_COMMON_IP;
+	frame.Data = addresses[2];
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	
+	//subnet mask
+	frame.Address = NET_COMMON_SUBN;
+	frame.Data = addresses[1];
+	NET_SPI(NET_CHIP_CLIENT, &frame);	
 	
 	
+	//interrupts
+	frame.N = 1;
+	frame.Address = NET_COMMON_SIMR;
+	frame.Data = (byte*)0xFF; //enable interrupts from all sockets
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+
 }
