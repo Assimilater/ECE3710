@@ -130,7 +130,7 @@ void NET_SPI_Client(byte* address, NET_Frame* frame) {
 // Handles toggling the CS for the SERVER and calls Read|Write                           |
 //---------------------------------------------------------------------------------------+
 void NET_SPI_Server(byte* address, NET_Frame* frame) {
-	NET_CS_CPC = 1;
+	NET_CS_ISP = 0;
 	if (frame->Control.write) {
 		NET_SPI_Write(address, frame);
 	} else {
@@ -172,6 +172,10 @@ void NET_SPI_Read(byte* address, NET_Frame* frame) {
 	// Read all remaining blocks
 	while (SSI0->SR & 0x10); // Wait for BSY == 0
 	k = frame->N - i;
+	for (j = 0; j < i; ++j) {
+		SSI0->DR = write;
+	}
+	while (SSI0->SR & 0x10); // Wait for BSY == 0
 	for (j = 0; j < i; ++j) {
 		frame->Data[k + j] = SSI0->DR;
 	}
