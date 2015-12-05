@@ -219,8 +219,8 @@ void init() {
 	// PC[0:3] => Unavailable
 	// PC[4:5] => NET status signals
 	// PC[6:7] => NC
-	GPIO.PortC->DEN.nibble1 = 0xF;
-	GPIO.PortC->DIR.nibble1 = 0x0;
+	GPIO.PortC->DEN.word |= 0xF0;
+	GPIO.PortC->DIR.word &= 0x0F;
 	
 	// PD[0:1] is shared with PB[6:7] (for reasons beyond my comprehension)
 	// PD[2:3,6:7] => LCD communication signals
