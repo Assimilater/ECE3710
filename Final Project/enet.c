@@ -279,4 +279,38 @@ void NET_Init() {
 	NET_SPI(NET_CHIP_CLIENT, &frame);
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
+	
+	
+	
+	
+	//OPEN all sockets
+	frame.Address = NET_SOCKET_CR;
+	data = 0x1; //OPEN socket command
+	frame.Data = &data;
+	frame.Control.reg = 1;
+	
+	frame.Control.socket = 0;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	frame.Control.socket = 1;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	frame.Control.socket = 2;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	frame.Control.socket = 3;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	frame.Control.socket = 4;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	frame.Control.socket = 5;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	frame.Control.socket = 6;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	frame.Control.socket = 7;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);	
 }
