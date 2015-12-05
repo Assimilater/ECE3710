@@ -240,6 +240,12 @@ void NET_Init() {
 	frame.Data = addresses[0]; //ip address
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
+	//test read ip address
+	frame.Control.write = false;
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	frame.Control.write = true;
+	
+	
 	//subnet mask
 	frame.Address = NET_COMMON_SUBN;
 	frame.Data = addresses[1]; //subnet mask
