@@ -53,6 +53,17 @@ void NET_SPI_Read(byte*, NET_Frame*);
 void NET_SPI_Write(byte*, NET_Frame*);
 
 //---------------------------------------------------------------------------------------+
+// Alias the more generic NET_SPI                                                        |
+//---------------------------------------------------------------------------------------+
+bool NET_SPI_BYTE(NET_CHIP chip, NET_Byteframe* frame) {
+	NET_Frame rogue;
+	rogue.Address = frame->Address;
+	rogue.Control = frame->Control;
+	rogue.Data = &frame->Data;
+	rogue.N = 1;
+	return NET_SPI(chip, &rogue);
+}
+//---------------------------------------------------------------------------------------+
 // Converts address into bytestream, does input validation, helper prep and delegation   |
 //---------------------------------------------------------------------------------------+
 bool NET_SPI(NET_CHIP chip, NET_Frame* frame) {
@@ -193,7 +204,7 @@ void NET_SPI_Write(byte* address, NET_Frame* frame) {
 void NET_Init() {
 	uint i;
 	NET_Frame frame;
-	byte data;
+	NET_Byteframe byteframe;
 	byte addresses[4][4] = {
 		{192, 168, 0, 1}, //ip address
 		{255, 255, 255, 0}, // subnet mask
@@ -211,7 +222,7 @@ void NET_Init() {
 	frame.Control.mode = NET_MODE_VAR;
 	frame.Control.reg = NET_REG_COMMON;
 	frame.Control.socket = 0;
-	frame.Control.write = 1;
+	frame.Control.write = true;
 	frame.N = 4;
 	
 	//SPI chip
@@ -246,78 +257,30 @@ void NET_Init() {
 	//subnet mask
 	frame.Address = NET_COMMON_SUBN;
 	frame.Data = addresses[1]; //subnet mask
-	NET_SPI(NET_CHIP_CLIENT, &frame);	
+	NET_SPI(NET_CHIP_CLIENT, &frame);
 	
 	
 	//interrupts
-	data = 0xFF;
-	frame.N = 1;
-	frame.Address = NET_COMMON_SIMR;
-	frame.Data = &data; //enable interrupts from all sockets
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	NET_SPI(NET_CHIP_SERVER, &frame);
+	byteframe.Address = NET_COMMON_SIMR;
+	byteframe.Data = 0xFF; //enable interrupts from all sockets
+	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 	
-	frame.Address = NET_SOCKET_IMR;
-	data = 0x4; //enables "recieving from peer" interrupt
-	frame.Data = &data;
-	frame.Control.reg = 1;
-	
-	frame.Control.socket = 0;
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	frame.Control.socket = 1;
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	frame.Control.socket = 2;
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	frame.Control.socket = 3;
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	frame.Control.socket = 4;
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	frame.Control.socket = 5;
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	frame.Control.socket = 6;
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	frame.Control.socket = 7;
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	
-	
-	
+	byteframe.Control.reg = NET_REG_SOCKET;
+	byteframe.Address = NET_SOCKET_IMR;
+	byteframe.Data = 0x4; //enables "recieving from peer" interrupt
+	for (i = 0; i < 8; ++i) {
+		byteframe.Control.socket = i;
+		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+	}
 	
 	//OPEN all sockets
-	frame.Address = NET_SOCKET_CR;
-	data = 0x1; //OPEN socket command
-	frame.Data = &data;
-	frame.Control.reg = 1;
-	
-	frame.Control.socket = 0;
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	frame.Control.socket = 1;
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	frame.Control.socket = 2;
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	frame.Control.socket = 3;
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	frame.Control.socket = 4;
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	frame.Control.socket = 5;
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	frame.Control.socket = 6;
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	frame.Control.socket = 7;
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	NET_SPI(NET_CHIP_SERVER, &frame);
+	byteframe.Address = NET_SOCKET_CR;
+	byteframe.Data = 0x1; //OPEN socket command
+	for (i = 0; i < 8; ++i) {
+		byteframe.Control.socket = i;
+		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+	}
 }

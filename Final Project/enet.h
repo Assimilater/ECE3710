@@ -41,6 +41,11 @@ typedef struct {
 	byte* Data;
 	uint N;
 } NET_Frame;
+typedef struct {
+	uint16 Address;
+	ControlByte Control;
+	byte Data;
+} NET_Byteframe;
 
 typedef union {
 	byte byte[4];
@@ -57,6 +62,7 @@ void NET_READDATA(void);
 void NET_PARSEDATA(void);
 void NET_WRITEDATA(void);
 
+bool NET_SPI_BYTE(NET_CHIP, NET_Byteframe*);
 bool NET_SPI(NET_CHIP, NET_Frame*);
 void NET_Init(void);
 
