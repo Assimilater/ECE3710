@@ -70,6 +70,14 @@ void NET_Init(void);
 // Register Offset Addresses                                                             |
 //---------------------------------------------------------------------------------------+
 #define NET_COMMON_MODE					(uint16)0x0000;
+#define NET_COMMON_GATEWAY				(uint16)0x0001;
+#define NET_COMMON_SUBN					(uint16)0x0005;
+#define NET_COMMON_MAC					(uint16)0x0009;
+#define NET_COMMON_IP					(uint16)0x000F;
+#define NET_COMMON_IR					(uint16)0x0015;
+#define NET_COMMON_IMR					(uint16)0x0016;
+#define NET_COMMON_SIR					(uint16)0x0017;
+#define NET_COMMON_SIMR					(uint16)0x0018;
 #define NET_SOCKET_MODE					(uint16)0x0000;
 
 #endif

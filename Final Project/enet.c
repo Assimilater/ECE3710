@@ -188,7 +188,48 @@ void NET_SPI_Write(byte* address, NET_Frame* frame) {
 //---------------------------------------------------------------------------------------+
 
 void NET_Init() {
+	NET_Frame frame;
+	byte addresses[4][4] = {
+		{192, 168, 0, 1}, //ip address
+		{255, 255, 255, 0}, // subnet mask
+		{129, 123, 85, 254}, // default gateway
+	};
+	byte address[6] = {0xB8, 0xAC, 0x6F, 0xA4, 0xAD, 0x42};
+	
 	NET_CS_CPC = 1;
 	NET_CS_ISP = 1;
+	
+	frame.Control.socket = 0;
+	frame.Control.reg = NET_REG_COMMON;
+	frame.Control.write = 1;
+	frame.Control.mode = NET_MODE_VAR;
+	frame.N = 4;
+	
+	//SPI chip
+	//ip address
+	frame.Address = NET_COMMON_IP;
+	frame.Data = addresses[0];
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	
+	//subnet mask
+	frame.Address = 0x1;
+	frame.Data = addresses[0];
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	
+
+	
+	// MAC (physical)
+	frame.Address = 0x1;
+	frame.Data = (byte*)address;
+	frame.N = 6;
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	
+	
+	//CLIENT chip
+	//default gateway
+	frame.Address = 0x1;
+	frame.Data = addresses[0];
+	NET_SPI(NET_CHIP_SERVER, &frame);	
+	
 	
 }
