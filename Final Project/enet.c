@@ -42,6 +42,15 @@ void NET_WRITEDATA() {
 	//After putting data in a socket's tx buffer a SEND command must be given through the socket command register
 }
 
+byte NET_ControlFix(ControlByte cb) {
+	byte value = 0;
+	value |= cb.socket << 5;
+	value |= cb.reg << 3;
+	value |= cb.write << 2;
+	value |= cb.mode;
+	return value;
+}
+
 //---------------------------------------------------------------------------------------+
 //---------------------------------------------------------------------------------------+
 // SECTION - NET_SPI: Generic function handler with helpers for w550io SPI interfacing   |
@@ -140,7 +149,7 @@ void NET_SPI_Read(byte* address, NET_Frame* frame) {
 	// Initialize the SPI Frame (See section 2.2 in w550 datasheet)
 	SSI0->DR = address[0];
 	SSI0->DR = address[1];
-	SSI0->DR = frame->Control.byte;
+	SSI0->DR = NET_ControlFix(frame->Control);
 	while (SSI0->SR & 0x10); // Wait for BSY == 0
 	write = SSI0->DR;
 	write = SSI0->DR;
@@ -176,7 +185,7 @@ void NET_SPI_Write(byte* address, NET_Frame* frame) {
 	// Initialize the SPI Frame (See section 2.2 in w550 datasheet)
 	SSI0->DR = address[0];
 	SSI0->DR = address[1];
-	SSI0->DR = frame->Control.byte;
+	SSI0->DR = NET_ControlFix(frame->Control);
 	// Since we don't care about reading data, it's ok if the Rx buffer overflows
 	
 	// See Figure 10 in 2550 datasheet for frame example
