@@ -196,34 +196,49 @@ void exec() {
 // Any configuration on the microcontroller                                              |
 //---------------------------------------------------------------------------------------+
 void init() {
-	SYSCTL->RCGCGPIO = 0x1B;
-	SYSCTL->RCGCSSI = 0x1;
+	// Enable clocks
+	SYSCTL->RCGCGPIO = 0x1F; // 11111 => e, d, c, b, a
+	SYSCTL->RCGCSSI = 0x1; // SSI0
 	GPIO.PortD->LOCK.word = GPIO_UNLOCK; // Port D needs to be unlcoked
 	
+	// PA[0:1] => Unavailable
 	// PA[2:5] => SPI
 	GPIO.PortA->DEN.byte[0] = 0xFC;
 	GPIO.PortA->AFSEL.byte[0] = 0x3C;
-	GPIO.PortA->DIR.bit7 = 1; // External Reset
-	// Port A -> Pin 6 is NC
+	GPIO.PortA->DIR.bit6 = 1; // External NET Reset (Shared)
+	GPIO.PortA->DIR.bit7 = 1; // External LCD Reset
 	
 	// Pull up configuration necessary to avoid electromagnetic interference between SSI pins
 	GPIO.PortA->PUR.bit4 = 1; // Rx
 	GPIO.PortA->PUR.bit5 = 1; // Tx
 	
-	// PB[0:7] is the LCD Data Bus
+	// PB[0:7] => LCD Data Bus
 	GPIO.PortB->DEN.byte[0] = 0xFF;
 	GPIO.PortB->DIR.byte[0] = 0xFF;
 	
+	// PC[0:3] => Unavailable
+	// PC[4:5] => NET status signals
+	// PC[6:7] => NC
+	GPIO.PortC->DEN.nibble1 = 0xF;
+	GPIO.PortC->DIR.nibble1 = 0x0;
+	
 	// PD[0:1] is shared with PB[6:7] (for reasons beyond my comprehension)
-	// PD[2:3,6:7] is used for LCD communication signals
+	// PD[2:3,6:7] => LCD communication signals
+	// PD[4:5] => Unavailable
 	GPIO.PortD->CR.byte[0] = 0xFF;
 	GPIO.PortD->DEN.byte[0] = 0xFF;
 	GPIO.PortD->DIR.byte[0] = 0xFF;
 	
 	// PE[0:2] => CS Pins (output)
 	// PE[3:5] => SPI Interrupt Pins (input)
+	// PE[6:7] => Nonexistent
 	GPIO.PortE->DEN.byte[0] = 0xFF;
 	GPIO.PortE->DIR.byte[0] = 0x07;
+	
+	// SPI CS default state high
+	GPIO.PortE->DATA.bit0 = 1;
+	GPIO.PortE->DATA.bit1 = 1;
+	GPIO.PortE->DATA.bit2 = 1;
 	
 	// Configure SSI Freescale (SPH = 0, SPO = 0)
 	SSI0->CR1 = 0; // Disable

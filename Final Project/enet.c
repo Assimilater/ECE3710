@@ -187,22 +187,30 @@ void NET_SPI_Write(byte* address, NET_Frame* frame) {
 //---------------------------------------------------------------------------------------+
 //---------------------------------------------------------------------------------------+
 
+//---------------------------------------------------------------------------------------+
+// Initialize ip addressing to a ghost configuration                                     |
+//---------------------------------------------------------------------------------------+
 void NET_Init() {
+	uint i;
 	NET_Frame frame;
 	byte addresses[4][4] = {
 		{192, 168, 0, 1}, //ip address
 		{255, 255, 255, 0}, // subnet mask
 		{129, 123, 85, 254}, // default gateway
 	};
-	byte address[6] = {0xB8, 0xAC, 0x6F, 0xA4, 0xAD, 0x42};
+	byte mac[6] = {0xB8, 0xAC, 0x6F, 0xA4, 0xAD, 0x42};
 	
-	NET_CS_CPC = 1;
-	NET_CS_ISP = 1;
+	// Reset the chips
+	// doc: http://wizwiki.net/wiki/doku.php?id=products:wiz550io:allpages#reset_timing
+	for (i = 0; i < 100000; ++i); // Busy wait to keep reset pin low for longer than 400us
+	while (!NET_RDY_CPC); // Wait for ready signal from CPC
+	while (!NET_RDY_ISP); // Wait for ready signal from ISP
 	
-	frame.Control.socket = 0;
-	frame.Control.reg = NET_REG_COMMON;
-	frame.Control.write = 1;
+	// Initialize the frame for all configuration needs
 	frame.Control.mode = NET_MODE_VAR;
+	frame.Control.reg = NET_REG_COMMON;
+	frame.Control.socket = 0;
+	frame.Control.write = 1;
 	frame.N = 4;
 	
 	//SPI chip
@@ -216,11 +224,10 @@ void NET_Init() {
 	frame.Data = addresses[0];
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
-
 	
 	// MAC (physical)
 	frame.Address = 0x1;
-	frame.Data = (byte*)address;
+	frame.Data = mac;
 	frame.N = 6;
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
@@ -229,7 +236,6 @@ void NET_Init() {
 	//default gateway
 	frame.Address = 0x1;
 	frame.Data = addresses[0];
-	NET_SPI(NET_CHIP_SERVER, &frame);	
-	
+	NET_SPI(NET_CHIP_SERVER, &frame);
 	
 }

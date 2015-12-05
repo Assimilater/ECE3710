@@ -20,6 +20,13 @@ typedef union {
 			bit16:1, bit17:1, bit18:1, bit19:1, bit20:1, bit21:1, bit22:1, bit23:1,
 			bit24:1, bit25:1, bit26:1, bit27:1, bit28:1, bit29:1, bit30:1, bit31:1;
 	};
+	struct {
+		unsigned
+			nibble0:4, nibble1:4,
+			nibble2:4, nibble3:4,
+			nibble4:4, nibble5:4,
+			nibble6:4, nibble7:4;
+	};
 	byte byte[4];
 	uint16 half[2];
 	uint word;
@@ -33,6 +40,13 @@ typedef union {
 			bit8:1,  bit9:1,  bit10:1, bit11:1, bit12:1, bit13:1, bit14:1, bit15:1,
 			bit16:1, bit17:1, bit18:1, bit19:1, bit20:1, bit21:1, bit22:1, bit23:1,
 			bit24:1, bit25:1, bit26:1, bit27:1, bit28:1, bit29:1, bit30:1, bit31:1;
+	};
+	struct {
+		volatile unsigned
+			nibble0:4, nibble1:4,
+			nibble2:4, nibble3:4,
+			nibble4:4, nibble5:4,
+			nibble6:4, nibble7:4;
 	};
 	volatile unsigned char byte[4];
 	volatile unsigned short half[2];

@@ -63,8 +63,11 @@ void NET_Init(void);
 //---------------------------------------------------------------------------------------+
 // Communication signals for the wiznet chips                                            |
 //---------------------------------------------------------------------------------------+
-#define NET_CS_ISP BAND_GPIO_PE1 // Internet Service Provider (server)
-#define NET_CS_CPC BAND_GPIO_PE2 // Attached computer (client pc)
+#define NET_RST			BAND_GPIO_PA6 // Attached to both chips
+#define NET_RDY_ISP		BAND_GPIO_PC4 // Internet Service Provider (server)
+#define NET_RDY_CPC		BAND_GPIO_PC5 // Attached computer (client pc)
+#define NET_CS_ISP		BAND_GPIO_PE1 // Internet Service Provider (server)
+#define NET_CS_CPC		BAND_GPIO_PE2 // Attached computer (client pc)
 
 //---------------------------------------------------------------------------------------+
 // Register Offset Addresses                                                             |
