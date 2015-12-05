@@ -189,6 +189,7 @@ void NET_SPI_Write(byte* address, NET_Frame* frame) {
 
 void NET_Init() {
 	NET_Frame frame;
+	byte data;
 	byte addresses[4][4] = {
 		{192, 168, 0, 1}, //ip address
 		{255, 255, 255, 0}, // subnet mask
@@ -208,17 +209,17 @@ void NET_Init() {
 	//SPI chip
 	//ip address
 	frame.Address = NET_COMMON_IP;
-	frame.Data = addresses[0];
+	frame.Data = addresses[0]; //ip address
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
 	//subnet mask
 	frame.Address = NET_COMMON_SUBN;
-	frame.Data = addresses[1];
+	frame.Data = addresses[1]; //subnet mask
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
 	//default gateway
 	frame.Address = NET_COMMON_GATEWAY;
-	frame.Data = addresses[2];
+	frame.Data = addresses[2]; //default gateway
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
 	// MAC (physical)
@@ -231,20 +232,51 @@ void NET_Init() {
 	//CLIENT chip
 	//ip address
 	frame.Address = NET_COMMON_IP;
-	frame.Data = addresses[2];
+	frame.Data = addresses[2]; //uses default gateway
 	NET_SPI(NET_CHIP_CLIENT, &frame);
 	
 	//subnet mask
 	frame.Address = NET_COMMON_SUBN;
-	frame.Data = addresses[1];
+	frame.Data = addresses[1]; //subnet mask
 	NET_SPI(NET_CHIP_CLIENT, &frame);	
 	
 	
 	//interrupts
+	data = 0xFF;
 	frame.N = 1;
 	frame.Address = NET_COMMON_SIMR;
-	frame.Data = (byte*)0xFF; //enable interrupts from all sockets
+	frame.Data = &data; //enable interrupts from all sockets
 	NET_SPI(NET_CHIP_CLIENT, &frame);
 	NET_SPI(NET_CHIP_SERVER, &frame);
-
+	
+	frame.Address = NET_SOCKET_IMR;
+	data = 0x4; //enables "recieving from peer" interrupt
+	frame.Data = &data;
+	frame.Control.reg = 1;
+	
+	frame.Control.socket = 0;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	frame.Control.socket = 1;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	frame.Control.socket = 2;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	frame.Control.socket = 3;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	frame.Control.socket = 4;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	frame.Control.socket = 5;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	frame.Control.socket = 6;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	frame.Control.socket = 7;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	
 }

@@ -27,7 +27,7 @@ typedef enum {
 } NET_MODE;
 typedef union {
 	struct {
-		int socket:3; // Note: Must be 0 if using common register
+		uint socket:3; // Note: Must be 0 if using common register
 		NET_REG reg:2;
 		bool write:1; // Default: Read (0)
 		NET_MODE mode:2; // Default: NET_VAR_M
@@ -79,5 +79,6 @@ void NET_Init(void);
 #define NET_COMMON_SIR					(uint16)0x0017;
 #define NET_COMMON_SIMR					(uint16)0x0018;
 #define NET_SOCKET_MODE					(uint16)0x0000;
+#define NET_SOCKET_IMR					(uint16)0x002C;
 
 #endif
