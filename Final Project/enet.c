@@ -260,25 +260,31 @@ void NET_Init() {
 	//---------------------------------------------------------------------------------------+
 	//interrupts
 	byteframe.Address = NET_COMMON_SIMR;
-	byteframe.Data = 0xFF; //enable interrupts from all sockets
+	byteframe.Data = 0x1; //enable interrupts from socket 0
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
 	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 	
 	byteframe.Control.reg = NET_REG_SOCKET;
 	byteframe.Address = NET_SOCKET_IMR;
 	byteframe.Data = 0x4; //enables "recieving from peer" interrupt
-	for (i = 0; i < 8; ++i) {
-		byteframe.Control.socket = i;
-		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
-		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
-	}
+	byteframe.Control.socket = 0;
+	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+//	for (i = 0; i < 8; ++i) {
+//		byteframe.Control.socket = i;
+//		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+//		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+//	}
 	
 	//OPEN all sockets
 	byteframe.Address = NET_SOCKET_CR;
 	byteframe.Data = 0x1; //OPEN socket command
-	for (i = 0; i < 8; ++i) {
-		byteframe.Control.socket = i;
-		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
-		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
-	}
+	byteframe.Control.socket = 0;
+	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+//	for (i = 0; i < 8; ++i) {
+//		byteframe.Control.socket = i;
+//		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+//		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+//	}
 }
