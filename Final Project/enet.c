@@ -210,10 +210,16 @@ void NET_Init() {
 	while (!NET_RDY_ISP); // Wait for ready signal from ISP
 	
 	// Initialize the frame for all configuration needs
-	frame.Control.mode = NET_MODE_VAR;
-	frame.Control.reg = NET_REG_COMMON;
-	frame.Control.socket = 0;
 	frame.Control.write = true;
+	frame.Control.reg = NET_REG_COMMON;
+	frame.Control.mode = NET_MODE_VAR;
+	frame.Control.socket = 0;
+	
+	// Initialize the byteframe for all configuration needs
+	byteframe.Control.write = true;
+	byteframe.Control.reg = NET_REG_COMMON;
+	byteframe.Control.mode = NET_MODE_VAR;
+	byteframe.Control.socket = 0;
 	
 	//---------------------------------------------------------------------------------------+
 	// Server Chip Configuration                                                             |
@@ -264,10 +270,16 @@ void NET_Init() {
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
 	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 	
+	byteframe.Address = NET_COMMON_SIMR;
+	byteframe.Control.reg = NET_REG_COMMON;
+	byteframe.Control.write = false;
+	byteframe.Control.socket = 0;
+	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+	
 	byteframe.Control.reg = NET_REG_SOCKET;
 	byteframe.Address = NET_SOCKET_IMR;
 	byteframe.Data = 0x4; //enables "recieving from peer" interrupt
-	byteframe.Control.socket = 0;
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
 	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 //	for (i = 0; i < 8; ++i) {
@@ -287,4 +299,35 @@ void NET_Init() {
 //		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
 //		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 //	}
+
+	byteframe.Address = NET_COMMON_IR;
+	byteframe.Control.reg = NET_REG_COMMON;
+	byteframe.Control.write = false;
+	byteframe.Control.socket = 0;
+	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+
+	byteframe.Address = NET_COMMON_IMR;
+	byteframe.Control.reg = NET_REG_COMMON;
+	byteframe.Control.write = false;
+	byteframe.Control.socket = 0;
+	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+
+
+	byteframe.Address = NET_COMMON_SIR;
+	byteframe.Control.reg = NET_REG_COMMON;
+	byteframe.Control.write = false;
+	byteframe.Control.socket = 0;
+	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+	
+	for (i = 0; i < 8; ++i) {
+		byteframe.Address = NET_SOCKET_SIR;
+		byteframe.Control.reg = NET_REG_SOCKET;
+		byteframe.Control.write = false;
+		byteframe.Control.socket = i;
+		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+	}
 }
