@@ -265,11 +265,6 @@ void NET_Init() {
 	frame.Data = addresses[ADDR_CLIENTIP]; // pretends to be the client
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
-	//test read ip address
-	frame.Control.write = false;
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	frame.Control.write = true;
-	
 	//subnet mask
 	frame.Address = NET_COMMON_SUBN;
 	frame.Data = addresses[ADDR_SUBNET];
