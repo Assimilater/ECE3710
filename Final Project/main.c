@@ -133,18 +133,21 @@ void Busy_Interrupts() {
 			i_touch = INT_TOUCH;
 			if (i_touch == 0) {
 				Touch_Handler();
+				//i_touch = 1;
 			}
 		}
 		if (i_net_isp != INT_NET_ISP) {
 			i_net_isp = INT_NET_ISP;
 			if (i_net_isp == 0) {
 				NET_ISP_Handler();
+				//i_net_isp = 1;
 			}
 		}
 		if (i_net_cpc != INT_NET_CPC) {
 			i_net_cpc = INT_NET_CPC;
 			if (i_net_cpc == 0) {
 				NET_CPC_Handler();
+				//i_net_cpc = 1;
 			}
 		}
 	}

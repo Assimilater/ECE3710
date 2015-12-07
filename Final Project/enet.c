@@ -2,53 +2,8 @@
 #include "../Shared/GPIO.h"
 #include "enet.h"
 
-void NET_WriteCmd(short address, char control) {
-	//Phase descriptions start at PG.18 in data sheet
-	//Address Phase
-	SSI0->DR = address >> 8 & 0xFF;
-	SSI0->DR = address & 0xFF;
-	//Control Phase  //BSB selects block //0bBSB[4:0]RWB[0]OM[1:0]
-	SSI0->DR = control;
-}
-
-void NET_READDATA() {
-	//char read;
-	//CS goes low
-	
-	NET_WriteCmd(0x0017,0x01); //Socket Interrupt Register, read 1 byte
-	//Data Phase
-	//read = SSI0->DR;
-	//CS goes high
-	
-	//check what socket
-	
-	//cs goes low
-	//NET_WriteCmd();
-	//read
-	//cs goes high
-	
-}
-
 void NET_PARSEDATA() {
 	
-}
-
-void NET_WRITEDATA() {
-	NET_WriteCmd(0x0000,0x00);
-	
-	//Data Phase
-	//Write
-	
-	//After putting data in a socket's tx buffer a SEND command must be given through the socket command register
-}
-
-byte NET_ControlFix(ControlByte cb) {
-	byte value = 0;
-	value |= cb.socket << 5;
-	value |= cb.reg << 3;
-	value |= cb.write << 2;
-	value |= cb.mode;
-	return value;
 }
 
 //---------------------------------------------------------------------------------------+
@@ -62,14 +17,26 @@ void NET_SPI_Read(byte*, NET_Frame*);
 void NET_SPI_Write(byte*, NET_Frame*);
 
 //---------------------------------------------------------------------------------------+
+// The ControlByte object is not packing properly, so this is a fix for byte packing     |
+//---------------------------------------------------------------------------------------+
+byte NET_ControlFix(ControlByte cb) {
+	byte value = 0;
+	value |= cb.socket << 5;
+	value |= cb.reg << 3;
+	value |= cb.write << 2;
+	value |= cb.mode;
+	return value;
+}
+
+//---------------------------------------------------------------------------------------+
 // Alias the more generic NET_SPI to handle case of single byte transmission             |
 //---------------------------------------------------------------------------------------+
 bool NET_SPI_BYTE(NET_CHIP chip, NET_Byteframe* frame) {
 	NET_Frame rogue;
+	rogue.N = 1;
 	rogue.Address = frame->Address;
 	rogue.Control = frame->Control;
 	rogue.Data = &frame->Data;
-	rogue.N = 1;
 	return NET_SPI(chip, &rogue);
 }
 //---------------------------------------------------------------------------------------+
