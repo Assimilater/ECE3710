@@ -213,7 +213,7 @@ void NET_Init() {
 	// doc: http://wizwiki.net/wiki/doku.php?id=products:wiz550io:allpages#reset_timing
 	// Busy wait to keep reset pin low for longer than 400us
 	NET_RST = 0;
-	for (i = 0; i < 100000; ++i);
+	for (i = 0; i < 5000; ++i);
 	NET_RST = 1;
 	
 	while (!NET_RDY_CPC); // Wait for ready signal from CPC
@@ -232,40 +232,17 @@ void NET_Init() {
 	byteframe.Control.socket = 0;
 	
 	//---------------------------------------------------------------------------------------+
-	// Server Chip Configuration                                                             |
+	// Chip Addressing Configuration                                                         |
 	//---------------------------------------------------------------------------------------+
 	// MAC (physical address)
 	frame.N = 6;
 	frame.Address = NET_COMMON_MAC;
-	frame.Data = mac[MAC_CLIENT];
-	NET_SPI(NET_CHIP_SERVER, &frame);
 	
-	// Following transmissions are 4-bytes
-	frame.N = 4;
-	
-	//ip address
-	frame.Address = NET_COMMON_IP;
-	frame.Data = address[ADDR_CLIENTIP]; // pretends to be the client
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	
-	//subnet mask
-	frame.Address = NET_COMMON_SUBNET;
-	frame.Data = address[ADDR_SUBNET];
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	
-	//default gateway
-	frame.Address = NET_COMMON_GATEWAY;
-	frame.Data = address[ADDR_GATEWAY];
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	
-	//---------------------------------------------------------------------------------------+
-	// Client Chip Configuration                                                             |
-	//---------------------------------------------------------------------------------------+
-	// MAC (physical address)
-	frame.N = 6;
-	frame.Address = NET_COMMON_MAC;
 	frame.Data = mac[MAC_CPS];
 	NET_SPI(NET_CHIP_CLIENT, &frame);
+	
+	frame.Data = mac[MAC_CLIENT];
+	NET_SPI(NET_CHIP_SERVER, &frame);
 	
 	// Following transmissions are 4-bytes
 	frame.N = 4;
@@ -275,16 +252,22 @@ void NET_Init() {
 	frame.Data = address[ADDR_GATEWAY]; // pretends to be the default gateway
 	NET_SPI(NET_CHIP_CLIENT, &frame);
 	
+	frame.Data = address[ADDR_CLIENTIP]; // pretends to be the client
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	
 	//subnet mask
 	frame.Address = NET_COMMON_SUBNET;
 	frame.Data = address[ADDR_SUBNET];
 	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
 	
 	//default gateway
 	frame.Address = NET_COMMON_GATEWAY;
 	frame.Data = address[ADDR_HOME];
 	NET_SPI(NET_CHIP_CLIENT, &frame);
 	
+	frame.Data = address[ADDR_GATEWAY];
+	NET_SPI(NET_CHIP_SERVER, &frame);
 	
 	// Debug code
 	frame.Data = debug;
@@ -307,8 +290,8 @@ void NET_Init() {
 	NET_SPI(NET_CHIP_CLIENT, &frame);
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
-	frame.Control.write = true;
 	frame.N = 4;
+	frame.Control.write = true;
 	
 	//---------------------------------------------------------------------------------------+
 	// Common Chip Configuration                                                             |
