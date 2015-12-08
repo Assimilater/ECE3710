@@ -303,11 +303,12 @@ void NET_Init() {
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
 	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 	
+	//debug
 	byteframe.Control.write = false;
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
 	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
-	
 	byteframe.Control.write = true;
+	
 	
 	byteframe.Control.reg = NET_REG_SOCKET;
 	byteframe.Address = NET_SOCKET_IMR;
@@ -320,7 +321,7 @@ void NET_Init() {
 //		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 //	}
 	
-	//OPEN all sockets
+	//OPEN socket 0, OPEN command is done last
 	byteframe.Address = NET_SOCKET_CR;
 	byteframe.Data = 0x1; //OPEN socket command
 	byteframe.Control.socket = 0;
@@ -332,6 +333,8 @@ void NET_Init() {
 //		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 //	}
 
+
+	//debug
 	byteframe.Address = NET_COMMON_IR;
 	byteframe.Control.reg = NET_REG_COMMON;
 	byteframe.Control.write = false;
