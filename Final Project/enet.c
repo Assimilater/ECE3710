@@ -190,14 +190,24 @@ void NET_Init() {
 		ADDR_SUBNET,
 		ADDR_CLIENTIP,
 		ADDR_GATEWAY,
-	} address;
-	byte addresses[4][4] = {
+	} addresses;
+	byte address[4][4] = {
 		{192, 168, 0, 1}, // default ip address in most systems
 		{255, 255, 255, 0}, // subnet mask, for seriously every network
 		{129, 123, 85, 134}, // ip address as seen by client before disconnecting
 		{129, 123, 85, 254}, // default gateway as seen by client before disconnecting
 	};
-	byte mac[6] = {0xB8, 0xAC, 0x6F, 0xA4, 0xAD, 0x42};
+	typedef enum {
+		MAC_CLIENT,
+		MAC_CPS,
+		MAC_ISP,
+	} macs;
+	byte mac[3][6] = {
+		{0xB8, 0xAC, 0x6F, 0xA4, 0xAD, 0x42},
+		{0x00, 0x08, 0xDC, 0x1E, 0xB8, 0x73},
+		{0x00, 0x08, 0xDC, 0x1E, 0xB8, 0x7D},
+	};
+	byte debug[6];
 	
 	// Reset the chips
 	// doc: http://wizwiki.net/wiki/doku.php?id=products:wiz550io:allpages#reset_timing
@@ -227,7 +237,7 @@ void NET_Init() {
 	// MAC (physical address)
 	frame.N = 6;
 	frame.Address = NET_COMMON_MAC;
-	frame.Data = mac;
+	frame.Data = mac[MAC_CLIENT];
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
 	// Following transmissions are 4-bytes
@@ -235,31 +245,70 @@ void NET_Init() {
 	
 	//ip address
 	frame.Address = NET_COMMON_IP;
-	frame.Data = addresses[ADDR_CLIENTIP]; // pretends to be the client
+	frame.Data = address[ADDR_CLIENTIP]; // pretends to be the client
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
 	//subnet mask
-	frame.Address = NET_COMMON_SUBN;
-	frame.Data = addresses[ADDR_SUBNET];
+	frame.Address = NET_COMMON_SUBNET;
+	frame.Data = address[ADDR_SUBNET];
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
 	//default gateway
 	frame.Address = NET_COMMON_GATEWAY;
-	frame.Data = addresses[ADDR_GATEWAY];
+	frame.Data = address[ADDR_GATEWAY];
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
 	//---------------------------------------------------------------------------------------+
 	// Client Chip Configuration                                                             |
 	//---------------------------------------------------------------------------------------+
+	// MAC (physical address)
+	frame.N = 6;
+	frame.Address = NET_COMMON_MAC;
+	frame.Data = mac[MAC_CPS];
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	
+	// Following transmissions are 4-bytes
+	frame.N = 4;
+	
 	//ip address
 	frame.Address = NET_COMMON_IP;
-	frame.Data = addresses[ADDR_GATEWAY]; // pretends to be the default gateway
+	frame.Data = address[ADDR_GATEWAY]; // pretends to be the default gateway
 	NET_SPI(NET_CHIP_CLIENT, &frame);
 	
 	//subnet mask
-	frame.Address = NET_COMMON_SUBN;
-	frame.Data = addresses[ADDR_SUBNET];
+	frame.Address = NET_COMMON_SUBNET;
+	frame.Data = address[ADDR_SUBNET];
 	NET_SPI(NET_CHIP_CLIENT, &frame);
+	
+	//default gateway
+	frame.Address = NET_COMMON_GATEWAY;
+	frame.Data = address[ADDR_HOME];
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	
+	
+	// Debug code
+	frame.Data = debug;
+	frame.Control.write = false;
+	
+	frame.Address = NET_COMMON_IP;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	
+	frame.Address = NET_COMMON_GATEWAY;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	
+	frame.Address = NET_COMMON_SUBNET;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	
+	frame.N = 6;
+	frame.Address = NET_COMMON_MAC;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	
+	frame.Control.write = true;
+	frame.N = 4;
 	
 	//---------------------------------------------------------------------------------------+
 	// Common Chip Configuration                                                             |
@@ -267,15 +316,15 @@ void NET_Init() {
 	//interrupts
 	byteframe.Address = NET_COMMON_SIMR;
 	byteframe.Data = 0x1; //enable interrupts from socket 0
+	byteframe.Control.write = true;
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
 	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 	
-	byteframe.Address = NET_COMMON_SIMR;
-	byteframe.Control.reg = NET_REG_COMMON;
 	byteframe.Control.write = false;
-	byteframe.Control.socket = 0;
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
 	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+	
+	byteframe.Control.write = true;
 	
 	byteframe.Control.reg = NET_REG_SOCKET;
 	byteframe.Address = NET_SOCKET_IMR;

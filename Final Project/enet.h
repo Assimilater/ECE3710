@@ -80,7 +80,7 @@ void NET_Init(void);
 //---------------------------------------------------------------------------------------+
 #define NET_COMMON_MODE					(uint16)0x0000;
 #define NET_COMMON_GATEWAY				(uint16)0x0001;
-#define NET_COMMON_SUBN					(uint16)0x0005;
+#define NET_COMMON_SUBNET				(uint16)0x0005;
 #define NET_COMMON_MAC					(uint16)0x0009;
 #define NET_COMMON_IP					(uint16)0x000F;
 #define NET_COMMON_IR					(uint16)0x0015;
