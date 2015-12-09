@@ -231,28 +231,48 @@ void NET_Init() {
 	byteframe.Control.mode = NET_MODE_VAR;
 	byteframe.Control.socket = 0;
 	
+	// Debug code
+	frame.Data = debug;
+	frame.Control.write = false;
+	
+	frame.N = 6;
+	frame.Address = NET_COMMON_MAC;
+	   NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	frame.N = 4;
+	
+	frame.Address = NET_COMMON_IP;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	
+	frame.Address = NET_COMMON_GATEWAY;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	
+	frame.Address = NET_COMMON_SUBNET;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	
+	frame.Control.write = true;
+	
 	//---------------------------------------------------------------------------------------+
 	// Chip Addressing Configuration                                                         |
 	//---------------------------------------------------------------------------------------+
 	// MAC (physical address)
 	frame.N = 6;
 	frame.Address = NET_COMMON_MAC;
-	
 	frame.Data = mac[MAC_CPS];
 	NET_SPI(NET_CHIP_CLIENT, &frame);
 	
 	frame.Data = mac[MAC_CLIENT];
 	NET_SPI(NET_CHIP_SERVER, &frame);
-	
-	// Following transmissions are 4-bytes
-	frame.N = 4;
+	frame.N = 4; // Following transmissions are 4-bytes
 	
 	//ip address
 	frame.Address = NET_COMMON_IP;
-	frame.Data = address[ADDR_GATEWAY]; // pretends to be the default gateway
+	frame.Data = address[ADDR_GATEWAY]; // client chip pretends to be the default gateway
 	NET_SPI(NET_CHIP_CLIENT, &frame);
-	
-	frame.Data = address[ADDR_CLIENTIP]; // pretends to be the client
+	frame.Data = address[ADDR_CLIENTIP]; // server chip pretends to be the client
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
 	//subnet mask
@@ -273,6 +293,12 @@ void NET_Init() {
 	frame.Data = debug;
 	frame.Control.write = false;
 	
+	frame.N = 6;
+	frame.Address = NET_COMMON_MAC;
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	frame.N = 4;
+	
 	frame.Address = NET_COMMON_IP;
 	NET_SPI(NET_CHIP_CLIENT, &frame);
 	NET_SPI(NET_CHIP_SERVER, &frame);
@@ -285,12 +311,6 @@ void NET_Init() {
 	NET_SPI(NET_CHIP_CLIENT, &frame);
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
-	frame.N = 6;
-	frame.Address = NET_COMMON_MAC;
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	
-	frame.N = 4;
 	frame.Control.write = true;
 	
 	//---------------------------------------------------------------------------------------+

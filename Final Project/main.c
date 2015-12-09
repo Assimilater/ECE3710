@@ -220,7 +220,7 @@ void init() {
 	GPIO.PortB->DIR.byte[0] = 0xFF;
 	
 	// PC[0:3] => Unavailable
-	// PC[4:5] => NET status signals
+	// PC[4:5] => NET ready signals
 	// PC[6:7] => NC
 	GPIO.PortC->DEN.word |= 0xF0;
 	GPIO.PortC->DIR.word &= 0x0F;
@@ -233,7 +233,7 @@ void init() {
 	GPIO.PortD->DIR.byte[0] = 0xFF;
 	
 	// PE[0:2] => CS Pins (output)
-	// PE[3:5] => SPI Interrupt Pins (input)
+	// PE[3:5] => Interrupt Pins for SPI request (input)
 	// PE[6:7] => Nonexistent
 	GPIO.PortE->DEN.byte[0] = 0xFF;
 	GPIO.PortE->DIR.byte[0] = 0x07;
