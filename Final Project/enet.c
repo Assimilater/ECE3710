@@ -237,7 +237,7 @@ void NET_Init() {
 	
 	frame.N = 6;
 	frame.Address = NET_COMMON_MAC;
-	   NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_CLIENT, &frame);
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	frame.N = 4;
 	
