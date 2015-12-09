@@ -68,8 +68,8 @@ void reportBlock() {
 // Define Interrupt Singals                                                              |
 //---------------------------------------------------------------------------------------+
 #define INT_TOUCH		BAND_GPIO_PE3
-#define INT_NET_ISP		BAND_GPIO_PE4
-#define INT_NET_CPC		BAND_GPIO_PE5
+#define INT_NET_SERVER		BAND_GPIO_PE4
+#define INT_NET_CLIENT		BAND_GPIO_PE5
 
 //---------------------------------------------------------------------------------------+
 // Time based sampling of touchscreen with atomic SPI blocker                            |
@@ -106,14 +106,14 @@ void Touch_Handler() {
 	while (atomic_touch); // Wait for touch interaction to finish
 }
 
-void NET_ISP_Handler() {
+void NET_SERVER_Handler() {
 	//Read from ISP
 	//NET_READDATA(give ISP CS if possible);
 	
 	//Write to PC
 }
 
-void NET_CPC_Handler() {
+void NET_CLIENT_Handler() {
 	//Read from PC
 	//NET_READDATA(give PC CS if possible);
 	//Parse Data
@@ -125,8 +125,8 @@ void NET_CPC_Handler() {
 // Real interrups create the need for atomic use of SPI, so instead use a busy wait      |
 //---------------------------------------------------------------------------------------+
 void Busy_Interrupts() {
-	byte i_touch, i_net_isp, i_net_cpc;
-	i_touch = i_net_isp = i_net_cpc = 1;
+	byte i_touch, i_net_server, i_net_client;
+	i_touch = i_net_server = i_net_client = 1;
 	
 	while (1) {
 		if (i_touch != INT_TOUCH) {
@@ -136,18 +136,18 @@ void Busy_Interrupts() {
 				//i_touch = 1;
 			}
 		}
-		if (i_net_isp != INT_NET_ISP) {
-			i_net_isp = INT_NET_ISP;
-			if (i_net_isp == 0) {
-				NET_ISP_Handler();
-				//i_net_isp = 1;
+		if (i_net_server != INT_NET_SERVER) {
+			i_net_server = INT_NET_SERVER;
+			if (i_net_server == 0) {
+				NET_SERVER_Handler();
+				//i_net_server = 1;
 			}
 		}
-		if (i_net_cpc != INT_NET_CPC) {
-			i_net_cpc = INT_NET_CPC;
-			if (i_net_cpc == 0) {
-				NET_CPC_Handler();
-				//i_net_cpc = 1;
+		if (i_net_client != INT_NET_CLIENT) {
+			i_net_client = INT_NET_CLIENT;
+			if (i_net_client == 0) {
+				NET_CLIENT_Handler();
+				//i_net_client = 1;
 			}
 		}
 	}

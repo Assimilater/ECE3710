@@ -85,25 +85,25 @@ bool NET_SPI(NET_CHIP chip, NET_Frame* frame) {
 // Handles toggling the CS for the CLIENT and calls Read|Write                           |
 //---------------------------------------------------------------------------------------+
 void NET_SPI_Client(byte* address, NET_Frame* frame) {
-	NET_CS_CPC = 0;
+	NET_CS_CLIENT = 0;
 	if (frame->Control.write) {
 		NET_SPI_Write(address, frame);
 	} else {
 		NET_SPI_Read(address, frame);
 	}
-	NET_CS_CPC = 1;
+	NET_CS_CLIENT = 1;
 }
 //---------------------------------------------------------------------------------------+
 // Handles toggling the CS for the SERVER and calls Read|Write                           |
 //---------------------------------------------------------------------------------------+
 void NET_SPI_Server(byte* address, NET_Frame* frame) {
-	NET_CS_ISP = 0;
+	NET_CS_SERVER = 0;
 	if (frame->Control.write) {
 		NET_SPI_Write(address, frame);
 	} else {
 		NET_SPI_Read(address, frame);
 	}
-	NET_CS_ISP = 1;
+	NET_CS_SERVER = 1;
 }
 
 //---------------------------------------------------------------------------------------+
@@ -198,9 +198,9 @@ void NET_Init() {
 		{129, 123, 85, 254}, // default gateway as seen by client before disconnecting
 	};
 	typedef enum {
+		MAC_GHOST,
 		MAC_CLIENT,
-		MAC_CPS,
-		MAC_ISP,
+		MAC_SERVER,
 	} macs;
 	byte mac[3][6] = {
 		{0xB8, 0xAC, 0x6F, 0xA4, 0xAD, 0x42},
@@ -216,8 +216,8 @@ void NET_Init() {
 	for (i = 0; i < 5000; ++i);
 	NET_RST = 1;
 	
-	while (!NET_RDY_CPC); // Wait for ready signal from CPC
-	while (!NET_RDY_ISP); // Wait for ready signal from ISP
+	while (!NET_RDY_CLIENT); // Wait for ready signal from CPC
+	while (!NET_RDY_SERVER); // Wait for ready signal from ISP
 	
 	// Initialize the frame for all configuration needs
 	frame.Control.write = true;
@@ -261,10 +261,10 @@ void NET_Init() {
 	// MAC (physical address)
 	frame.N = 6;
 	frame.Address = NET_COMMON_MAC;
-	frame.Data = mac[MAC_CPS];
+	frame.Data = mac[MAC_CLIENT];
 	NET_SPI(NET_CHIP_CLIENT, &frame);
 	
-	frame.Data = mac[MAC_CLIENT];
+	frame.Data = mac[MAC_GHOST];
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	frame.N = 4; // Following transmissions are 4-bytes
 	
