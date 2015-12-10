@@ -92,7 +92,8 @@ void init() {
 	// Enable clocks
 	SYSCTL->RCGCGPIO = 0x1F; // 11111 => e, d, c, b, a
 	SYSCTL->RCGCSSI = 0x1; // SSI0
-	GPIO.PortD->LOCK.word = GPIO_UNLOCK; // Port D needs to be unlcoked
+	GPIO.PortD->LOCK.word = GPIO_UNLOCK; // Port D needs to be unlocked
+	GPIO.PortF->LOCK.word = GPIO_UNLOCK; // Port F needs to be unlocked
 	
 	// PA[0:1] => Unavailable
 	// PA[2:5] => SPI
@@ -134,12 +135,27 @@ void init() {
 	GPIO.PortE->DATA.bit1 = 1;
 	GPIO.PortE->DATA.bit2 = 1;
 	
+	// PA[0:1] => Unavailable
+	// PA[2:5] => SPI
+	GPIO.PortF->CR.byte[0] = 0xFF;
+	GPIO.PortF->DEN.byte[0] = 0xF;
+	GPIO.PortF->AFSEL.byte[0] = 0xF;
+	GPIO.PortF->PCTL.byte[0] = 0x2;
+	GPIO.PortF->PUR.byte[0] = 0xF;
+	
 	// Configure SSI Freescale (SPH = 0, SPO = 0)
 	SSI0->CR1 = 0; // Disable
 	SSI0->CC = 0x5; // Use PIOsc for the clock
 	SSI0->CPSR = 0xFE; // Clock divisor = 2 (the minimum, or fastest we can make this divisor)
 	SSI0->CR0 = 0x3F07; // SCR = 3 (divisor), SPH = 0, SPO = 0, FRF = 0 (freescale), DSS = 7 (8-bit data)
 	SSI0->CR1 |= 0x2; // Enable
+	
+	// Configure SSI Freescale (SPH = 0, SPO = 0)
+	SSI1->CR1 = 0; // Disable
+	SSI1->CC = 0x5; // Use PIOsc for the clock
+	SSI1->CPSR = 0xFE; // Clock divisor = 2 (the minimum, or fastest we can make this divisor)
+	SSI1->CR0 = 0x3F07; // SCR = 3 (divisor), SPH = 0, SPO = 0, FRF = 0 (freescale), DSS = 7 (8-bit data)
+	SSI1->CR1 |= 0x2; // Enable
 	
 	// Configure Systick
 	SysTick->LOAD = 16000; // 1ms
