@@ -91,9 +91,8 @@ void exec() {
 void init() {
 	// Enable clocks
 	SYSCTL->RCGCGPIO = 0x1F; // 11111 => e, d, c, b, a
-	SYSCTL->RCGCSSI = 0x1; // SSI0
+	SYSCTL->RCGCSSI = 0x3; // SSI0
 	GPIO.PortD->LOCK.word = GPIO_UNLOCK; // Port D needs to be unlocked
-	GPIO.PortF->LOCK.word = GPIO_UNLOCK; // Port F needs to be unlocked
 	
 	// PA[0:1] => Unavailable
 	// PA[2:5] => SPI
@@ -107,41 +106,18 @@ void init() {
 	GPIO.PortA->PUR.bit4 = 1; // Rx
 	GPIO.PortA->PUR.bit5 = 1; // Tx
 	
-	// PB[0:7] => LCD Data Bus
-	GPIO.PortB->DEN.byte[0] = 0xFF;
-	GPIO.PortB->DIR.byte[0] = 0xFF;
-	
-	// PC[0:3] => Unavailable
-	// PC[4:5] => NET ready signals
-	// PC[6:7] => NC
-	GPIO.PortC->DEN.word |= 0xF0;
-	GPIO.PortC->DIR.word &= 0x0F;
-	
-	// PD[0:1] is shared with PB[6:7] (for reasons beyond my comprehension)
-	// PD[2:3,6:7] => LCD communication signals
-	// PD[4:5] => Unavailable
-	GPIO.PortD->CR.byte[0] = 0xFF;
-	GPIO.PortD->DEN.byte[0] = 0xFF;
-	GPIO.PortD->DIR.byte[0] = 0xFF;
-	
-	// PE[0:2] => CS Pins (output)
-	// PE[3:5] => Interrupt Pins for SPI request (input)
-	// PE[6:7] => Nonexistent
-	GPIO.PortE->DEN.byte[0] = 0xFF;
-	GPIO.PortE->DIR.byte[0] = 0x07;
+	// PD[0:3] => SPI
+	GPIO.PortD->CR.byte[0] = 0xF;
+	GPIO.PortD->DEN.byte[0] = 0xF;
+	GPIO.PortD->AFSEL.byte[0] = 0xF;
+	GPIO.PortD->PCTL.half[0] = 0x2222;
+	GPIO.PortD->PUR.bit2 = 1;
+	GPIO.PortD->PUR.bit3 = 1;
 	
 	// SPI CS default state high
 	GPIO.PortE->DATA.bit0 = 1;
 	GPIO.PortE->DATA.bit1 = 1;
 	GPIO.PortE->DATA.bit2 = 1;
-	
-	// PA[0:1] => Unavailable
-	// PA[2:5] => SPI
-	GPIO.PortF->CR.byte[0] = 0xFF;
-	GPIO.PortF->DEN.byte[0] = 0xF;
-	GPIO.PortF->AFSEL.byte[0] = 0xF;
-	GPIO.PortF->PCTL.byte[0] = 0x2;
-	GPIO.PortF->PUR.byte[0] = 0xF;
 	
 	// Configure SSI Freescale (SPH = 0, SPO = 0)
 	SSI0->CR1 = 0; // Disable
@@ -165,22 +141,30 @@ void init() {
 }
 
 void test() {
-	SPI_Frame frame;
+	SPI_Frame frame1, frame2;
 	byte
 		miso[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		mosi[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	
-	init();
-	frame.CS = &NET_CS_CLIENT;
-	frame.MISO = miso;
-	frame.MOSI = mosi;
-	frame.N = 10;
+	// Configure frame1
+	frame1.CS = &NET_CS_CLIENT;
+	frame1.MISO = miso;
+	frame1.MOSI = mosi;
+	frame1.N = 4;
+	
+	// Configure frame2
+	frame2.CS = &NET_CS_SERVER;
+	frame2.MISO = miso;
+	frame2.MOSI = mosi;
+	frame2.N = 4;
 	
 	// Test output data
 	mosi[1] = 0x39;
 	
+	init();
 	while (1) {
-		SPI_Transfer(SSI0, &frame);
+		SPI_Transfer(SSI0, &frame1);
+		//SPI_Transfer(SSI1, &frame2);
 	}
 }
 
