@@ -235,6 +235,14 @@ void NET_Init() {
 	frame.Data = debug;
 	frame.Control.write = false;
 	
+	frame.N = 1;
+	frame.Address = 0x39;
+	while (1) {
+		NET_SPI(NET_CHIP_CLIENT, &frame);
+	}
+	return;
+	
+	
 	frame.N = 6;
 	frame.Address = NET_COMMON_MAC;
 	NET_SPI(NET_CHIP_CLIENT, &frame);
