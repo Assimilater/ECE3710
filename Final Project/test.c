@@ -164,7 +164,7 @@ void test() {
 	mosi[1] = 0x39;
 	
 	while (1) {
-		SPI_Transfer(&frame);
+		SPI_Transfer(SSI0, &frame);
 	}
 }
 

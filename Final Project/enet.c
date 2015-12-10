@@ -32,6 +32,7 @@ bool NET_SPI_BYTE(NET_CHIP chip, NET_Byteframe* frame) {
 bool NET_SPI(NET_CHIP chip, NET_Frame* frame) {
 	uint i;
 	SPI_Frame spi;
+	SSI0_Type* SSI;
 	byte
 		mosi[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		miso[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -67,6 +68,11 @@ bool NET_SPI(NET_CHIP chip, NET_Frame* frame) {
 		? &NET_CS_CLIENT
 		: &NET_CS_SERVER;
 	
+	// Temporary code setting which SSI module is used
+	SSI = (chip == NET_CHIP_CLIENT)
+		? SSI0
+		: SSI1;
+	
 	// Copy data to MOSI when writing
 	if (frame->Control.write) {
 		for (i = 0; i < frame->N; ++i) {
@@ -75,7 +81,7 @@ bool NET_SPI(NET_CHIP chip, NET_Frame* frame) {
 	}
 	
 	// Perform the SPI transaction
-	SPI_Transfer(&spi);
+	SPI_Transfer(SSI, &spi);
 	
 	// Copy data from MISO when reading
 	if (!frame->Control.write) {
@@ -146,11 +152,7 @@ void NET_Init() {
 	
 	frame.N = 1;
 	frame.Address = 0x39;
-	while (1) {
-		NET_SPI(NET_CHIP_CLIENT, &frame);
-	}
-	return;
-	
+	NET_SPI(NET_CHIP_CLIENT, &frame);
 	
 	frame.N = 6;
 	frame.Address = NET_COMMON_MAC;

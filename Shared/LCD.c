@@ -55,7 +55,7 @@ bool LCD_GetXY(SAMPLE_MODE mode, coord* val) {
 		frame.MOSI = mosi;
 		frame.MISO = miso;
 		frame.N = 5;
-		SPI_Transfer(&frame);
+		SPI_Transfer(SSI0, &frame);
 		
 		// Read = X C[11:0] X[2:0] (where X is don't care)
 		poll = &data[sample++ % SAMPLE_SIZE];
