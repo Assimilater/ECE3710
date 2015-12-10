@@ -13,7 +13,8 @@ bool LCD_GetXY(SAMPLE_MODE mode, coord* val) {
 	static coord data[SAMPLE_SIZE];
 	
 	// Vars used for poll
-	unsigned short read0, read1, read2, read3, read4;
+	byte miso[5], mosi[5] = {0xD0, 0, 0x90, 0, 0};
+	SPI_Frame frame;
 	coord* poll;
 	
 	// Vars used for get (averaging)
@@ -50,29 +51,17 @@ bool LCD_GetXY(SAMPLE_MODE mode, coord* val) {
 		//---------------------------------------------------------------------------------------+
 		// Uses SPI to interact with the touchscreen chip and retrieve coordinates               |
 		//---------------------------------------------------------------------------------------+
-		while (SSI0->SR & 0x4) { read0 = SSI0->DR; } // Clear the buffer, just in case
-		poll = &data[sample++ % SAMPLE_SIZE]; // Select which sample to write data to
-		TP_CSX = 0;
-		
-		while(!(SSI0->SR & 0x1)); // Wait for TFE = 1
-		SSI0->DR = 0xD0; // X
-		SSI0->DR = 0; // Give the TFT time to write both byes before issuing new command
-		SSI0->DR = 0x90; // Y
-		SSI0->DR = 0;
-		SSI0->DR = 0; // Second byte of null so we can receive both bytes pertaining to y
-		
-		while (SSI0->SR & 0x10); // Wait for BSY == 0
-		read0 = SSI0->DR; // Read null byte
-		read1 = SSI0->DR; // Read first x-data byte
-		read2 = SSI0->DR; // Read second x-data byte
-		read3 = SSI0->DR; // Read first y-data byte
-		read4 = SSI0->DR; // Read second y-data byte
+		frame.CS = &TP_CSX;
+		frame.MOSI = mosi;
+		frame.MISO = miso;
+		frame.N = 5;
+		SPI_Transfer(&frame);
 		
 		// Read = X C[11:0] X[2:0] (where X is don't care)
-		poll->col  = ((read1 << 8 | read2) >> 3) & 0xFFF;
-		poll->page = ((read3 << 8 | read4) >> 3) & 0xFFF;
+		poll = &data[sample++ % SAMPLE_SIZE];
+		poll->col  = ((miso[1] << 8 | miso[2]) >> 3) & 0xFFF;
+		poll->page = ((miso[3] << 8 | miso[4]) >> 3) & 0xFFF;
 		
-		TP_CSX = 1;
 	} else { return false; } // Unrecognized command
 	return true; // Inidicate success
 }

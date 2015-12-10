@@ -254,15 +254,36 @@ void init() {
 	SysTick->LOAD = 16000; // 1ms
 	NVIC_EN0_R = 0x1;
 	
-	LCD_Init();
-	NET_Init();
+	//LCD_Init();
+	//NET_Init();
+}
+
+void test() {
+	SPI_Frame frame;
+	byte
+		miso[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		mosi[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	
+	init();
+	frame.CS = &NET_CS_CLIENT;
+	frame.MISO = miso;
+	frame.MOSI = mosi;
+	frame.N = 10;
+	
+	// Test output data
+	mosi[1] = 0x39;
+	
+	while (1) {
+		SPI_Transfer(&frame);
+	}
 }
 
 //---------------------------------------------------------------------------------------+
 // No program logic should be contained here                                             |
 //---------------------------------------------------------------------------------------+
 int main() {
-	init();
-	exec();
+	test();
+	//init();
+	//exec();
 	while (1);
 }

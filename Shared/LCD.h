@@ -5,8 +5,9 @@
 // Inlucded dependencies                                                                 |
 //---------------------------------------------------------------------------------------+
 #include "LCD_Codes.h"
-#include "../Shared/embedded_t.h"
-#include "../Shared/fonts.h"
+#include "embedded_t.h"
+#include "fonts.h"
+#include "SPI.h"
 
 //---------------------------------------------------------------------------------------+
 // Color Codes For The LCD                                                               |
