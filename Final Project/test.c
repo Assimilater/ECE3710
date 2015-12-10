@@ -1,23 +1,6 @@
 #include "../Shared/embedded_t.h"
 #include "../Shared/Controller.h"
-#include "../Shared/LCD.h"
 #include "enet.h"
-
-//---------------------------------------------------------------------------------------+
-// Precalculated constants for the dimensions of our boxes                               |
-//---------------------------------------------------------------------------------------+
-const short LENGTH_OUTER = 80;
-const short LENGTH_INNER = 70;
-
-const short ROW_OUTER_Y0 = 25;
-const short ROW_INNER_Y0 = 30;
-const short COL_OUTER_Y0 = 80;
-const short COL_INNER_Y0 = 85;
-
-const short ROW_OUTER_YF = ROW_OUTER_Y0 + LENGTH_OUTER;
-const short ROW_INNER_YF = ROW_INNER_Y0 + LENGTH_INNER;
-const short COL_OUTER_YF = COL_OUTER_Y0 + LENGTH_OUTER;
-const short COL_INNER_YF = COL_INNER_Y0 + LENGTH_INNER;
 
 //---------------------------------------------------------------------------------------+
 // Status variables                                                                      |
@@ -27,32 +10,6 @@ State enable = FILTER_DISABLED;
 
 uint block = 0;
 char blocked_s[8] = "0000000";
-TextRegion blocked_r;
-TextRegion status_r;
-
-//---------------------------------------------------------------------------------------+
-// Helper functions to easily manage the display after initialization                    |
-//---------------------------------------------------------------------------------------+
-void toggleStatus() {
-	static Region button_r = {
-		COL_INNER_Y0, COL_INNER_YF,
-		ROW_INNER_Y0, ROW_INNER_YF
-	};
-	
-	if (enable) {
-		enable = FILTER_DISABLED;
-		button_r.Color = LCD_COLOR_RED;
-		status_r.Color = LCD_COLOR_RED;
-		status_r.Text = "Status: Disabled";
-	} else {
-		enable = FILTER_ENABLED;
-		button_r.Color = LCD_COLOR_GREEN;
-		status_r.Color = LCD_COLOR_GREEN;
-		status_r.Text = "Status:  Enabled";
-	}
-	LCD_FillRegion(button_r);
-	LCD_WriteText(status_r);
-}
 
 void reportBlock() {
 	uint i = 7, t = ++block, mod;
@@ -61,7 +18,7 @@ void reportBlock() {
 		blocked_s[--i] = '0' + mod;
 		t /= 10;
 	}
-	LCD_WriteText(blocked_r);
+	//LCD_WriteText(blocked_r);
 }
 
 //---------------------------------------------------------------------------------------+
@@ -71,40 +28,7 @@ void reportBlock() {
 #define INT_NET_SERVER		BAND_GPIO_PE4
 #define INT_NET_CLIENT		BAND_GPIO_PE5
 
-//---------------------------------------------------------------------------------------+
-// Time based sampling of touchscreen with atomic SPI blocker                            |
-//---------------------------------------------------------------------------------------+
-volatile bool atomic_touch = false;
-void SysTick_Handler() {
-	static coord data;
-	SysTick->CTRL = 0x0; // Disable Systick interrups
-	if (!INT_TOUCH) { // User is pressing down, collect sample
-		LCD_GetXY(TOUCH_POLL, &data);
-		SysTick->CTRL = 0x3; // Enable SysTick interrupts
-	} else {
-		if (LCD_GetXY(TOUCH_GET, &data)) { // User let go, get the average from samples
-			if ((COL_OUTER_Y0 < data.col) && (data.col < COL_OUTER_YF)) {
-				if ((ROW_OUTER_Y0 < data.page) && (data.page < ROW_OUTER_YF)) {
-					toggleStatus();
-				}
-			}
-		}
-		
-		// Signal that touch interaction is over
-		atomic_touch = false;
-	}
-}
-
-//---------------------------------------------------------------------------------------+
-// Uses a timer to sample; so data is averaged over a longer time and touch is debounced |
-// This function is blocking, so as to give priority to user input on the touchscreen    |
-// Because of interrupts, this acts like a multi-threaded portion of the application     |
-//---------------------------------------------------------------------------------------+
-void Touch_Handler() {
-	atomic_touch = true;
-	SysTick->CTRL = 0x3; // Enable SysTick interrupts
-	while (atomic_touch); // Wait for touch interaction to finish
-}
+void Touch_Handler() {}
 
 void NET_SERVER_Handler() {
 	//Read from ISP
@@ -157,40 +81,6 @@ void Busy_Interrupts() {
 // Program initialization logic                                                          |
 //---------------------------------------------------------------------------------------+
 void exec() {
-	Region button_r = {
-		COL_OUTER_Y0, COL_OUTER_YF,
-		ROW_OUTER_Y0, ROW_OUTER_YF,
-		LCD_COLOR_BLUE
-	};
-	LCD_FillRegion(button_r); // Fill in the outer box
-	
-	// Write the static text
-	blocked_r.y = 95;
-	blocked_r.x = ROW_OUTER_YF + 5;
-	blocked_r.Font = &fonts()->Big;
-	blocked_r.Text = "Pages Blocked";
-	blocked_r.BackColor = LCD_COLOR_BLACK;
-	blocked_r.Color = LCD_COLOR_YELLOW;
-	LCD_WriteText(blocked_r);
-	
-	// Setup for the dynamic text
-	blocked_r.y = 120;
-	blocked_r.x = ROW_OUTER_YF + 25;
-	blocked_r.Font = &fonts()->Ubuntu;
-	blocked_r.Text = blocked_s;
-	
-	// Write initial value for dynamic text
-	LCD_WriteText(blocked_r);
-	
-	// Setup status text (also dynamic)
-	status_r.x = 25;
-	status_r.y = 175;
-	status_r.Font = &fonts()->Big;
-	status_r.BackColor = LCD_COLOR_BLACK;
-	
-	// Start the filter as enabled
-	toggleStatus();
-	
 	// Our program is a busy wait on interrupt conditions
 	Busy_Interrupts();
 }
@@ -255,7 +145,6 @@ void init() {
 	SysTick->LOAD = 16000; // 1ms
 	NVIC_EN0_R = 0x1;
 	
-	//LCD_Init();
 	//NET_Init();
 }
 
