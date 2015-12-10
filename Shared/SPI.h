@@ -10,6 +10,6 @@ typedef struct {
 	uint N;
 } SPI_Frame;
 
-void SPI_Transfer(SPI_Frame*);
+void SPI_Transfer(SSI0_Type*, SPI_Frame*);
 
 #endif
