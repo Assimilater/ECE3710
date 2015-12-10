@@ -212,6 +212,7 @@ void init() {
 	GPIO.PortA->DIR.bit7 = 1; // External LCD Reset
 	
 	// Pull up configuration necessary to avoid electromagnetic interference between SSI pins
+	GPIO.PortA->PUR.bit2 = 1; // Clk
 	GPIO.PortA->PUR.bit4 = 1; // Rx
 	GPIO.PortA->PUR.bit5 = 1; // Tx
 	
