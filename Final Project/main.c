@@ -121,9 +121,9 @@ void NET_CLIENT_Handler() {
 	frame->Control.socket = 0; //FIX!!!
 	frame->Control.mode = NET_MODE_VAR;
 
-	NET_READDATA(NET_CHIP_CLIENT);
+	NET_READDATA(NET_CHIP_CLIENT, &frame);
 	//Parse Data
-	
+	NET_PARSEDATA(data);
 	//write to ISP
 }
 

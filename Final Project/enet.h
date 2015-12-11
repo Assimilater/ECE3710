@@ -60,7 +60,7 @@ typedef union {
 //---------------------------------------------------------------------------------------+
 void NET_WriteCmd(short, char);
 void NET_READDATA(NET_CHIP, NET_Frame*);
-void NET_PARSEDATA(void);
+void NET_PARSEDATA(byte* data);
 void NET_WRITEDATA(void);
 
 bool NET_SPI_BYTE(NET_CHIP, NET_Byteframe*);
