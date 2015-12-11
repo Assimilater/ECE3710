@@ -115,7 +115,13 @@ void NET_SERVER_Handler() {
 
 void NET_CLIENT_Handler() {
 	//Read from PC
-	//NET_READDATA(give PC CS if possible);
+	static NET_Frame frame;
+	static byte data[2000]; //How much data can be on the buffer
+	frame->Data = data;
+	frame->Control.socket = 0; //FIX!!!
+	frame->Control.mode = NET_MODE_VAR;
+
+	NET_READDATA(NET_CHIP_CLIENT);
 	//Parse Data
 	
 	//write to ISP
