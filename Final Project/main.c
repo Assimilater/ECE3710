@@ -212,9 +212,10 @@ void init() {
 	GPIO.PortA->DIR.bit7 = 1; // External LCD Reset
 	
 	// Pull up configuration necessary to avoid electromagnetic interference between SSI pins
-	GPIO.PortA->PUR.bit2 = 1; // Clk
-	GPIO.PortA->PUR.bit4 = 1; // Rx
-	GPIO.PortA->PUR.bit5 = 1; // Tx
+	//GPIO.PortA->PDR.bit2 = 1; // Clk
+	//GPIO.PortA->PDR.bit4 = 1; // Rx
+	GPIO.PortA->PDR.bit5 = 1; // Tx
+	//GPIO.PortA->ODR.bit5 = 1; // Tx
 	
 	// PB[0:7] => LCD Data Bus
 	GPIO.PortB->DEN.byte[0] = 0xFF;
@@ -255,7 +256,7 @@ void init() {
 	SysTick->LOAD = 16000; // 1ms
 	NVIC_EN0_R = 0x1;
 	
-	//LCD_Init();
+	LCD_Init();
 	//NET_Init();
 }
 
@@ -269,7 +270,7 @@ void test() {
 	frame.CS = &NET_CS_CLIENT;
 	frame.MISO = miso;
 	frame.MOSI = mosi;
-	frame.N = 10;
+	frame.N = 4;
 	
 	// Test output data
 	mosi[1] = 0x39;
