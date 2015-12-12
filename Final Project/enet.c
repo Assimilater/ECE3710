@@ -2,6 +2,51 @@
 #include "../Shared/GPIO.h"
 #include "enet.h"
 
+void NET_READDATA(NET_CHIP chip, NET_Frame* frame){
+	static byte* data;
+	static byte data2[2];
+	static unsigned short readsize;
+	
+	frame->Control.write = false;
+	frame->Control.reg = NET_REG_SOCKET;
+
+	frame->Address = NET_SOCKET_RX_RSR;
+	frame->N = 2;	
+	NET_SPI(chip, frame);
+	
+	readsize = (frame->Data[0] << 8) + frame->Data[1];
+	
+	//find the RX read pointer
+	frame->Address = NET_SOCKET_RX_RD;		
+	NET_SPI(chip, frame);
+	
+	//read the data on the buffer
+	frame->Address = (frame->Data[0] << 8) + frame->Data[1];
+	frame->Control.reg = NET_REG_RX;
+	frame->N = readsize;
+	NET_SPI(chip, frame);
+	
+	data = frame->Data;
+	data2[0] = (frame->Address + readsize) >> 8;
+	data2[1] = (frame->Address + readsize);
+	
+	//update the RX read pointer
+	frame->Address = NET_SOCKET_RX_RD;
+	frame->Control.reg = NET_REG_SOCKET;
+	frame->Control.write = true;
+	frame->Data = data2;
+	frame->N = 2;
+	NET_SPI(chip, frame);
+	
+	//Give RECV command to the CR
+	frame->Address = NET_SOCKET_CR;
+	data2[0] = 0x40;
+	frame->N = 1;
+	NET_SPI(chip, frame);
+	
+	frame->Data = data;
+}
+
 //---------------------------------------------------------------------------------------+
 // The ControlByte object is not packing properly, so this is a fix for byte packing     |
 //---------------------------------------------------------------------------------------+

@@ -29,9 +29,9 @@ typedef enum {
 typedef union {
 	struct {
 		uint socket:3; // Note: Must be 0 if using common register
-		NET_REG reg:2;
-		bool write:1; // Default: Read (0)
-		NET_MODE mode:2; // Default: NET_VAR_M
+		uint reg:2;
+		uint write:1; // Default: Read (0)
+		uint mode:2; // Default: NET_VAR_M
 	};
 	byte byte;
 } ControlByte; // See section 2.2.2 in w550 datasheet
@@ -59,8 +59,8 @@ typedef union {
 // Driver Functions                                                                      |
 //---------------------------------------------------------------------------------------+
 void NET_WriteCmd(short, char);
-void NET_READDATA(void);
-void NET_PARSEDATA(void);
+void NET_READDATA(NET_CHIP, NET_Frame*);
+void NET_PARSEDATA(byte* data);
 void NET_WRITEDATA(void);
 
 bool NET_SPI_BYTE(NET_CHIP, NET_Byteframe*);
@@ -91,6 +91,14 @@ void NET_Init(void);
 #define NET_SOCKET_MODE					(uint16)0x0000;
 #define NET_SOCKET_CR					(uint16)0x0001;
 #define NET_SOCKET_SIR					(uint16)0x0002;
+#define NET_SOCKET_RX_BUFSIZE			(uint16)0x001E;
+#define NET_SOCKET_TX_BUFSIZE			(uint16)0x001F;
+#define NET_SOCKET_TX_FSR				(uint16)0x0020;
+#define NET_SOCKET_TX_RD				(uint16)0x0022;
+#define NET_SOCKET_TX_WR				(uint16)0x0024;
+#define NET_SOCKET_RX_RSR				(uint16)0x0026;
+#define NET_SOCKET_RX_RD				(uint16)0x0028;
+#define NET_SOCKET_RX_WR				(uint16)0x002A;
 #define NET_SOCKET_IMR					(uint16)0x002C;
 
 #endif
