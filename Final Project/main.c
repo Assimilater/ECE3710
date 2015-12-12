@@ -117,13 +117,13 @@ void NET_CLIENT_Handler() {
 	//Read from PC
 	static NET_Frame frame;
 	static byte data[2000]; //How much data can be on the buffer
-	frame->Data = data;
-	frame->Control.socket = 0; //FIX!!!
-	frame->Control.mode = NET_MODE_VAR;
+	//frame->Data = data;
+	//frame->Control.socket = 0; //FIX!!!
+	//frame->Control.mode = NET_MODE_VAR;
 
-	NET_READDATA(NET_CHIP_CLIENT, &frame);
+	//NET_READDATA(NET_CHIP_CLIENT, &frame);
 	//Parse Data
-	NET_PARSEDATA(data);
+	//NET_PARSEDATA(data);
 	//write to ISP
 }
 
@@ -206,9 +206,10 @@ void exec() {
 //---------------------------------------------------------------------------------------+
 void init() {
 	// Enable clocks
-	SYSCTL->RCGCGPIO = 0x1F; // 11111 => e, d, c, b, a
-	SYSCTL->RCGCSSI = 0x1; // SSI0
-	GPIO.PortD->LOCK.word = GPIO_UNLOCK; // Port D needs to be unlcoked
+	SYSCTL->RCGCGPIO = 0x3F; // 11 1111 => f, e, d, c, b, a
+	SYSCTL->RCGCSSI = 0x3; // SSI0, SSI1
+	GPIO.PortD->LOCK.word = GPIO_UNLOCK; // PD7 needs to be unlcoked
+	GPIO.PortF->LOCK.word = GPIO_UNLOCK; // PF0 needs to be unlocked
 	
 	// PA[0:1] => Unavailable
 	// PA[2:5] => SPI
@@ -251,38 +252,57 @@ void init() {
 	GPIO.PortE->DATA.bit1 = 1;
 	GPIO.PortE->DATA.bit2 = 1;
 	
+	// PA[0:1] => Unavailable
+	// PA[2:5] => SPI
+	GPIO.PortF->CR.byte[0] = 0xF;
+	GPIO.PortF->DEN.byte[0] = 0xF;
+	GPIO.PortF->AFSEL.byte[0] = 0xF;
+	GPIO.PortF->PCTL.half[0] = 0x2222;
+	GPIO.PortF->PDR.bit1 = 1; // Tx
+	
 	// Configure SSI Freescale (SPH = 0, SPO = 0)
 	SSI0->CR1 = 0; // Disable
 	SSI0->CC = 0x5; // Use PIOsc for the clock
-	SSI0->CPSR = 0xFE; // Clock divisor = 2 (the minimum, or fastest we can make this divisor)
-	SSI0->CR0 = 0x3F07; // SCR = 3 (divisor), SPH = 0, SPO = 0, FRF = 0 (freescale), DSS = 7 (8-bit data)
+	SSI0->CPSR = 0x2; // Clock divisor = 2 (the minimum, or fastest we can make this divisor)
+	SSI0->CR0 = 0x307; // SCR = 3 (divisor), SPH = 0, SPO = 0, FRF = 0 (freescale), DSS = 7 (8-bit data)
 	SSI0->CR1 |= 0x2; // Enable
+	
+	// Configure SSI Freescale (SPH = 0, SPO = 0)
+	SSI1->CR1 = 0; // Disable
+	SSI1->CC = 0x5; // Use PIOsc for the clock
+	SSI1->CPSR = 0x2; // Clock divisor = 2 (the minimum, or fastest we can make this divisor)
+	SSI1->CR0 = 0x307; // SCR = 3 (divisor), SPH = 0, SPO = 0, FRF = 0 (freescale), DSS = 7 (8-bit data)
+	SSI1->CR1 |= 0x2; // Enable
 	
 	// Configure Systick
 	SysTick->LOAD = 16000; // 1ms
 	NVIC_EN0_R = 0x1;
 	
 	LCD_Init();
-	//NET_Init();
+	NET_Init();
 }
 
 void test() {
-	SPI_Frame frame;
+	SPI_Frame frame1, frame2;
 	byte
 		miso[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		mosi[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 	
 	init();
-	frame.CS = &NET_CS_CLIENT;
-	frame.MISO = miso;
-	frame.MOSI = mosi;
-	frame.N = 4;
+	frame1.CS = &NET_CS_CLIENT;
+	frame1.MISO = miso;
+	frame1.MOSI = mosi;
+	frame1.N = 4;
+	
+	frame2 = frame1;
+	frame2.CS = &NET_CS_SERVER;
 	
 	// Test output data
 	mosi[1] = 0x39;
 	
 	while (1) {
-		SPI_Transfer(SSI0, &frame);
+		SPI_Transfer(SSI0, &frame1);
+		SPI_Transfer(SSI0, &frame2);
 	}
 }
 
@@ -290,8 +310,8 @@ void test() {
 // No program logic should be contained here                                             |
 //---------------------------------------------------------------------------------------+
 int main() {
-	test();
-	//init();
-	//exec();
+	//test();
+	init();
+	exec();
 	while (1);
 }

@@ -17,7 +17,7 @@ void NET_READDATA(NET_CHIP chip, NET_Frame* frame){
 	readsize = (frame->Data[0] << 8) + frame->Data[1];
 	
 	//find the RX read pointer
-	frame->Address = NET_SOCKET_RX_RD;		
+	frame->Address = NET_SOCKET_RX_RD;
 	NET_SPI(chip, frame);
 	
 	//read the data on the buffer
@@ -77,7 +77,6 @@ bool NET_SPI_BYTE(NET_CHIP chip, NET_Byteframe* frame) {
 bool NET_SPI(NET_CHIP chip, NET_Frame* frame) {
 	uint i;
 	SPI_Frame spi;
-	SSI0_Type* SSI;
 	byte
 		mosi[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		miso[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -113,11 +112,6 @@ bool NET_SPI(NET_CHIP chip, NET_Frame* frame) {
 		? &NET_CS_CLIENT
 		: &NET_CS_SERVER;
 	
-	// Temporary code setting which SSI module is used
-	SSI = (chip == NET_CHIP_CLIENT)
-		? SSI0
-		: SSI1;
-	
 	// Copy data to MOSI when writing
 	if (frame->Control.write) {
 		for (i = 0; i < frame->N; ++i) {
@@ -126,7 +120,7 @@ bool NET_SPI(NET_CHIP chip, NET_Frame* frame) {
 	}
 	
 	// Perform the SPI transaction
-	SPI_Transfer(SSI, &spi);
+	SPI_Transfer(SSI0, &spi);
 	
 	// Copy data from MISO when reading
 	if (!frame->Control.write) {
