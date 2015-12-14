@@ -11,10 +11,12 @@ void NET_READDATA(NET_CHIP chip, NET_Frame* frame){
 	frame->Control.reg = NET_REG_SOCKET;
 
 	frame->Address = NET_SOCKET_RX_RSR;
-	frame->N = 2;	
-	NET_SPI(chip, frame);
-	
+	frame->N = 2;
+	do{
 	readsize = (frame->Data[0] << 8) + frame->Data[1];
+	NET_SPI(chip, frame);
+	} while (readsize != ((frame->Data[0] << 8) + frame->Data[1]));
+	
 	
 	//find the RX read pointer
 	frame->Address = NET_SOCKET_RX_RD;
@@ -43,6 +45,7 @@ void NET_READDATA(NET_CHIP chip, NET_Frame* frame){
 	data2[0] = 0x40;
 	frame->N = 1;
 	NET_SPI(chip, frame);
+	//we may need to poll at some point to confirm that the command was processed!!!
 	
 	frame->Data = data;
 }
