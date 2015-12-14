@@ -60,9 +60,9 @@ typedef union {
 // Driver Functions                                                                      |
 //---------------------------------------------------------------------------------------+
 void NET_WriteCmd(short, char);
-void NET_READDATA(NET_CHIP, NET_Frame*);
-void NET_PARSEDATA(byte* data);
-void NET_WRITEDATA(void);
+void NET_READDATA(NET_CHIP, NET_Frame*, unsigned short);
+void NET_PARSEDATA(byte*, unsigned short);
+void NET_WRITEDATA(NET_CHIP, NET_Frame*, unsigned short);
 
 bool NET_SPI_BYTE(NET_CHIP, NET_Byteframe*);
 bool NET_SPI(NET_CHIP, NET_Frame*);
