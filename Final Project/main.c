@@ -123,23 +123,25 @@ void NET_SERVER_Handler() {
 	
 	
 	//Read from ISP
-	//NET_READDATA(give ISP CS if possible);
+	//NET_READDATA();
 	
 	//Write to PC
+	
 }
 
 void NET_CLIENT_Handler() {
 	//Read from PC
-	NET_Frame frame;
+	static NET_Frame frame;
+	static unsigned short datasize;
 	//frame->Data = data;
 	//frame->Control.socket = 0; //FIX!!!
 	//frame->Control.mode = NET_MODE_VAR;
 
-	//NET_READDATA(NET_CHIP_CLIENT, &frame);
+	//NET_READDATA(NET_CHIP_CLIENT, &frame, &datasize);
 	//Parse Data
-	//NET_PARSEDATA(data);
+	//NET_PARSEDATA(data, datasize);
 	//write to ISP
-	
+	//NET_WRITEDATA(NET_CHIP_SERVER, &frame, datasize);
 	
 	
 	frame.Control.mode = NET_MODE_VAR;

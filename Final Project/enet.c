@@ -2,10 +2,10 @@
 #include "../Shared/GPIO.h"
 #include "enet.h"
 
-void NET_READDATA(NET_CHIP chip, NET_Frame* frame){
+void NET_READDATA(NET_CHIP chip, NET_Frame* frame, unsigned short datasize){
 	static byte* data;
 	static byte data2[2];
-	static unsigned short readsize;
+	//static unsigned short readsize;
 	
 	frame->Control.write = false;
 	frame->Control.reg = NET_REG_SOCKET;
@@ -13,9 +13,9 @@ void NET_READDATA(NET_CHIP chip, NET_Frame* frame){
 	frame->Address = NET_SOCKET_RX_RSR;
 	frame->N = 2;
 	do{
-	readsize = (frame->Data[0] << 8) + frame->Data[1];
+	datasize = (frame->Data[0] << 8) + frame->Data[1];
 	NET_SPI(chip, frame);
-	} while (readsize != ((frame->Data[0] << 8) + frame->Data[1]));
+	} while (datasize != ((frame->Data[0] << 8) + frame->Data[1]));
 	
 	
 	//find the RX read pointer
@@ -25,14 +25,15 @@ void NET_READDATA(NET_CHIP chip, NET_Frame* frame){
 	//read the data on the buffer
 	frame->Address = (frame->Data[0] << 8) + frame->Data[1];
 	frame->Control.reg = NET_REG_RX;
-	frame->N = readsize;
+	frame->N = datasize;
 	NET_SPI(chip, frame);
 	
 	data = frame->Data;
-	data2[0] = (frame->Address + readsize) >> 8;
-	data2[1] = (frame->Address + readsize);
 	
 	//update the RX read pointer
+	data2[0] = (frame->Address + datasize) >> 8;
+	data2[1] = (frame->Address + datasize) & 0xFF;
+	
 	frame->Address = NET_SOCKET_RX_RD;
 	frame->Control.reg = NET_REG_SOCKET;
 	frame->Control.write = true;
@@ -48,6 +49,63 @@ void NET_READDATA(NET_CHIP chip, NET_Frame* frame){
 	//we may need to poll at some point to confirm that the command was processed!!!
 	
 	frame->Data = data;
+}
+
+void NET_WRITEDATA(NET_CHIP chip, NET_Frame* frame, unsigned short datasize){
+	static byte* data;
+	static byte data2[2];
+	//static unsigned short readsize;
+	
+	frame->Control.write = false;
+	frame->Control.reg = NET_REG_SOCKET;
+
+	frame->Address = NET_SOCKET_TX_FSR;
+	data = frame->Data;
+	frame->Data = data2;
+	frame->N = 2;
+	
+	//do a loop until we recieve the same ouptut**
+	NET_SPI(chip, frame);
+	
+	if (((frame->Data[0] << 8) + frame->Data[1]) < datasize){
+		//split up the data**
+	}
+	
+	//find the TX write pointer
+	frame->Address = NET_SOCKET_RX_WR;
+	NET_SPI(chip, frame);
+	
+	//write the data to the buffer
+	frame->Address = (frame->Data[0] << 8) + frame->Data[1];
+	frame->Control.reg = NET_REG_TX;
+	frame->N = datasize;
+	frame->Control.write = true;
+	frame->Data = data;
+	NET_SPI(chip, frame);
+	
+	//update the TX write pointer
+	data2[0] += datasize >> 8;
+	data2[1] += datasize & 0xFF;
+	
+	frame->Address = NET_SOCKET_TX_WR;
+	frame->Control.reg = NET_REG_SOCKET;
+	frame->Control.write = true;
+	frame->Data = data2;
+	frame->N = 2;
+	NET_SPI(chip, frame);
+	
+	//Give SEND command to the CR
+	frame->Address = NET_SOCKET_CR;
+	data2[0] = 0x20;
+	frame->N = 1;
+	NET_SPI(chip, frame);
+	//we may need to poll at some point to confirm that the command was processed!!!
+	
+	frame->Data = data;
+}
+
+void NET_PARSEDATA(byte* data, unsigned short datasize){
+	
 }
 
 //---------------------------------------------------------------------------------------+
