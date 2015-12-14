@@ -131,8 +131,8 @@ void NET_SERVER_Handler() {
 
 void NET_CLIENT_Handler() {
 	//Read from PC
-	static NET_Frame frame;
-	static unsigned short datasize;
+	NET_Frame frame;
+	//unsigned short datasize;
 	//frame->Data = data;
 	//frame->Control.socket = 0; //FIX!!!
 	//frame->Control.mode = NET_MODE_VAR;

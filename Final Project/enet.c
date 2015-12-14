@@ -220,7 +220,6 @@ void NET_Init() {
 		{0x00, 0x08, 0xDC, 0x1E, 0xB8, 0x73},
 		{0x00, 0x08, 0xDC, 0x1E, 0xB8, 0x7D},
 	};
-	byte debug[6];
 	
 	// Reset the chips
 	// doc: http://wizwiki.net/wiki/doku.php?id=products:wiz550io:allpages#reset_timing
@@ -277,22 +276,22 @@ void NET_Init() {
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
 	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 	
-//	byteframe.Control.reg = NET_REG_SOCKET;
-//	byteframe.Address = NET_SOCKET_IMR;
-//	byteframe.Data = 0x4; //enables "recieving from peer" interrupt
-//	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
-//	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
-//	for (i = 0; i < 8; ++i) {
-//		byteframe.Control.socket = i;
-//		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
-//		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
-//	}
+	// Enable interrupts on all sockets
+	byteframe.Control.reg = NET_REG_SOCKET;
+	byteframe.Address = NET_SOCKET_IMR;
+	byteframe.Data = 0xF; //enables most interrupts
+	for (i = 0; i < 8; ++i) {
+		byteframe.Control.socket = i;
+		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+	}
 	
-	//OPEN socket 0, OPEN command is done last
-//	byteframe.Address = NET_SOCKET_CR;
-//	byteframe.Data = 0x1; //OPEN socket command
-//	byteframe.Control.socket = 0;
-//	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	byteframe.Control.socket = 0;
+	byteframe.Address = NET_SOCKET_CR;
+	byteframe.Data = 0x2; // Set Socket 0 to Listen
+	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	
+	
 //	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 //	for (i = 0; i < 8; ++i) {
 //		byteframe.Control.socket = i;
