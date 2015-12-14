@@ -115,9 +115,9 @@ void NET_SERVER_Handler() {
 	frame.Control.reg = NET_REG_COMMON;
 	frame.Control.socket = 0;
 	
-	frame.Address = NET_COMMON_IR;
+	frame.Address = 0;
 	frame.Data = debug;
-	frame.N = 4;
+	frame.N = 0x40;
 	
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
@@ -147,9 +147,9 @@ void NET_CLIENT_Handler() {
 	frame.Control.reg = NET_REG_COMMON;
 	frame.Control.socket = 0;
 	
-	frame.Address = NET_COMMON_IR;
+	frame.Address = 0;
 	frame.Data = debug;
-	frame.N = 4;
+	frame.N = 0x40;
 	
 	NET_SPI(NET_CHIP_CLIENT, &frame);
 }

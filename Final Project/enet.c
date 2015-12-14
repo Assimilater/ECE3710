@@ -81,11 +81,11 @@ bool NET_SPI(NET_CHIP chip, NET_Frame* frame) {
 	uint i;
 	SPI_Frame spi;
 	byte
-		mosi[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-		miso[20] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		mosi[2500] = {0},
+		miso[2500] = {0};
 	
 	// Safety percautions
-	if (frame->N > 17) { return false; }
+	if (frame->N > 2497) { return false; }
 	if (frame->Control.mode == NET_MODE_F1B) {
 		if (frame->N > 1) { frame->N = 1; }
 		else if (frame->N < 1) { return false; }
@@ -145,13 +145,11 @@ void NET_Init() {
 	typedef enum {
 		ADDR_HOME,
 		ADDR_SUBNET,
-		ADDR_CLIENTIP,
 		ADDR_GATEWAY,
 	} addresses;
 	byte address[4][4] = {
 		{192, 168, 0, 1}, // default ip address in most systems
 		{255, 255, 255, 0}, // subnet mask, for seriously every network
-		{129, 123, 4, 128}, // ip address as seen by client before disconnecting
 		{129, 123, 5, 254}, // default gateway as seen by client before disconnecting
 	};
 	typedef enum {
@@ -160,7 +158,7 @@ void NET_Init() {
 		MAC_SERVER,
 	} macs;
 	byte mac[3][6] = {
-		{0x00, 0x23, 0xAE, 0x6F, 0x11, 0xC4},
+		{0x00, 0x90, 0xF5, 0xE9, 0xAA, 0x21},
 		{0x00, 0x08, 0xDC, 0x1E, 0xB8, 0x73},
 		{0x00, 0x08, 0xDC, 0x1E, 0xB8, 0x7D},
 	};
@@ -172,7 +170,6 @@ void NET_Init() {
 	NET_RST = 0;
 	for (i = 0; i < 5000; ++i);
 	NET_RST = 1;
-	
 	while (!NET_RDY_CLIENT); // Wait for ready signal from CPC
 	while (!NET_RDY_SERVER); // Wait for ready signal from ISP
 	
@@ -188,49 +185,21 @@ void NET_Init() {
 	byteframe.Control.mode = NET_MODE_VAR;
 	byteframe.Control.socket = 0;
 	
-	// Debug code
-	frame.Data = debug;
-	frame.Control.write = false;
-	
-	frame.N = 1;
-	frame.Address = 0x39;
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	frame.N = 4;
-	
-	frame.Control.write = true;
-	
 	//---------------------------------------------------------------------------------------+
 	// Chip Addressing Configuration                                                         |
 	//---------------------------------------------------------------------------------------+
 	// MAC (physical address)
 	frame.N = 6;
-	frame.Address = NET_COMMON_MAC;
-	frame.Data = mac[MAC_CLIENT];
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	
 	frame.Data = mac[MAC_GHOST];
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	frame.N = 4; // Following transmissions are 4-bytes
 	
 	//ip address
 	frame.Address = NET_COMMON_IP;
-	frame.Data = address[ADDR_GATEWAY]; // client chip pretends to be the default gateway
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	frame.Data = address[ADDR_CLIENTIP]; // server chip pretends to be the client
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	
-	//subnet mask
-	frame.Address = NET_COMMON_SUBNET;
-	frame.Data = address[ADDR_SUBNET];
-	NET_SPI(NET_CHIP_CLIENT, &frame);
-	NET_SPI(NET_CHIP_SERVER, &frame);
-	
-	//default gateway
-	frame.Address = NET_COMMON_GATEWAY;
 	frame.Data = address[ADDR_HOME];
 	NET_SPI(NET_CHIP_CLIENT, &frame);
 	
+	//default gateway
 	frame.Data = address[ADDR_GATEWAY];
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
