@@ -106,7 +106,22 @@ void Touch_Handler() {
 	while (atomic_touch); // Wait for touch interaction to finish
 }
 
+byte debug[2000] = {0};
 void NET_SERVER_Handler() {
+	NET_Frame frame;
+	
+	frame.Control.mode = NET_MODE_VAR;
+	frame.Control.write = false;
+	frame.Control.reg = NET_REG_COMMON;
+	frame.Control.socket = 0;
+	
+	frame.Address = NET_COMMON_IR;
+	frame.Data = debug;
+	frame.N = 4;
+	
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	
+	
 	//Read from ISP
 	//NET_READDATA(give ISP CS if possible);
 	
@@ -115,8 +130,7 @@ void NET_SERVER_Handler() {
 
 void NET_CLIENT_Handler() {
 	//Read from PC
-	static NET_Frame frame;
-	static byte data[2000]; //How much data can be on the buffer
+	NET_Frame frame;
 	//frame->Data = data;
 	//frame->Control.socket = 0; //FIX!!!
 	//frame->Control.mode = NET_MODE_VAR;
@@ -125,6 +139,19 @@ void NET_CLIENT_Handler() {
 	//Parse Data
 	//NET_PARSEDATA(data);
 	//write to ISP
+	
+	
+	
+	frame.Control.mode = NET_MODE_VAR;
+	frame.Control.write = false;
+	frame.Control.reg = NET_REG_COMMON;
+	frame.Control.socket = 0;
+	
+	frame.Address = NET_COMMON_IR;
+	frame.Data = debug;
+	frame.N = 4;
+	
+	NET_SPI(NET_CHIP_CLIENT, &frame);
 }
 
 //---------------------------------------------------------------------------------------+
@@ -139,21 +166,21 @@ void Busy_Interrupts() {
 			i_touch = INT_TOUCH;
 			if (i_touch == 0) {
 				Touch_Handler();
-				//i_touch = 1;
+				i_touch = 1;
 			}
 		}
 		if (i_net_server != INT_NET_SERVER) {
 			i_net_server = INT_NET_SERVER;
 			if (i_net_server == 0) {
 				NET_SERVER_Handler();
-				//i_net_server = 1;
+				i_net_server = 1;
 			}
 		}
 		if (i_net_client != INT_NET_CLIENT) {
 			i_net_client = INT_NET_CLIENT;
 			if (i_net_client == 0) {
 				NET_CLIENT_Handler();
-				//i_net_client = 1;
+				i_net_client = 1;
 			}
 		}
 	}

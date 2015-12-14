@@ -28,10 +28,11 @@ typedef enum {
 } NET_MODE;
 typedef union {
 	struct {
-		uint socket:3; // Note: Must be 0 if using common register
-		uint reg:2;
-		uint write:1; // Default: Read (0)
-		uint mode:2; // Default: NET_VAR_M
+		uint
+			socket:3, // Note: Must be 0 if using common register
+			reg:2, // Default: NET_REG_COMMON
+			write:1, // Default: Read (false)
+			mode:2; // Default: NET_VAR_M
 	};
 	byte byte;
 } ControlByte; // See section 2.2.2 in w550 datasheet
