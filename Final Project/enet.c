@@ -29,7 +29,7 @@ void NET_READDATA(NET_CHIP chip) {
 	
 	// read the data on the buffer
 	frame.Control.reg = NET_REG_RX;
-	frame.Address = (data[0] << 8) + data[1];
+	frame.Address = (data[0] << 8) | data[1];
 	frame.Data = NET_Buffer;
 	frame.N = NET_Size;
 	NET_SPI(chip, &frame);
@@ -83,14 +83,14 @@ void NET_WRITEDATA(NET_CHIP chip){
 	//write the data to the buffer
 	frame.Control.write = true;
 	frame.Control.reg = NET_REG_TX;
-	frame.Address = (data[0] << 8) + data[1];
+	frame.Address = (data[0] << 8) | data[1];
 	frame.N = NET_Size;
 	frame.Data = NET_Buffer;
 	NET_SPI(chip, &frame);
 	
 	//update the TX write pointer
-	data[0] += (NET_Size & 0xFF00) >> 8;
-	data[1] += (NET_Size & 0x00FF);
+	data[0] = ((frame.Address + NET_Size) & 0xFF00) >> 8;
+	data[1] = ((frame.Address + NET_Size) & 0x00FF);
 	
 	frame.Address = NET_SOCKET_TX_WR;
 	frame.Control.reg = NET_REG_SOCKET;
