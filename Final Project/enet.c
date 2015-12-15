@@ -201,14 +201,14 @@ void NET_Init() {
 	NET_Frame frame;
 	NET_Byteframe byteframe;
 	typedef enum {
-		ADDR_HOME,
+		ADDR_CLIENT,
 		ADDR_SUBNET,
 		ADDR_GATEWAY,
 	} addresses;
 	byte address[4][4] = {
-		{192, 168, 0, 1}, // default ip address in most systems
-		{255, 255, 255, 0}, // subnet mask, for seriously every network
-		{129, 123, 5, 254}, // default gateway as seen by client before disconnecting
+		{129, 123, 5, 74}, // IP seen by client before disconnecting
+		{255, 255, 254, 0}, // subnet mask, for seriously every network
+		{129, 123, 5, 254}, // default gateway seen by client before disconnecting
 	};
 	typedef enum {
 		MAC_GHOST,
@@ -253,7 +253,11 @@ void NET_Init() {
 	
 	//ip address
 	frame.Address = NET_COMMON_IP;
-	frame.Data = address[ADDR_HOME];
+	frame.Data = address[ADDR_CLIENT];
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	
+	// Look like the default gateway to the client chip
+	frame.Data = address[ADDR_GATEWAY];
 	NET_SPI(NET_CHIP_CLIENT, &frame);
 	
 	//default gateway
