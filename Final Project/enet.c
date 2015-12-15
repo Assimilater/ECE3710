@@ -2,6 +2,9 @@
 #include "../Shared/GPIO.h"
 #include "enet.h"
 
+byte NET_Buffer[NET_BUFFER_SIZE] = {0};
+uint NET_Size = 0;
+
 void NET_READDATA(NET_CHIP chip) {
 	NET_Frame frame;
 	byte data[2];
@@ -251,7 +254,13 @@ void NET_Init() {
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	frame.N = 4; // Following transmissions are 4-bytes
 	
-	//ip address
+	// Subnet Mask
+	frame.Address = NET_COMMON_SUBNET;
+	frame.Data = address[ADDR_SUBNET];
+	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_SPI(NET_CHIP_SERVER, &frame);
+	
+	// IP Address
 	frame.Address = NET_COMMON_IP;
 	frame.Data = address[ADDR_CLIENT];
 	NET_SPI(NET_CHIP_SERVER, &frame);
@@ -260,7 +269,8 @@ void NET_Init() {
 	frame.Data = address[ADDR_GATEWAY];
 	NET_SPI(NET_CHIP_CLIENT, &frame);
 	
-	//default gateway
+	// Default Gateway
+	frame.Address = NET_COMMON_GATEWAY;
 	frame.Data = address[ADDR_GATEWAY];
 	NET_SPI(NET_CHIP_SERVER, &frame);
 	
@@ -270,27 +280,44 @@ void NET_Init() {
 	//interrupts
 	byteframe.Address = NET_COMMON_IMR;
 	byteframe.Data = 0xC0; // enable interrupts for ip conflict, and dest unreachable
-	byteframe.Control.write = true;
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
 	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 	
 	byteframe.Address = NET_COMMON_SIMR;
 	byteframe.Data = 0xFF; // enable interrupts from all sockets
-	byteframe.Control.write = true;
+	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+	
+	// Set socket 0 to use the full buffer
+	byteframe.Control.reg = NET_REG_SOCKET;
+	byteframe.Data = 0;
+	for (i = 1; i < 8; ++i) {
+		byteframe.Control.socket = i;
+		byteframe.Address = NET_SOCKET_RXBUF_SIZE;
+		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+		
+		byteframe.Address = NET_SOCKET_TXBUF_SIZE;
+		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+	}
+	byteframe.Control.socket = 0;
+	
+	byteframe.Data = 16;
+	byteframe.Address = NET_SOCKET_RXBUF_SIZE;
+	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+	
+	byteframe.Address = NET_SOCKET_TXBUF_SIZE;
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
 	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 	
 	// Enable interrupts on all sockets
-	byteframe.Control.reg = NET_REG_SOCKET;
 	byteframe.Address = NET_SOCKET_IMR;
 	byteframe.Data = 0xF; //enables most interrupts
-	//for (i = 0; i < 8; ++i) {
-		byteframe.Control.socket = 0; // i;
-		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
-		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
-	//}
+	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 	
-	byteframe.Control.socket = 0;
 	byteframe.Address = NET_SOCKET_MR;
 	byteframe.Data = 4; // MacRaw mode
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);

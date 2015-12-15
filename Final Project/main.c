@@ -108,6 +108,9 @@ void Touch_Handler() {
 	while (atomic_touch); // Wait for touch interaction to finish
 }
 
+byte debug[30];
+NET_Frame debug_frame;
+
 void NET_SERVER_Handler() {
 	NET_READDATA(NET_CHIP_CLIENT);
 	NET_WRITEDATA(NET_CHIP_SERVER);
@@ -120,8 +123,19 @@ void NET_CLIENT_Handler() {
 	NET_READDATA(NET_CHIP_CLIENT);
 	NET_WRITEDATA(NET_CHIP_SERVER);
 	
-	NET_READDATA(NET_CHIP_SERVER);
-	NET_WRITEDATA(NET_CHIP_CLIENT);
+	debug_frame.Control.mode = NET_MODE_VAR;
+	debug_frame.Control.reg = NET_REG_SOCKET;
+	debug_frame.Control.socket = 0;
+	debug_frame.Control.write = false;
+	
+	debug_frame.Address = NET_SOCKET_IR;
+	debug_frame.Data = debug;
+	debug_frame.N = 2;
+	
+	NET_SPI(NET_CHIP_CLIENT, &debug_frame);
+	
+//	NET_READDATA(NET_CHIP_SERVER);
+//	NET_WRITEDATA(NET_CHIP_CLIENT);
 }
 
 //---------------------------------------------------------------------------------------+
@@ -142,7 +156,7 @@ void Busy_Interrupts() {
 		if (i_net_server != INT_NET_SERVER) {
 			i_net_server = INT_NET_SERVER;
 			if (i_net_server == 0) {
-				NET_SERVER_Handler();
+				//NET_SERVER_Handler();
 				i_net_server = 1;
 			}
 		}

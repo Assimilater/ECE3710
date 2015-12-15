@@ -57,8 +57,8 @@ typedef union {
 } MAC;
 
 static const uint NET_BUFFER_SIZE = 2000;
-static byte NET_Buffer[NET_BUFFER_SIZE];
-static uint NET_Size = 0;
+extern byte NET_Buffer[NET_BUFFER_SIZE];
+extern uint NET_Size;
 
 //---------------------------------------------------------------------------------------+
 // Driver Functions (specific to interpreting macraw data and blocking requests)         |
@@ -92,17 +92,19 @@ void NET_Init(void);
 #define NET_COMMON_SUBNET				(uint16)0x0005;
 #define NET_COMMON_MAC					(uint16)0x0009;
 #define NET_COMMON_IP					(uint16)0x000F;
+#define NET_COMMON_INTLEVEL				(uint16)0x0013;
 #define NET_COMMON_IR					(uint16)0x0015;
 #define NET_COMMON_IMR					(uint16)0x0016;
 #define NET_COMMON_SIR					(uint16)0x0017;
 #define NET_COMMON_SIMR					(uint16)0x0018;
+#define NET_COMMON_VERSIONR				(uint16)0x0039;
 
 #define NET_SOCKET_MR					(uint16)0x0000;
 #define NET_SOCKET_CR					(uint16)0x0001;
 #define NET_SOCKET_IR					(uint16)0x0002;
 #define NET_SOCKET_SR					(uint16)0x0003;
-#define NET_SOCKET_RX_BUFSIZE			(uint16)0x001E;
-#define NET_SOCKET_TX_BUFSIZE			(uint16)0x001F;
+#define NET_SOCKET_RXBUF_SIZE			(uint16)0x001E;
+#define NET_SOCKET_TXBUF_SIZE			(uint16)0x001F;
 #define NET_SOCKET_TX_FSR				(uint16)0x0020;
 #define NET_SOCKET_TX_RD				(uint16)0x0022;
 #define NET_SOCKET_TX_WR				(uint16)0x0024;
