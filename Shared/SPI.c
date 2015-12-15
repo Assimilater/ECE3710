@@ -1,7 +1,7 @@
 #include "SPI.h"
 
 //---------------------------------------------------------------------------------------+
-// Forward declaration of function that actually handles the SPI FIFO buffers            |
+// Forward declaration of functions that actually handle the SPI FIFO buffers            |
 //---------------------------------------------------------------------------------------+
 void SPI_ReadWrite(SPI_Route*, SPI_Bus*);
 void SPI_Read(SPI_Route*, SPI_Bus*);

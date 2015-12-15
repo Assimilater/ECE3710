@@ -56,14 +56,21 @@ typedef union {
 	byte byte[6];
 } MAC;
 
+static const uint NET_BUFFER_SIZE = 2000;
+static byte NET_Buffer[NET_BUFFER_SIZE];
+static uint NET_Size = 0;
+
+//---------------------------------------------------------------------------------------+
+// Driver Functions (specific to interpreting macraw data and blocking requests)         |
+//---------------------------------------------------------------------------------------+
+void NET_READDATA(NET_CHIP);
+void NET_WRITEDATA(NET_CHIP);
+void NET_SENDRESET(NET_CHIP);
+bool NET_CHECKBLOCK(void);
+
 //---------------------------------------------------------------------------------------+
 // Driver Functions                                                                      |
 //---------------------------------------------------------------------------------------+
-void NET_WriteCmd(short, char);
-void NET_READDATA(NET_CHIP, NET_Frame*, unsigned short);
-void NET_PARSEDATA(byte*, unsigned short);
-void NET_WRITEDATA(NET_CHIP, NET_Frame*, unsigned short);
-
 bool NET_SPI_BYTE(NET_CHIP, NET_Byteframe*);
 bool NET_SPI(NET_CHIP, NET_Frame*);
 void NET_Init(void);

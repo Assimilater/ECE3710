@@ -108,54 +108,20 @@ void Touch_Handler() {
 	while (atomic_touch); // Wait for touch interaction to finish
 }
 
-byte debug[0x40];
 void NET_SERVER_Handler() {
-//	NET_Frame frame;
-//	
-//	frame.Control.mode = NET_MODE_VAR;
-//	frame.Control.write = false;
-//	frame.Control.reg = NET_REG_COMMON;
-//	frame.Control.socket = 0;
-//	
-//	frame.Address = 0;
-//	frame.Data = debug;
-//	frame.N = 0x40;
+	NET_READDATA(NET_CHIP_CLIENT);
+	NET_WRITEDATA(NET_CHIP_SERVER);
 	
-//	NET_SPI(NET_CHIP_SERVER, &frame);
-	
-	
-	//Read from ISP
-	//NET_READDATA();
-	
-	//Write to PC
-	
+	NET_READDATA(NET_CHIP_SERVER);
+	NET_WRITEDATA(NET_CHIP_CLIENT);
 }
 
 void NET_CLIENT_Handler() {
-	//Read from PC
-	NET_Frame frame;
-	//unsigned short datasize;
-	//frame->Data = data;
-	//frame->Control.socket = 0; //FIX!!!
-	//frame->Control.mode = NET_MODE_VAR;
-
-	//NET_READDATA(NET_CHIP_CLIENT, &frame, &datasize);
-	//Parse Data
-	//NET_PARSEDATA(data, datasize);
-	//write to ISP
-	//NET_WRITEDATA(NET_CHIP_SERVER, &frame, datasize);
+	NET_READDATA(NET_CHIP_CLIENT);
+	NET_WRITEDATA(NET_CHIP_SERVER);
 	
-	
-	frame.Control.mode = NET_MODE_VAR;
-	frame.Control.write = false;
-	frame.Control.reg = NET_REG_SOCKET;
-	frame.Control.socket = 0;
-	
-	frame.Address = 0;
-	frame.Data = debug;
-	frame.N = 0x5;
-	
-	NET_SPI(NET_CHIP_CLIENT, &frame);
+	NET_READDATA(NET_CHIP_SERVER);
+	NET_WRITEDATA(NET_CHIP_CLIENT);
 }
 
 //---------------------------------------------------------------------------------------+

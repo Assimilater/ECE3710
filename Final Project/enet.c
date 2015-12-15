@@ -2,109 +2,109 @@
 #include "../Shared/GPIO.h"
 #include "enet.h"
 
-void NET_READDATA(NET_CHIP chip, NET_Frame* frame, unsigned short datasize){
-	byte data2[2];
-	//static unsigned short readsize;
+void NET_READDATA(NET_CHIP chip) {
+	NET_Frame frame;
+	byte data[2];
+	uint16 size = 0;
 	
-	frame->Control.write = false;
-	frame->Control.reg = NET_REG_SOCKET;
-
-	frame->Address = NET_SOCKET_RX_RSR;
-	frame->N = 2;
+	// Constant through the function
+	frame.Control.socket = 0;
+	frame.Control.mode = NET_MODE_VAR;
+	
+	// Determine the amount of data to read
+	frame.Control.reg = NET_REG_SOCKET;
+	frame.Control.write = false;
+	frame.Address = NET_SOCKET_RX_RSR;
+	frame.Data = data;
+	frame.N = 2;
 	do{
-	datasize = (frame->Data[0] << 8) + frame->Data[1];
-	NET_SPI(chip, frame);
-	} while (datasize != ((frame->Data[0] << 8) + frame->Data[1]));
+		NET_Size = size;
+		NET_SPI(chip, &frame);
+		size = (data[0] << 8) | data[1];
+	} while (NET_Size != size);
 	
+	// find the RX read pointer
+	frame.Address = NET_SOCKET_RX_RD;
+	NET_SPI(chip, &frame);
 	
-	//find the RX read pointer
-	frame->Address = NET_SOCKET_RX_RD;
-	NET_SPI(chip, frame);
-	
-	//read the data on the buffer
-	frame->Address = (frame->Data[0] << 8) + frame->Data[1];
-	frame->Control.reg = NET_REG_RX;
-	frame->N = datasize;
-	NET_SPI(chip, frame);
-	
-	//data = frame->Data;
+	// read the data on the buffer
+	frame.Control.reg = NET_REG_RX;
+	frame.Address = (data[0] << 8) + data[1];
+	frame.Data = NET_Buffer;
+	frame.N = NET_Size;
+	NET_SPI(chip, &frame);
 	
 	//update the RX read pointer
-	data2[0] = (frame->Address + datasize) >> 8;
-	data2[1] = (frame->Address + datasize) & 0xFF;
+	data[0] = ((frame.Address + NET_Size) & 0xFF00) >> 8;
+	data[1] = ((frame.Address + NET_Size) & 0x00FF);
 	
-	frame->Address = NET_SOCKET_RX_RD;
-	frame->Control.reg = NET_REG_SOCKET;
-	frame->Control.write = true;
-	frame->Data = data2;
-	frame->N = 2;
-	NET_SPI(chip, frame);
+	frame.Control.write = true;
+	frame.Control.reg = NET_REG_SOCKET;
+	frame.Address = NET_SOCKET_RX_RD;
+	frame.Data = data;
+	frame.N = 2;
+	NET_SPI(chip, &frame);
 	
 	//Give RECV command to the CR
-	frame->Address = NET_SOCKET_CR;
-	data2[0] = 0x40;
-	frame->N = 1;
-	NET_SPI(chip, frame);
-	//we may need to poll at some point to confirm that the command was processed!!!
+	frame.Address = NET_SOCKET_CR;
+	data[0] = 0x40;
+	frame.N = 1;
+	NET_SPI(chip, &frame);
 	
-	//frame->Data = data;
+	//we may need to poll at some point to confirm that the command was processed!!!
 }
 
-void NET_WRITEDATA(NET_CHIP chip, NET_Frame* frame, unsigned short datasize){
+void NET_WRITEDATA(NET_CHIP chip){
+	NET_Frame frame;
 	byte data[2];
-	byte data2[2];
-	//static unsigned short readsize;
 	
-	frame->Control.write = false;
-	frame->Control.reg = NET_REG_SOCKET;
-
-	frame->Address = NET_SOCKET_TX_FSR;
-	//data = frame->Data;
-	frame->Data = data2;
-	frame->N = 2;
+	// Constant through the function
+	frame.Control.socket = 0;
+	frame.Control.mode = NET_MODE_VAR;
+	
+	// Determine how much space is available
+	frame.Control.write = false;
+	frame.Control.reg = NET_REG_SOCKET;
+	frame.Address = NET_SOCKET_TX_FSR;
+	frame.Data = data;
+	frame.N = 2;
 	
 	//do a loop until we recieve the same ouptut**
-	NET_SPI(chip, frame);
+	NET_SPI(chip, &frame);
 	
-	if (((frame->Data[0] << 8) + frame->Data[1]) < datasize){
+	if (((frame.Data[0] << 8) + frame.Data[1]) < NET_Size){
 		//split up the data**
 	}
 	
 	//find the TX write pointer
-	frame->Address = NET_SOCKET_RX_WR;
-	NET_SPI(chip, frame);
+	frame.Address = NET_SOCKET_RX_WR;
+	NET_SPI(chip, &frame);
 	
 	//write the data to the buffer
-	frame->Address = (frame->Data[0] << 8) + frame->Data[1];
-	frame->Control.reg = NET_REG_TX;
-	frame->N = datasize;
-	frame->Control.write = true;
-	frame->Data = data;
-	NET_SPI(chip, frame);
+	frame.Control.write = true;
+	frame.Control.reg = NET_REG_TX;
+	frame.Address = (data[0] << 8) + data[1];
+	frame.N = NET_Size;
+	frame.Data = NET_Buffer;
+	NET_SPI(chip, &frame);
 	
 	//update the TX write pointer
-	data2[0] += datasize >> 8;
-	data2[1] += datasize & 0xFF;
+	data[0] += (NET_Size & 0xFF00) >> 8;
+	data[1] += (NET_Size & 0x00FF);
 	
-	frame->Address = NET_SOCKET_TX_WR;
-	frame->Control.reg = NET_REG_SOCKET;
-	frame->Control.write = true;
-	frame->Data = data2;
-	frame->N = 2;
-	NET_SPI(chip, frame);
+	frame.Address = NET_SOCKET_TX_WR;
+	frame.Control.reg = NET_REG_SOCKET;
+	frame.Control.write = true;
+	frame.Data = data;
+	frame.N = 2;
+	NET_SPI(chip, &frame);
 	
 	//Give SEND command to the CR
-	frame->Address = NET_SOCKET_CR;
-	data2[0] = 0x20;
-	frame->N = 1;
-	NET_SPI(chip, frame);
+	frame.Address = NET_SOCKET_CR;
+	data[0] = 0x20;
+	frame.N = 1;
+	NET_SPI(chip, &frame);
 	//we may need to poll at some point to confirm that the command was processed!!!
-	
-	frame->Data = data;
-}
-
-void NET_PARSEDATA(byte* data, unsigned short datasize){
-	
 }
 
 //---------------------------------------------------------------------------------------+
@@ -280,46 +280,30 @@ void NET_Init() {
 	byteframe.Control.reg = NET_REG_SOCKET;
 	byteframe.Address = NET_SOCKET_IMR;
 	byteframe.Data = 0xF; //enables most interrupts
-	for (i = 0; i < 8; ++i) {
-		byteframe.Control.socket = i;
+	//for (i = 0; i < 8; ++i) {
+		byteframe.Control.socket = 0; // i;
 		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
 		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
-	}
+	//}
 	
 	byteframe.Control.socket = 0;
 	byteframe.Address = NET_SOCKET_MR;
-	byteframe.Data = 1;
+	byteframe.Data = 4; // MacRaw mode
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 	
 	byteframe.Address = NET_SOCKET_CR;
 	byteframe.Data = 0x1; // Open Socket 0
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 	
-	// Wait for the socket to finish opening
+	// Wait for the sockets to finish opening
 	byteframe.Address = NET_SOCKET_SR;
 	byteframe.Control.write = false;
-	while (byteframe.Data != 0x13) {
+	while (byteframe.Data != 0x42) {
 		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
 	}
-	byteframe.Control.write = true;
-	
-	byteframe.Address = NET_SOCKET_CR;
-	byteframe.Data = 0x2; // Set Socket 0 to Listen
-	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
-	
-	// Wait for the socket to be actively listening
-	byteframe.Address = NET_SOCKET_SR;
-	byteframe.Control.write = false;
-	while (byteframe.Data != 0x14) {
-		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	while (byteframe.Data != 0x42) {
+		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 	}
-	byteframe.Control.write = true;
-	
-	
-//	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
-//	for (i = 0; i < 8; ++i) {
-//		byteframe.Control.socket = i;
-//		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
-//		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
-//	}
 }
