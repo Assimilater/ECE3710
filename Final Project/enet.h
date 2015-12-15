@@ -89,9 +89,11 @@ void NET_Init(void);
 #define NET_COMMON_IMR					(uint16)0x0016;
 #define NET_COMMON_SIR					(uint16)0x0017;
 #define NET_COMMON_SIMR					(uint16)0x0018;
-#define NET_SOCKET_MODE					(uint16)0x0000;
+
+#define NET_SOCKET_MR					(uint16)0x0000;
 #define NET_SOCKET_CR					(uint16)0x0001;
-#define NET_SOCKET_SIR					(uint16)0x0002;
+#define NET_SOCKET_IR					(uint16)0x0002;
+#define NET_SOCKET_SR					(uint16)0x0003;
 #define NET_SOCKET_RX_BUFSIZE			(uint16)0x001E;
 #define NET_SOCKET_TX_BUFSIZE			(uint16)0x001F;
 #define NET_SOCKET_TX_FSR				(uint16)0x0020;

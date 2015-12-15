@@ -1,7 +1,7 @@
 #include "../Shared/embedded_t.h"
 #include "../Shared/Controller.h"
 #include "../Shared/LCD.h"
-//#include "enet.h"
+#include "enet.h"
 
 //---------------------------------------------------------------------------------------+
 // Precalculated constants for the dimensions of our boxes                               |
@@ -108,6 +108,7 @@ void Touch_Handler() {
 	while (atomic_touch); // Wait for touch interaction to finish
 }
 
+byte debug[0x40];
 void NET_SERVER_Handler() {
 //	NET_Frame frame;
 //	
@@ -132,7 +133,7 @@ void NET_SERVER_Handler() {
 
 void NET_CLIENT_Handler() {
 	//Read from PC
-//	NET_Frame frame;
+	NET_Frame frame;
 	//unsigned short datasize;
 	//frame->Data = data;
 	//frame->Control.socket = 0; //FIX!!!
@@ -145,16 +146,16 @@ void NET_CLIENT_Handler() {
 	//NET_WRITEDATA(NET_CHIP_SERVER, &frame, datasize);
 	
 	
-//	frame.Control.mode = NET_MODE_VAR;
-//	frame.Control.write = false;
-//	frame.Control.reg = NET_REG_COMMON;
-//	frame.Control.socket = 0;
-//	
-//	frame.Address = 0;
-////	frame.Data = debug;
-//	frame.N = 0x40;
+	frame.Control.mode = NET_MODE_VAR;
+	frame.Control.write = false;
+	frame.Control.reg = NET_REG_SOCKET;
+	frame.Control.socket = 0;
 	
-//	NET_SPI(NET_CHIP_CLIENT, &frame);
+	frame.Address = 0;
+	frame.Data = debug;
+	frame.N = 0x5;
+	
+	NET_SPI(NET_CHIP_CLIENT, &frame);
 }
 
 //---------------------------------------------------------------------------------------+
@@ -309,7 +310,7 @@ void init() {
 	NVIC_EN0_R = 0x1;
 	
 	LCD_Init();
-	//NET_Init();
+	NET_Init();
 }
 
 //---------------------------------------------------------------------------------------+

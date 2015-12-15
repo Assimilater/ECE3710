@@ -134,15 +134,16 @@ bool NET_SPI_BYTE(NET_CHIP chip, NET_Byteframe* frame) {
 //---------------------------------------------------------------------------------------+
 // Converts address into bytestream, does input validation, and calls spi handler        |
 //---------------------------------------------------------------------------------------+
+#define MAX_BUFFER (uint)1024;
 bool NET_SPI(NET_CHIP chip, NET_Frame* frame) {
 	uint i;
 	SPI_Frame spi;
 	byte
-		mosi[53] = {0},
-		miso[53] = {0};
+		mosi[1027] = {0},
+		miso[1027] = {0};
 	
 	// Safety percautions
-	if (frame->N > 50) { return false; }
+	if (frame->N > 1024) { return false; }
 	if (frame->Control.mode == NET_MODE_F1B) {
 		if (frame->N > 1) { frame->N = 1; }
 		else if (frame->N < 1) { return false; }
@@ -286,9 +287,33 @@ void NET_Init() {
 	}
 	
 	byteframe.Control.socket = 0;
+	byteframe.Address = NET_SOCKET_MR;
+	byteframe.Data = 1;
+	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	
+	byteframe.Address = NET_SOCKET_CR;
+	byteframe.Data = 0x1; // Open Socket 0
+	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	
+	// Wait for the socket to finish opening
+	byteframe.Address = NET_SOCKET_SR;
+	byteframe.Control.write = false;
+	while (byteframe.Data != 0x13) {
+		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	}
+	byteframe.Control.write = true;
+	
 	byteframe.Address = NET_SOCKET_CR;
 	byteframe.Data = 0x2; // Set Socket 0 to Listen
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	
+	// Wait for the socket to be actively listening
+	byteframe.Address = NET_SOCKET_SR;
+	byteframe.Control.write = false;
+	while (byteframe.Data != 0x14) {
+		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	}
+	byteframe.Control.write = true;
 	
 	
 //	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
