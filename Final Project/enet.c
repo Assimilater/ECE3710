@@ -3,8 +3,7 @@
 #include "enet.h"
 
 void NET_READDATA(NET_CHIP chip, NET_Frame* frame, unsigned short datasize){
-	static byte* data;
-	static byte data2[2];
+	byte data2[2];
 	//static unsigned short readsize;
 	
 	frame->Control.write = false;
@@ -28,7 +27,7 @@ void NET_READDATA(NET_CHIP chip, NET_Frame* frame, unsigned short datasize){
 	frame->N = datasize;
 	NET_SPI(chip, frame);
 	
-	data = frame->Data;
+	//data = frame->Data;
 	
 	//update the RX read pointer
 	data2[0] = (frame->Address + datasize) >> 8;
@@ -48,19 +47,19 @@ void NET_READDATA(NET_CHIP chip, NET_Frame* frame, unsigned short datasize){
 	NET_SPI(chip, frame);
 	//we may need to poll at some point to confirm that the command was processed!!!
 	
-	frame->Data = data;
+	//frame->Data = data;
 }
 
 void NET_WRITEDATA(NET_CHIP chip, NET_Frame* frame, unsigned short datasize){
-	static byte* data;
-	static byte data2[2];
+	byte data[2];
+	byte data2[2];
 	//static unsigned short readsize;
 	
 	frame->Control.write = false;
 	frame->Control.reg = NET_REG_SOCKET;
 
 	frame->Address = NET_SOCKET_TX_FSR;
-	data = frame->Data;
+	//data = frame->Data;
 	frame->Data = data2;
 	frame->N = 2;
 	
@@ -139,11 +138,11 @@ bool NET_SPI(NET_CHIP chip, NET_Frame* frame) {
 	uint i;
 	SPI_Frame spi;
 	byte
-		mosi[2500] = {0},
-		miso[2500] = {0};
+		mosi[53] = {0},
+		miso[53] = {0};
 	
 	// Safety percautions
-	if (frame->N > 2497) { return false; }
+	if (frame->N > 50) { return false; }
 	if (frame->Control.mode == NET_MODE_F1B) {
 		if (frame->N > 1) { frame->N = 1; }
 		else if (frame->N < 1) { return false; }

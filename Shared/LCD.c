@@ -2,14 +2,14 @@
 #include "../Shared/GPIO.h"
 #include "LCD.h"
 
+#define TOUCH_MAX_COL (uint16)0xEDF;
+#define TOUCH_MAX_ROW (uint16)0xFFF;
+
 //---------------------------------------------------------------------------------------+
 // Uses SPI to interact witht the touchscreen chip and retrieve coordinates              |
 //---------------------------------------------------------------------------------------+
 bool LCD_GetXY(SAMPLE_MODE mode, coord* val) {
-	// Vars used for all modes
-	static const unsigned short TOUCH_MAX_COL = 0xEDF;
-	static const unsigned short TOUCH_MAX_ROW = 0xFFF;
-	static const uint SAMPLE_SIZE = 100;
+	const uint SAMPLE_SIZE = 100;
 	static coord data[SAMPLE_SIZE];
 	
 	// Vars used for poll
@@ -18,7 +18,7 @@ bool LCD_GetXY(SAMPLE_MODE mode, coord* val) {
 	coord* poll;
 	
 	// Vars used for get (averaging)
-	static uint sample = 0;
+	static uint8 sample = 0;
 	uint i, n, col, page;
 	
 	if (mode == TOUCH_RESET) {

@@ -1,7 +1,7 @@
 #include "../Shared/embedded_t.h"
 #include "../Shared/Controller.h"
 #include "../Shared/LCD.h"
-#include "enet.h"
+//#include "enet.h"
 
 //---------------------------------------------------------------------------------------+
 // Precalculated constants for the dimensions of our boxes                               |
@@ -27,6 +27,8 @@ State enable = FILTER_DISABLED;
 
 uint block = 0;
 char blocked_s[8] = "0000000";
+char status_e[17] = "Status:  Enabled";
+char status_d[17] = "Status: Disabled";
 TextRegion blocked_r;
 TextRegion status_r;
 
@@ -41,14 +43,14 @@ void toggleStatus() {
 	
 	if (enable) {
 		enable = FILTER_DISABLED;
+		status_r.Text = status_d;
 		button_r.Color = LCD_COLOR_RED;
 		status_r.Color = LCD_COLOR_RED;
-		status_r.Text = "Status: Disabled";
 	} else {
 		enable = FILTER_ENABLED;
+		status_r.Text = status_e;
 		button_r.Color = LCD_COLOR_GREEN;
 		status_r.Color = LCD_COLOR_GREEN;
-		status_r.Text = "Status:  Enabled";
 	}
 	LCD_FillRegion(button_r);
 	LCD_WriteText(status_r);
@@ -106,20 +108,19 @@ void Touch_Handler() {
 	while (atomic_touch); // Wait for touch interaction to finish
 }
 
-byte debug[2000] = {0};
 void NET_SERVER_Handler() {
-	NET_Frame frame;
+//	NET_Frame frame;
+//	
+//	frame.Control.mode = NET_MODE_VAR;
+//	frame.Control.write = false;
+//	frame.Control.reg = NET_REG_COMMON;
+//	frame.Control.socket = 0;
+//	
+//	frame.Address = 0;
+//	frame.Data = debug;
+//	frame.N = 0x40;
 	
-	frame.Control.mode = NET_MODE_VAR;
-	frame.Control.write = false;
-	frame.Control.reg = NET_REG_COMMON;
-	frame.Control.socket = 0;
-	
-	frame.Address = 0;
-	frame.Data = debug;
-	frame.N = 0x40;
-	
-	NET_SPI(NET_CHIP_SERVER, &frame);
+//	NET_SPI(NET_CHIP_SERVER, &frame);
 	
 	
 	//Read from ISP
@@ -131,7 +132,7 @@ void NET_SERVER_Handler() {
 
 void NET_CLIENT_Handler() {
 	//Read from PC
-	NET_Frame frame;
+//	NET_Frame frame;
 	//unsigned short datasize;
 	//frame->Data = data;
 	//frame->Control.socket = 0; //FIX!!!
@@ -144,16 +145,16 @@ void NET_CLIENT_Handler() {
 	//NET_WRITEDATA(NET_CHIP_SERVER, &frame, datasize);
 	
 	
-	frame.Control.mode = NET_MODE_VAR;
-	frame.Control.write = false;
-	frame.Control.reg = NET_REG_COMMON;
-	frame.Control.socket = 0;
+//	frame.Control.mode = NET_MODE_VAR;
+//	frame.Control.write = false;
+//	frame.Control.reg = NET_REG_COMMON;
+//	frame.Control.socket = 0;
+//	
+//	frame.Address = 0;
+////	frame.Data = debug;
+//	frame.N = 0x40;
 	
-	frame.Address = 0;
-	frame.Data = debug;
-	frame.N = 0x40;
-	
-	NET_SPI(NET_CHIP_CLIENT, &frame);
+//	NET_SPI(NET_CHIP_CLIENT, &frame);
 }
 
 //---------------------------------------------------------------------------------------+
@@ -308,38 +309,13 @@ void init() {
 	NVIC_EN0_R = 0x1;
 	
 	LCD_Init();
-	NET_Init();
-}
-
-void test() {
-	SPI_Frame frame1, frame2;
-	byte
-		miso[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-		mosi[10] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-	
-	init();
-	frame1.CS = &NET_CS_CLIENT;
-	frame1.MISO = miso;
-	frame1.MOSI = mosi;
-	frame1.N = 4;
-	
-	frame2 = frame1;
-	frame2.CS = &NET_CS_SERVER;
-	
-	// Test output data
-	mosi[1] = 0x39;
-	
-	while (1) {
-		SPI_Transfer(SSI0, &frame1);
-		SPI_Transfer(SSI0, &frame2);
-	}
+	//NET_Init();
 }
 
 //---------------------------------------------------------------------------------------+
 // No program logic should be contained here                                             |
 //---------------------------------------------------------------------------------------+
 int main() {
-	//test();
 	init();
 	exec();
 	while (1);
