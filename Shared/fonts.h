@@ -14,11 +14,11 @@ typedef struct {
 	
 typedef struct {
 	font Ubuntu;
-//	font Terminus;
-//	font Small;
+	font Terminus;
+	font Small;
 	font Big;
-//	font _8x8;
-//	font Basic_8x8;
+	font _8x8;
+	font Basic_8x8;
 } FontList;
 
 const FontList* fonts(void);

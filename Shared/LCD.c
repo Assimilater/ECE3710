@@ -51,11 +51,12 @@ bool LCD_GetXY(SAMPLE_MODE mode, coord* val) {
 		//---------------------------------------------------------------------------------------+
 		// Uses SPI to interact with the touchscreen chip and retrieve coordinates               |
 		//---------------------------------------------------------------------------------------+
-		frame.CS = &TP_CSX;
-		frame.MOSI = mosi;
-		frame.MISO = miso;
-		frame.N = 5;
-		SPI_Transfer(SSI1, &frame);
+		frame.route.CS = &TP_CSX;
+		frame.route.SSI = SSI1;
+		frame.bus.MOSI = mosi;
+		frame.bus.MISO = miso;
+		frame.bus.N = 5;
+		SPI_Transfer(&frame);
 		
 		// Read = X C[11:0] X[2:0] (where X is don't care)
 		poll = &data[sample++ % SAMPLE_SIZE];

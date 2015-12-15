@@ -134,16 +134,12 @@ bool NET_SPI_BYTE(NET_CHIP chip, NET_Byteframe* frame) {
 //---------------------------------------------------------------------------------------+
 // Converts address into bytestream, does input validation, and calls spi handler        |
 //---------------------------------------------------------------------------------------+
-#define MAX_BUFFER (uint)1024;
 bool NET_SPI(NET_CHIP chip, NET_Frame* frame) {
-	uint i;
 	SPI_Frame spi;
-	byte
-		mosi[1027] = {0},
-		miso[1027] = {0};
+	byte mosi[3] = {0},
+		miso[3] = {0};
 	
 	// Safety percautions
-	if (frame->N > 1024) { return false; }
 	if (frame->Control.mode == NET_MODE_F1B) {
 		if (frame->N > 1) { frame->N = 1; }
 		else if (frame->N < 1) { return false; }
@@ -166,29 +162,33 @@ bool NET_SPI(NET_CHIP chip, NET_Frame* frame) {
 	mosi[2] = NET_ControlFix(frame->Control);
 	
 	// Setup the spi frame
-	spi.N = frame->N + 3;
-	spi.MOSI = mosi;
-	spi.MISO = miso;
-	spi.CS = (chip == NET_CHIP_CLIENT)
+	spi.bus.N = 3;
+	spi.bus.MOSI = mosi;
+	spi.bus.MISO = miso;
+	spi.route.SSI = SSI0;
+	spi.route.CS = (chip == NET_CHIP_CLIENT)
 		? &NET_CS_CLIENT
 		: &NET_CS_SERVER;
 	
-	// Copy data to MOSI when writing
+	// Fancy SPI_Transfer
+	SPI_Begin(&spi.route);
+	
+	// Send the Address/Control Block
+	SPI_Block(&spi.route, &spi.bus);
+	
+	// Send the data block
+	spi.bus.N = frame->N;
 	if (frame->Control.write) {
-		for (i = 0; i < frame->N; ++i) {
-			mosi[i + 3] = frame->Data[i];
-		}
+		spi.bus.MISO = 0;
+		spi.bus.MOSI = frame->Data;
+	} else {
+		spi.bus.MISO = frame->Data;
+		spi.bus.MOSI = 0;
 	}
+	SPI_Block(&spi.route, &spi.bus);
 	
-	// Perform the SPI transaction
-	SPI_Transfer(SSI0, &spi);
-	
-	// Copy data from MISO when reading
-	if (!frame->Control.write) {
-		for (i = 0; i < frame->N; ++i) {
-			frame->Data[i] = miso[i + 3];
-		}
-	}
+	// End Fancy SPI_Transfer
+	SPI_End(&spi.route);
 	
 	return true;
 }
