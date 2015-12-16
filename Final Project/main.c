@@ -156,7 +156,7 @@ void test() {
 //---------------------------------------------------------------------------------------+
 #define ACTIVE_INT 0
 void Busy_Interrupts() {
-	test();
+	//test();
 	while (1) {
 		if (INT_TOUCH == ACTIVE_INT) {
 			Touch_Handler();

@@ -344,8 +344,9 @@ void NET_Init() {
 	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 	
 	byteframe.Address = NET_SOCKET_MR;
-	byteframe.Data = 4; // MacRaw mode
+	byteframe.Data = 0x04; // MacRaw mode
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	byteframe.Data = 0x84; // MacRaw mode w/MAC Filtering
 	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 	
 	byteframe.Address = NET_SOCKET_CR;
