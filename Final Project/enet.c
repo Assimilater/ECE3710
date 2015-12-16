@@ -37,6 +37,39 @@ byte mac[3][6] = {
 };
 
 //---------------------------------------------------------------------------------------+
+// Parse all the data into packet groups                                                 |
+//---------------------------------------------------------------------------------------+
+void NET_ParsePackets() {
+	uint i = 0;
+	NET_Packets = 0;
+	while (i < NET_Size) {
+		// Get the packet size
+		NET_Packet[NET_Packets].Size = ((NET_Buffer[i] << 8) | NET_Buffer[i + 1]) - 2;
+		i += 2;
+		
+		// Get the contents of the Data Packet
+		NET_Packet[NET_Packets].DataPacket = NET_Buffer + i;
+		NET_Packet[NET_Packets].DataInfo.Destination = NET_Buffer + i;
+		NET_Packet[NET_Packets].DataInfo.Source = NET_Buffer + i + 6;
+		NET_Packet[NET_Packets].DataInfo.Type = (NET_Buffer[i + 12] << 8) | NET_Buffer[i + 13];
+		NET_Packet[NET_Packets].DataInfo.Data = NET_Buffer + i + 14;
+		NET_Packet[NET_Packets].DataInfo.Size = NET_Packet[NET_Packets].Size - 14;
+		i += NET_Packet[NET_Packets].Size;
+		
+//		// Get the CRC
+//		NET_Packet[NET_Packets].CRC =
+//			(NET_Buffer[i] << (3*8)) |
+//			(NET_Buffer[i + 1] << (2*8)) |
+//			(NET_Buffer[i + 2] << (1*8)) |
+//			NET_Buffer[i + 3];
+//		i += 4;
+		
+		// Move onto the next packet
+		++NET_Packets;
+	}
+}
+
+//---------------------------------------------------------------------------------------+
 // Read all available data from the given chip                                           |
 //---------------------------------------------------------------------------------------+
 void NET_READDATA(NET_CHIP chip) {
@@ -89,6 +122,8 @@ void NET_READDATA(NET_CHIP chip) {
 	NET_SPI(chip, &frame);
 	
 	//we may need to poll at some point to confirm that the command was processed!!!
+	
+	NET_ParsePackets();
 }
 
 //---------------------------------------------------------------------------------------+
@@ -97,54 +132,68 @@ void NET_READDATA(NET_CHIP chip) {
 void NET_WRITEDATA(NET_CHIP chip){
 	NET_Frame frame;
 	byte data[2];
+	uint i;
 	
 	// Constant through the function
 	frame.Control.socket = 0;
 	frame.Control.mode = NET_MODE_VAR;
 	
-	// Determine how much space is available
-	frame.Control.write = false;
-	frame.Control.reg = NET_REG_SOCKET;
-	frame.Address = NET_SOCKET_TX_FSR;
-	frame.Data = data;
-	frame.N = 2;
-	
-	//do a loop until we recieve the same ouptut**
-	NET_SPI(chip, &frame);
-	
-	if (((frame.Data[0] << 8) + frame.Data[1]) < NET_Size){
-		//split up the data**
+	for (i = 0; i < NET_Packets; ++i) {
+		// Determine how much space is available
+		frame.Control.write = false;
+		frame.Control.reg = NET_REG_SOCKET;
+		frame.Data = data;
+		frame.N = 2;
+		
+		// NOTE: Probably important!!!
+//		//do a loop until we recieve the same ouptut**
+//		frame.Address = NET_SOCKET_TX_FSR;
+//		NET_SPI(chip, &frame);
+//		
+//		if (((frame.Data[0] << 8) + frame.Data[1]) < NET_Size){
+//			//split up the data**
+//		}
+		
+		//find the TX write pointer
+		frame.Address = NET_SOCKET_RX_WR;
+		NET_SPI(chip, &frame);
+		
+		//write the data to the buffer
+		frame.Control.write = true;
+		frame.Control.reg = NET_REG_TX;
+		frame.Address = (data[0] << 8) | data[1];
+		frame.N = NET_Packet[i].DataInfo.Size;
+		frame.Data = NET_Packet[i].DataPacket;
+		NET_SPI(chip, &frame);
+		
+		//update the TX write pointer
+		data[0] = ((frame.Address + frame.N) & 0xFF00) >> 8;
+		data[1] = ((frame.Address + frame.N) & 0x00FF);
+		
+		frame.Address = NET_SOCKET_TX_WR;
+		frame.Control.reg = NET_REG_SOCKET;
+		frame.Control.write = true;
+		frame.Data = data;
+		frame.N = 2;
+		NET_SPI(chip, &frame);
+		
+		//Give SENDMAC command to the CR
+		frame.N = 1;
+		data[0] = 0x21;
+		frame.Address = NET_SOCKET_CR;
+		NET_SPI(chip, &frame);
+		
+		// Poll to confirm the command was processed
+		frame.Control.write = false;
+		frame.Address = NET_SOCKET_IR;
+		do { NET_SPI(chip, &frame);
+		} while(!(data[0] & NET_INT_SENDOK));
+		
+		// Acknowledge (only) the SendOk interrupt
+		frame.Control.write = true;
+		data[0] = NET_INT_SENDOK;
+		NET_SPI(chip, &frame);
 	}
-	
-	//find the TX write pointer
-	frame.Address = NET_SOCKET_RX_WR;
-	NET_SPI(chip, &frame);
-	
-	//write the data to the buffer
-	frame.Control.write = true;
-	frame.Control.reg = NET_REG_TX;
-	frame.Address = (data[0] << 8) | data[1];
-	frame.N = NET_Size;
-	frame.Data = NET_Buffer;
-	NET_SPI(chip, &frame);
-	
-	//update the TX write pointer
-	data[0] = ((frame.Address + NET_Size) & 0xFF00) >> 8;
-	data[1] = ((frame.Address + NET_Size) & 0x00FF);
-	
-	frame.Address = NET_SOCKET_TX_WR;
-	frame.Control.reg = NET_REG_SOCKET;
-	frame.Control.write = true;
-	frame.Data = data;
-	frame.N = 2;
-	NET_SPI(chip, &frame);
-	
-	//Give SENDMAC command to the CR
-	frame.Address = NET_SOCKET_CR;
-	data[0] = 0x21;
-	frame.N = 1;
-	NET_SPI(chip, &frame);
-	//we may need to poll at some point to confirm that the command was processed!!!
 }
 
 //---------------------------------------------------------------------------------------+
