@@ -162,7 +162,7 @@ void Busy_Interrupts() {
 			Touch_Handler();
 		}
 		if (INT_NET_SERVER == ACTIVE_INT) {
-			//NET_SERVER_Handler();
+			NET_SERVER_Handler();
 		}
 		if (INT_NET_CLIENT == ACTIVE_INT) {
 			NET_CLIENT_Handler();
