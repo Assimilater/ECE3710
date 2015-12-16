@@ -108,9 +108,6 @@ void Touch_Handler() {
 	while (atomic_touch); // Wait for touch interaction to finish
 }
 
-byte debug[30];
-NET_Frame debug_frame;
-
 void NET_SERVER_Handler() {
 	byte Int = NET_GetInterrupt(NET_CHIP_SERVER);
 	if (Int & NET_INT_RECV) {
@@ -127,21 +124,21 @@ void NET_CLIENT_Handler() {
 		NET_READDATA(NET_CHIP_CLIENT);
 		NET_WRITEDATA(NET_CHIP_SERVER);
 	}
+}
+
+byte debug_data[30];
+NET_Frame debug_frame;
+void debug() {
+	debug_frame.Control.mode = NET_MODE_VAR;
+	debug_frame.Control.reg = NET_REG_SOCKET;
+	debug_frame.Control.socket = 0;
+	debug_frame.Control.write = false;
 	
+	debug_frame.Address = NET_SOCKET_IR;
+	debug_frame.Data = debug_data;
+	debug_frame.N = 2;
 	
-//	NET_READDATA(NET_CHIP_SERVER);
-//	NET_WRITEDATA(NET_CHIP_CLIENT);
-	
-//	debug_frame.Control.mode = NET_MODE_VAR;
-//	debug_frame.Control.reg = NET_REG_SOCKET;
-//	debug_frame.Control.socket = 0;
-//	debug_frame.Control.write = false;
-//	
-//	debug_frame.Address = NET_SOCKET_IR;
-//	debug_frame.Data = debug;
-//	debug_frame.N = 2;
-//	
-//	NET_SPI(NET_CHIP_CLIENT, &debug_frame);
+	NET_SPI(NET_CHIP_SERVER, &debug_frame);
 }
 
 void test() {
@@ -156,7 +153,6 @@ void test() {
 //---------------------------------------------------------------------------------------+
 #define ACTIVE_INT 0
 void Busy_Interrupts() {
-	//test();
 	while (1) {
 		if (INT_TOUCH == ACTIVE_INT) {
 			Touch_Handler();
@@ -167,6 +163,8 @@ void Busy_Interrupts() {
 		if (INT_NET_CLIENT == ACTIVE_INT) {
 			NET_CLIENT_Handler();
 		}
+		debug();
+		//test();
 	}
 }
 

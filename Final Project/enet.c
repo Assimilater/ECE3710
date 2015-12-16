@@ -138,7 +138,7 @@ void NET_WRITEDATA(NET_CHIP chip){
 	
 	//Give SEND command to the CR
 	frame.Address = NET_SOCKET_CR;
-	data[0] = 0x21;
+	data[0] = 0x20;
 	frame.N = 1;
 	NET_SPI(chip, &frame);
 	//we may need to poll at some point to confirm that the command was processed!!!
