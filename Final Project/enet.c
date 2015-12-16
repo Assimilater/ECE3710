@@ -136,9 +136,9 @@ void NET_WRITEDATA(NET_CHIP chip){
 	frame.N = 2;
 	NET_SPI(chip, &frame);
 	
-	//Give SEND command to the CR
+	//Give SENDMAC command to the CR
 	frame.Address = NET_SOCKET_CR;
-	data[0] = 0x20;
+	data[0] = 0x21;
 	frame.N = 1;
 	NET_SPI(chip, &frame);
 	//we may need to poll at some point to confirm that the command was processed!!!
