@@ -48,12 +48,12 @@ void NET_ParsePackets() {
 		i += 2;
 		
 		// Get the contents of the Data Packet
-		NET_Packet[NET_Packets].DataPacket = NET_Buffer + i;
-		NET_Packet[NET_Packets].DataInfo.Destination = NET_Buffer + i;
-		NET_Packet[NET_Packets].DataInfo.Source = NET_Buffer + i + 6;
-		NET_Packet[NET_Packets].DataInfo.Type = (NET_Buffer[i + 12] << 8) | NET_Buffer[i + 13];
-		NET_Packet[NET_Packets].DataInfo.Data = NET_Buffer + i + 14;
-		NET_Packet[NET_Packets].DataInfo.Size = NET_Packet[NET_Packets].Size - 14;
+		NET_Packet[NET_Packets].Data = NET_Buffer + i;
+		NET_Packet[NET_Packets].Destination = NET_Buffer + i;
+		NET_Packet[NET_Packets].Source = NET_Buffer + i + 6;
+		NET_Packet[NET_Packets].Type = (NET_Buffer[i + 12] << 8) | NET_Buffer[i + 13];
+		NET_Packet[NET_Packets].Payload = NET_Buffer + i + 14;
+		NET_Packet[NET_Packets].PayloadSize = NET_Packet[NET_Packets].Size - 14;
 		i += NET_Packet[NET_Packets].Size;
 		
 //		// Get the CRC
@@ -162,8 +162,8 @@ void NET_WRITEDATA(NET_CHIP chip){
 		frame.Control.write = true;
 		frame.Control.reg = NET_REG_TX;
 		frame.Address = (data[0] << 8) | data[1];
-		frame.N = NET_Packet[i].DataInfo.Size;
-		frame.Data = NET_Packet[i].DataPacket;
+		frame.N = NET_Packet[i].Size;
+		frame.Data = NET_Packet[i].Destination;
 		NET_SPI(chip, &frame);
 		
 		//update the TX write pointer
@@ -177,9 +177,9 @@ void NET_WRITEDATA(NET_CHIP chip){
 		frame.N = 2;
 		NET_SPI(chip, &frame);
 		
-		//Give SENDMAC command to the CR
+		//Give SEND command to the CR
 		frame.N = 1;
-		data[0] = 0x21;
+		data[0] = 0x20;
 		frame.Address = NET_SOCKET_CR;
 		NET_SPI(chip, &frame);
 		

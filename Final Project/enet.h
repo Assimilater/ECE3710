@@ -65,18 +65,14 @@ typedef enum {
 } NET_INT;
 
 typedef struct {
+	uint16 Size; // Data Packet Size
+	byte* Data; // Pointer to "Data Packet" (same as Destination)
 	byte* Destination; // size 6
 	byte* Source; // size 6
 	uint16 Type;
-	uint16 Size; // Payload size
-	byte* Data; // Pointer to "Payload"
-} NET_MACRAW_DATA;
-
-typedef struct {
-	uint16 Size; // Data Packet Size
-	byte* DataPacket; // Pointer to "Data Packet"
-	NET_MACRAW_DATA DataInfo; // Info that is useful for program logic
-//	uint CRC; // Validation block included by wiz550io. Not particularly useful
+	
+	uint16 PayloadSize;
+	byte* Payload; // size "Size - 14"
 } NET_MACRAW;
 
 static const uint NET_BUFFER_SIZE = 2000;
