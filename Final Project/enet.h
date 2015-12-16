@@ -64,9 +64,22 @@ typedef enum {
 	NET_INT_SENDOK =	1 << 4,
 } NET_INT;
 
+typedef struct {
+	uint16 Size;
+	byte Destination[6];
+	byte Source[6];
+	uint16 Type;
+	byte* Data;
+	uint CRC;
+} NET_MACRAW;
+
 static const uint NET_BUFFER_SIZE = 2000;
 extern byte NET_Buffer[NET_BUFFER_SIZE];
 extern uint NET_Size;
+
+static const uint NET_PACKET_BUFFER_SIZE = 25;
+extern NET_MACRAW NET_Packet[NET_PACKET_BUFFER_SIZE];
+extern uint NET_Packets;
 
 //---------------------------------------------------------------------------------------+
 // Driver Functions (specific to interpreting macraw data and blocking requests)         |

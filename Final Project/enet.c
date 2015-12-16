@@ -8,6 +8,9 @@
 byte NET_Buffer[NET_BUFFER_SIZE] = {0};
 uint NET_Size = 0;
 
+NET_MACRAW NET_Packet[NET_PACKET_BUFFER_SIZE] = {0};
+uint NET_Packets = 0;
+
 //---------------------------------------------------------------------------------------+
 // Addressing information for configuration                                              |
 //---------------------------------------------------------------------------------------+
