@@ -128,7 +128,7 @@ void NET_CLIENT_Handler() {
 
 byte debug_data[30];
 NET_Frame debug_frame;
-void debug() {
+void debug_init() {
 	debug_frame.Control.mode = NET_MODE_VAR;
 	debug_frame.Control.reg = NET_REG_SOCKET;
 	debug_frame.Control.socket = 0;
@@ -137,47 +137,57 @@ void debug() {
 	debug_frame.Address = NET_SOCKET_IR;
 	debug_frame.Data = debug_data;
 	debug_frame.N = 2;
-	
+}
+void debug() {
 	NET_SPI(NET_CHIP_SERVER, &debug_frame);
+//	NET_READDATA(NET_CHIP_CLIENT);
+//	NET_WRITEDATA(NET_CHIP_SERVER);
+//	NET_READDATA(NET_CHIP_CLIENT);
 }
 
-void test() {
-	NET_READDATA(NET_CHIP_CLIENT);
-	NET_WRITEDATA(NET_CHIP_SERVER);
+// Forward declarations used in main
+void m4config(void);
+void disp_init(void);
+
+//---------------------------------------------------------------------------------------+
+// void main() - Our Program Logic:                                                      |
+// Real interrups create the need for atomic use of SPI. To avoid the complications      |
+// associated with doing this, our program is a busy wait on those interrupt pins.       |
+// All interrupts are active low for our application                                     |
+//---------------------------------------------------------------------------------------+
+int main() {
+	m4config();
+	LCD_Init();
+	disp_init();
+	debug_init();
+	NET_Init();
 	
-	NET_READDATA(NET_CHIP_CLIENT);
-}
-
-//---------------------------------------------------------------------------------------+
-// Real interrups create the need for atomic use of SPI, so instead use a busy wait      |
-//---------------------------------------------------------------------------------------+
-#define ACTIVE_INT 0
-void Busy_Interrupts() {
 	while (1) {
-		if (INT_TOUCH == ACTIVE_INT) {
+		debug();
+		if (!INT_TOUCH) {
 			Touch_Handler();
 		}
-		if (INT_NET_SERVER == ACTIVE_INT) {
+		if (!INT_NET_SERVER) {
 			NET_SERVER_Handler();
 		}
-		if (INT_NET_CLIENT == ACTIVE_INT) {
+		if (!INT_NET_CLIENT) {
 			NET_CLIENT_Handler();
 		}
-		debug();
-		//test();
 	}
 }
 
 //---------------------------------------------------------------------------------------+
-// Program initialization logic                                                          |
+// Initializing the display (LCD) for our application                                    |
 //---------------------------------------------------------------------------------------+
-void exec() {
+void disp_init() {
 	Region button_r = {
 		COL_OUTER_Y0, COL_OUTER_YF,
 		ROW_OUTER_Y0, ROW_OUTER_YF,
 		LCD_COLOR_BLUE
 	};
-	LCD_FillRegion(button_r); // Fill in the outer box
+	
+	// Fill in the outer box
+	LCD_FillRegion(button_r);
 	
 	// Write the static text
 	blocked_r.y = 95;
@@ -205,19 +215,16 @@ void exec() {
 	
 	// Start the filter as enabled
 	toggleStatus();
-	
-	// Our program is a busy wait on interrupt conditions
-	Busy_Interrupts();
 }
 
 //---------------------------------------------------------------------------------------+
-// Any configuration on the microcontroller                                              |
+// Configuring the registers on the m4 for our application                               |
 //---------------------------------------------------------------------------------------+
-void init() {
+void m4config() {
 	// Enable clocks
 	SYSCTL->RCGCGPIO = 0x3F; // 11 1111 => f, e, d, c, b, a
 	SYSCTL->RCGCSSI = 0x3; // SSI0, SSI1
-	GPIO.PortD->LOCK.word = GPIO_UNLOCK; // PD7 needs to be unlcoked
+	GPIO.PortD->LOCK.word = GPIO_UNLOCK; // PD7 needs to be unlocked
 	GPIO.PortF->LOCK.word = GPIO_UNLOCK; // PF0 needs to be unlocked
 	
 	// PA[0:1] => Unavailable
@@ -285,16 +292,22 @@ void init() {
 	
 	// Configure Systick
 	SysTick->LOAD = 16000; // 1ms
-	
-	LCD_Init();
-	NET_Init();
 }
 
 //---------------------------------------------------------------------------------------+
-// No program logic should be contained here                                             |
+// Genereic Hard Fault Handler                                                           |
 //---------------------------------------------------------------------------------------+
-int main() {
-	init();
-	exec();
-	while (1);
+#include <stdio.h>
+void printErrorMsg(const char* err) {
+	while(*err != '\0'){
+		ITM_SendChar(*err);
+		++err;
+	}
+}
+void HardFault_Handler() {
+	static char msg[80];
+	sprintf(msg, "SCB->HFSR = 0x%08x\n", SCB->HFSR);
+	printErrorMsg(msg);
+	__ASM volatile("BKPT #01");
+	while(1);
 }
