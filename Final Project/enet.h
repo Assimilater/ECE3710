@@ -56,6 +56,14 @@ typedef union {
 	byte byte[6];
 } MAC;
 
+typedef enum {
+	NET_INT_CON =		1 << 0,
+	NET_INT_DISCON =	1 << 1,
+	NET_INT_RECV =		1 << 2,
+	NET_INT_TIMEOUT =	1 << 3,
+	NET_INT_SENDOK =	1 << 4,
+} NET_INT;
+
 static const uint NET_BUFFER_SIZE = 2000;
 extern byte NET_Buffer[NET_BUFFER_SIZE];
 extern uint NET_Size;
@@ -71,6 +79,8 @@ bool NET_CHECKBLOCK(void);
 //---------------------------------------------------------------------------------------+
 // Driver Functions                                                                      |
 //---------------------------------------------------------------------------------------+
+byte NET_GetInterrupt(NET_CHIP);
+void NET_ClearInterrupt(NET_CHIP, byte);
 bool NET_SPI_BYTE(NET_CHIP, NET_Byteframe*);
 bool NET_SPI(NET_CHIP, NET_Frame*);
 void NET_Init(void);

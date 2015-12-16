@@ -112,60 +112,60 @@ byte debug[30];
 NET_Frame debug_frame;
 
 void NET_SERVER_Handler() {
-	NET_READDATA(NET_CHIP_CLIENT);
-	NET_WRITEDATA(NET_CHIP_SERVER);
-	
-	NET_READDATA(NET_CHIP_SERVER);
-	NET_WRITEDATA(NET_CHIP_CLIENT);
+	byte Int = NET_GetInterrupt(NET_CHIP_SERVER);
+	if (Int & NET_INT_RECV) {
+		NET_ClearInterrupt(NET_CHIP_SERVER, NET_INT_RECV);
+		NET_READDATA(NET_CHIP_SERVER);
+		NET_WRITEDATA(NET_CHIP_CLIENT);
+	}
 }
 
 void NET_CLIENT_Handler() {
-	NET_READDATA(NET_CHIP_CLIENT);
-	NET_WRITEDATA(NET_CHIP_SERVER);
+	byte Int = NET_GetInterrupt(NET_CHIP_CLIENT);
+	if (Int & NET_INT_RECV) {
+		NET_ClearInterrupt(NET_CHIP_CLIENT, NET_INT_RECV);
+		NET_READDATA(NET_CHIP_CLIENT);
+		NET_WRITEDATA(NET_CHIP_SERVER);
+	}
 	
-	debug_frame.Control.mode = NET_MODE_VAR;
-	debug_frame.Control.reg = NET_REG_SOCKET;
-	debug_frame.Control.socket = 0;
-	debug_frame.Control.write = false;
-	
-	debug_frame.Address = NET_SOCKET_IR;
-	debug_frame.Data = debug;
-	debug_frame.N = 2;
-	
-	NET_SPI(NET_CHIP_CLIENT, &debug_frame);
 	
 //	NET_READDATA(NET_CHIP_SERVER);
 //	NET_WRITEDATA(NET_CHIP_CLIENT);
+	
+//	debug_frame.Control.mode = NET_MODE_VAR;
+//	debug_frame.Control.reg = NET_REG_SOCKET;
+//	debug_frame.Control.socket = 0;
+//	debug_frame.Control.write = false;
+//	
+//	debug_frame.Address = NET_SOCKET_IR;
+//	debug_frame.Data = debug;
+//	debug_frame.N = 2;
+//	
+//	NET_SPI(NET_CHIP_CLIENT, &debug_frame);
+}
+
+void test() {
+	NET_READDATA(NET_CHIP_CLIENT);
+	NET_WRITEDATA(NET_CHIP_SERVER);
+	
+	NET_READDATA(NET_CHIP_CLIENT);
 }
 
 //---------------------------------------------------------------------------------------+
 // Real interrups create the need for atomic use of SPI, so instead use a busy wait      |
 //---------------------------------------------------------------------------------------+
+#define ACTIVE_INT 0
 void Busy_Interrupts() {
-	byte i_touch, i_net_server, i_net_client;
-	i_touch = i_net_server = i_net_client = 1;
-	
+	test();
 	while (1) {
-		if (i_touch != INT_TOUCH) {
-			i_touch = INT_TOUCH;
-			if (i_touch == 0) {
-				Touch_Handler();
-				i_touch = 1;
-			}
+		if (INT_TOUCH == ACTIVE_INT) {
+			Touch_Handler();
 		}
-		if (i_net_server != INT_NET_SERVER) {
-			i_net_server = INT_NET_SERVER;
-			if (i_net_server == 0) {
-				//NET_SERVER_Handler();
-				i_net_server = 1;
-			}
+		if (INT_NET_SERVER == ACTIVE_INT) {
+			//NET_SERVER_Handler();
 		}
-		if (i_net_client != INT_NET_CLIENT) {
-			i_net_client = INT_NET_CLIENT;
-			if (i_net_client == 0) {
-				NET_CLIENT_Handler();
-				i_net_client = 1;
-			}
+		if (INT_NET_CLIENT == ACTIVE_INT) {
+			NET_CLIENT_Handler();
 		}
 	}
 }
@@ -287,7 +287,6 @@ void init() {
 	
 	// Configure Systick
 	SysTick->LOAD = 16000; // 1ms
-	NVIC_EN0_R = 0x1;
 	
 	LCD_Init();
 	NET_Init();

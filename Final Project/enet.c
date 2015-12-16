@@ -2,9 +2,40 @@
 #include "../Shared/GPIO.h"
 #include "enet.h"
 
+//---------------------------------------------------------------------------------------+
+// RX/TX Buffer for transfer between chips                                               |
+//---------------------------------------------------------------------------------------+
 byte NET_Buffer[NET_BUFFER_SIZE] = {0};
 uint NET_Size = 0;
 
+//---------------------------------------------------------------------------------------+
+// Addressing information for configuration                                              |
+//---------------------------------------------------------------------------------------+
+typedef enum {
+	ADDR_CLIENT,
+	ADDR_SUBNET,
+	ADDR_GATEWAY,
+} addresses;
+typedef enum {
+	MAC_GHOST,
+	MAC_CLIENT,
+	MAC_SERVER,
+} macs;
+
+byte address[4][4] = {
+	{129, 123, 5, 74}, // IP seen by client before disconnecting
+	{255, 255, 254, 0}, // subnet mask, for seriously every network
+	{129, 123, 5, 254}, // default gateway seen by client before disconnecting
+};
+byte mac[3][6] = {
+	{0x00, 0x90, 0xF5, 0xE9, 0xAA, 0x21},
+	{0x00, 0x08, 0xDC, 0x1E, 0xB8, 0x73},
+	{0x00, 0x08, 0xDC, 0x1E, 0xB8, 0x7D},
+};
+
+//---------------------------------------------------------------------------------------+
+// Read all available data from the given chip                                           |
+//---------------------------------------------------------------------------------------+
 void NET_READDATA(NET_CHIP chip) {
 	NET_Frame frame;
 	byte data[2];
@@ -57,6 +88,9 @@ void NET_READDATA(NET_CHIP chip) {
 	//we may need to poll at some point to confirm that the command was processed!!!
 }
 
+//---------------------------------------------------------------------------------------+
+// A blind copy all into the TX buffer of a given chip                                   |
+//---------------------------------------------------------------------------------------+
 void NET_WRITEDATA(NET_CHIP chip){
 	NET_Frame frame;
 	byte data[2];
@@ -108,6 +142,39 @@ void NET_WRITEDATA(NET_CHIP chip){
 	frame.N = 1;
 	NET_SPI(chip, &frame);
 	//we may need to poll at some point to confirm that the command was processed!!!
+}
+
+//---------------------------------------------------------------------------------------+
+// Interrupt Handlers                                                                    |
+//---------------------------------------------------------------------------------------+
+byte NET_GetInterrupt(NET_CHIP chip) {
+	NET_Frame frame;
+	byte Int;
+	
+	frame.Control.mode = NET_MODE_VAR;
+	frame.Control.reg = NET_REG_SOCKET;
+	frame.Control.write = false;
+	frame.Control.socket = 0;
+	
+	frame.Address = NET_SOCKET_IR;
+	frame.Data = &Int;
+	frame.N = 1;
+	
+	NET_SPI(chip, &frame);
+	return Int;
+}
+void NET_ClearInterrupt(NET_CHIP chip, byte Int) {
+	NET_Frame frame;
+	frame.Control.mode = NET_MODE_VAR;
+	frame.Control.reg = NET_REG_SOCKET;
+	frame.Control.write = true;
+	frame.Control.socket = 0;
+	
+	frame.Address = NET_SOCKET_IR;
+	frame.Data = &Int;
+	frame.N = 1;
+	
+	NET_SPI(chip, &frame);
 }
 
 //---------------------------------------------------------------------------------------+
@@ -203,26 +270,6 @@ void NET_Init() {
 	uint i;
 	NET_Frame frame;
 	NET_Byteframe byteframe;
-	typedef enum {
-		ADDR_CLIENT,
-		ADDR_SUBNET,
-		ADDR_GATEWAY,
-	} addresses;
-	byte address[4][4] = {
-		{129, 123, 5, 74}, // IP seen by client before disconnecting
-		{255, 255, 254, 0}, // subnet mask, for seriously every network
-		{129, 123, 5, 254}, // default gateway seen by client before disconnecting
-	};
-	typedef enum {
-		MAC_GHOST,
-		MAC_CLIENT,
-		MAC_SERVER,
-	} macs;
-	byte mac[3][6] = {
-		{0x00, 0x90, 0xF5, 0xE9, 0xAA, 0x21},
-		{0x00, 0x08, 0xDC, 0x1E, 0xB8, 0x73},
-		{0x00, 0x08, 0xDC, 0x1E, 0xB8, 0x7D},
-	};
 	
 	// Reset the chips
 	// doc: http://wizwiki.net/wiki/doku.php?id=products:wiz550io:allpages#reset_timing
@@ -288,31 +335,9 @@ void NET_Init() {
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
 	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 	
-	// Set socket 0 to use the full buffer
 	byteframe.Control.reg = NET_REG_SOCKET;
-	byteframe.Data = 0;
-	for (i = 1; i < 8; ++i) {
-		byteframe.Control.socket = i;
-		byteframe.Address = NET_SOCKET_RXBUF_SIZE;
-		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
-		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
-		
-		byteframe.Address = NET_SOCKET_TXBUF_SIZE;
-		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
-		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
-	}
-	byteframe.Control.socket = 0;
 	
-	byteframe.Data = 16;
-	byteframe.Address = NET_SOCKET_RXBUF_SIZE;
-	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
-	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
-	
-	byteframe.Address = NET_SOCKET_TXBUF_SIZE;
-	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
-	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
-	
-	// Enable interrupts on all sockets
+	// Enable interrupts on socket 0
 	byteframe.Address = NET_SOCKET_IMR;
 	byteframe.Data = 0xF; //enables most interrupts
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
@@ -331,10 +356,35 @@ void NET_Init() {
 	// Wait for the sockets to finish opening
 	byteframe.Address = NET_SOCKET_SR;
 	byteframe.Control.write = false;
-	while (byteframe.Data != 0x42) {
-		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
-	}
-	while (byteframe.Data != 0x42) {
-		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
-	}
+	
+	do { NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+	} while (byteframe.Data != 0x42);
+	
+	do { NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+	} while (byteframe.Data != 0x42);
 }
+
+/*
+// Set socket 0 to use the full buffer
+//	byteframe.Data = 0;
+//	for (i = 1; i < 8; ++i) {
+//		byteframe.Control.socket = i;
+//		byteframe.Address = NET_SOCKET_RXBUF_SIZE;
+//		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+//		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+//		
+//		byteframe.Address = NET_SOCKET_TXBUF_SIZE;
+//		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+//		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+//	}
+//	byteframe.Control.socket = 0;
+//	
+//	byteframe.Data = 16;
+//	byteframe.Address = NET_SOCKET_RXBUF_SIZE;
+//	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+//	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+//	
+//	byteframe.Address = NET_SOCKET_TXBUF_SIZE;
+//	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
+//	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
+*/
