@@ -56,8 +56,11 @@ void toggleStatus() {
 	LCD_WriteText(status_r);
 }
 
-void reportBlock() {
-	uint i = 7, t = ++block, mod;
+void reportBlock(uint n) {
+	uint i = 7, t, mod;
+	block += n;
+	t = block;
+	
 	while (i > 0) {
 		mod = t % 10;
 		blocked_s[--i] = '0' + mod;
@@ -113,16 +116,18 @@ void NET_SERVER_Handler() {
 	if (Int & NET_INT_RECV) {
 		NET_ClearInterrupt(NET_CHIP_SERVER, NET_INT_RECV);
 		NET_READDATA(NET_CHIP_SERVER);
-		NET_WRITEDATA(NET_CHIP_CLIENT);
+		NET_WRITEDATA(NET_CHIP_CLIENT, false);
 	}
 }
 
 void NET_CLIENT_Handler() {
+	uint n;
 	byte Int = NET_GetInterrupt(NET_CHIP_CLIENT);
 	if (Int & NET_INT_RECV) {
 		NET_ClearInterrupt(NET_CHIP_CLIENT, NET_INT_RECV);
 		NET_READDATA(NET_CHIP_CLIENT);
-		NET_WRITEDATA(NET_CHIP_SERVER);
+		n = NET_WRITEDATA(NET_CHIP_SERVER, (bool)enable);
+		if (n > 0) { reportBlock(n); }
 	}
 }
 

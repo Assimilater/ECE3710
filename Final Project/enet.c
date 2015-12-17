@@ -123,10 +123,10 @@ void NET_READDATA(NET_CHIP chip) {
 //---------------------------------------------------------------------------------------+
 // A blind copy all into the TX buffer of a given chip                                   |
 //---------------------------------------------------------------------------------------+
-void NET_WRITEDATA(NET_CHIP chip){
+uint NET_WRITEDATA(NET_CHIP chip, bool filter){
 	NET_Frame frame;
 	byte data[2];
-	uint i;
+	uint i, n = 0;
 	
 	// Constant through the function
 	frame.Control.socket = 0;
@@ -188,6 +188,8 @@ void NET_WRITEDATA(NET_CHIP chip){
 		data[0] = NET_INT_SENDOK;
 		NET_SPI(chip, &frame);
 	}
+	
+	return n;
 }
 
 //---------------------------------------------------------------------------------------+
