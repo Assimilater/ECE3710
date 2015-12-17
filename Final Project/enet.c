@@ -1,6 +1,7 @@
 #include "../Shared/Controller.h"
 #include "../Shared/GPIO.h"
 #include "enet.h"
+#include "filter.h"
 
 //---------------------------------------------------------------------------------------+
 // RX/TX Buffer for transfer between chips                                               |
@@ -26,9 +27,9 @@ typedef enum {
 	MAC_SERVER,
 } macs;
 
-byte address[4][4] = {
+byte address[3][4] = {
 	{129, 123, 5, 74}, // IP seen by client before disconnecting
-	{255, 255, 254, 0}, // subnet mask, for seriously every network
+	{255, 255, 254, 0}, // subnet mask; usu is weird
 	{129, 123, 5, 254}, // default gateway seen by client before disconnecting
 };
 byte mac[4][6] = {
@@ -98,7 +99,7 @@ void NET_READDATA(NET_CHIP chip) {
 	frame.N = NET_Size;
 	NET_SPI(chip, &frame);
 	
-	//update the RX read pointer
+	// Update the RX read pointer
 	data[0] = ((frame.Address + NET_Size) & 0xFF00) >> 8;
 	data[1] = ((frame.Address + NET_Size) & 0x00FF);
 	
@@ -109,87 +110,69 @@ void NET_READDATA(NET_CHIP chip) {
 	frame.N = 2;
 	NET_SPI(chip, &frame);
 	
-	//Give RECV command to the CR
+	// Give RECV command to the CR
 	frame.Address = NET_SOCKET_CR;
 	data[0] = 0x40;
 	frame.N = 1;
 	NET_SPI(chip, &frame);
 	
-	//we may need to poll at some point to confirm that the command was processed!!!
-	
 	NET_ParsePackets();
 }
 
 //---------------------------------------------------------------------------------------+
-// A blind copy all into the TX buffer of a given chip                                   |
+// In MacRaw mode, packets must be sent one at a time                                    |
 //---------------------------------------------------------------------------------------+
-uint NET_WRITEDATA(NET_CHIP chip, bool filter){
+void NET_WRITEPACKET(NET_CHIP chip, uint packet) {
 	NET_Frame frame;
 	byte data[2];
-	uint i, n = 0;
 	
-	// Constant through the function
+	// Initial frame setup
 	frame.Control.socket = 0;
 	frame.Control.mode = NET_MODE_VAR;
+	frame.Data = data;
+	frame.N = 2;
 	
-	for (i = 0; i < NET_Packets; ++i) {
-		// Determine how much space is available
-		frame.Control.write = false;
-		frame.Control.reg = NET_REG_SOCKET;
-		frame.Data = data;
-		frame.N = 2;
-		
-		// NOTE: Probably important!!!
-//		//do a loop until we recieve the same ouptut**
-//		frame.Address = NET_SOCKET_TX_FSR;
-//		NET_SPI(chip, &frame);
-//		
-//		if (((frame.Data[0] << 8) + frame.Data[1]) < NET_Size){
-//			//split up the data**
-//		}
-		
-		//find the TX write pointer
-		frame.Address = NET_SOCKET_TX_WR;
-		NET_SPI(chip, &frame);
-		
-		//write the data to the buffer
-		frame.Control.write = true;
-		frame.Control.reg = NET_REG_TX;
-		frame.Address = (data[0] << 8) | data[1];
-		frame.N = NET_Packet[i].Size;
-		frame.Data = NET_Packet[i].Destination;
-		NET_SPI(chip, &frame);
-		
-		//update the TX write pointer
-		data[0] = ((frame.Address + frame.N) & 0xFF00) >> 8;
-		data[1] = ((frame.Address + frame.N) & 0x00FF);
-		
-		frame.Address = NET_SOCKET_TX_WR;
-		frame.Control.reg = NET_REG_SOCKET;
-		frame.Control.write = true;
-		frame.Data = data;
-		frame.N = 2;
-		NET_SPI(chip, &frame);
-		
-		//Give SEND command to the CR
-		frame.N = 1;
-		data[0] = 0x20;
-		frame.Address = NET_SOCKET_CR;
-		NET_SPI(chip, &frame);
-		
-		// Poll to confirm the command was processed
-		frame.Control.write = false;
-		frame.Address = NET_SOCKET_IR;
-		do { NET_SPI(chip, &frame);
-		} while(!(data[0] & NET_INT_SENDOK));
-		
-		// Acknowledge (only) the SendOk interrupt
-		frame.Control.write = true;
-		data[0] = NET_INT_SENDOK;
-		NET_SPI(chip, &frame);
-	}
+	// Find the TX write pointer
+	frame.Control.write = false;
+	frame.Control.reg = NET_REG_SOCKET;
+	frame.Address = NET_SOCKET_TX_WR;
+	NET_SPI(chip, &frame);
 	
-	return n;
+	// Write the data to the buffer
+	frame.Control.write = true;
+	frame.Control.reg = NET_REG_TX;
+	frame.Address = (data[0] << 8) | data[1];
+	frame.N = NET_Packet[packet].Size;
+	frame.Data = NET_Packet[packet].Destination;
+	NET_SPI(chip, &frame);
+	
+	// Update the TX write pointer
+	data[0] = ((frame.Address + frame.N) & 0xFF00) >> 8;
+	data[1] = ((frame.Address + frame.N) & 0x00FF);
+	
+	frame.Address = NET_SOCKET_TX_WR;
+	frame.Control.reg = NET_REG_SOCKET;
+	frame.Control.write = true;
+	frame.Data = data;
+	frame.N = 2;
+	NET_SPI(chip, &frame);
+	
+	// Give SEND command to the CR
+	frame.N = 1;
+	data[0] = 0x20;
+	frame.Address = NET_SOCKET_CR;
+	NET_SPI(chip, &frame);
+	
+	// Poll to confirm the command was processed
+	frame.Control.write = false;
+	frame.Address = NET_SOCKET_IR;
+	do { NET_SPI(chip, &frame);
+	} while(!(data[0] & NET_INT_SENDOK));
+	
+	// Acknowledge (only) the SendOk interrupt
+	frame.Control.write = true;
+	data[0] = NET_INT_SENDOK;
+	NET_SPI(chip, &frame);
 }
 
 //---------------------------------------------------------------------------------------+
@@ -375,7 +358,7 @@ void NET_Init() {
 	//---------------------------------------------------------------------------------------+
 	// Common Chip Configuration                                                             |
 	//---------------------------------------------------------------------------------------+
-	//interrupts
+	// Interrupts
 	byteframe.Address = NET_COMMON_IMR;
 	byteframe.Data = 0xC0; // enable interrupts for ip conflict, and dest unreachable
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
@@ -387,17 +370,15 @@ void NET_Init() {
 	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 	
 	byteframe.Control.reg = NET_REG_SOCKET;
-	
-	// Enable interrupts on socket 0
-	byteframe.Address = NET_SOCKET_IMR;
-	byteframe.Data = 0xF; //enables most interrupts
+	byteframe.Address = NET_SOCKET_IMR; // Configure socket 0
+	byteframe.Data = 0xF; // Enables most interrupts
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
 	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 	
+	// MacRaw Mode
 	byteframe.Address = NET_SOCKET_MR;
-	byteframe.Data = 0x04; // MacRaw mode
+	byteframe.Data = 0x04;
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
-	byteframe.Data = 0x04; //0x84; // MacRaw mode w/MAC Filtering
 	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 	
 	byteframe.Address = NET_SOCKET_CR;
@@ -415,28 +396,3 @@ void NET_Init() {
 	do { NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 	} while (byteframe.Data != 0x42);
 }
-
-/*
-// Set socket 0 to use the full buffer
-//	byteframe.Data = 0;
-//	for (i = 1; i < 8; ++i) {
-//		byteframe.Control.socket = i;
-//		byteframe.Address = NET_SOCKET_RXBUF_SIZE;
-//		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
-//		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
-//		
-//		byteframe.Address = NET_SOCKET_TXBUF_SIZE;
-//		NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
-//		NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
-//	}
-//	byteframe.Control.socket = 0;
-//	
-//	byteframe.Data = 16;
-//	byteframe.Address = NET_SOCKET_RXBUF_SIZE;
-//	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
-//	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
-//	
-//	byteframe.Address = NET_SOCKET_TXBUF_SIZE;
-//	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
-//	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
-*/

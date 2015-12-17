@@ -87,7 +87,7 @@ extern uint NET_Packets;
 // Driver Functions (specific to interpreting macraw data and blocking requests)         |
 //---------------------------------------------------------------------------------------+
 void NET_READDATA(NET_CHIP);
-uint NET_WRITEDATA(NET_CHIP, bool);
+void NET_WRITEPACKET(NET_CHIP, uint);
 void NET_SENDRESET(NET_CHIP);
 bool NET_CHECKBLOCK(void);
 

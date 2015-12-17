@@ -2,6 +2,7 @@
 #include "../Shared/Controller.h"
 #include "../Shared/LCD.h"
 #include "enet.h"
+#include "filter.h"
 
 //---------------------------------------------------------------------------------------+
 // Precalculated constants for the dimensions of our boxes                               |
@@ -56,11 +57,8 @@ void toggleStatus() {
 	LCD_WriteText(status_r);
 }
 
-void reportBlock(uint n) {
-	uint i = 7, t, mod;
-	block += n;
-	t = block;
-	
+void reportBlock() {
+	uint i = 7, t = ++block, mod;
 	while (i > 0) {
 		mod = t % 10;
 		blocked_s[--i] = '0' + mod;
@@ -86,12 +84,11 @@ void SysTick_Handler() {
 	if (!INT_TOUCH) { // User is pressing down, collect sample
 		LCD_GetXY(TOUCH_POLL, &data);
 		SysTick->CTRL = 0x3; // Enable SysTick interrupts
-	} else {
-		if (LCD_GetXY(TOUCH_GET, &data)) { // User let go, get the average from samples
-			if ((COL_OUTER_Y0 < data.col) && (data.col < COL_OUTER_YF)) {
-				if ((ROW_OUTER_Y0 < data.page) && (data.page < ROW_OUTER_YF)) {
-					toggleStatus();
-				}
+	} else { // User let go, get the average from samples
+		if (LCD_GetXY(TOUCH_GET, &data)) { // Won't enter if-statement if no samples
+			if ((COL_OUTER_Y0 < data.col) && (data.col < COL_OUTER_YF) &&
+				(ROW_OUTER_Y0 < data.page) && (data.page < ROW_OUTER_YF)) {
+				toggleStatus();
 			}
 		}
 		
@@ -112,42 +109,31 @@ void Touch_Handler() {
 }
 
 void NET_SERVER_Handler() {
+	uint i;
 	byte Int = NET_GetInterrupt(NET_CHIP_SERVER);
 	if (Int & NET_INT_RECV) {
 		NET_ClearInterrupt(NET_CHIP_SERVER, NET_INT_RECV);
 		NET_READDATA(NET_CHIP_SERVER);
-		NET_WRITEDATA(NET_CHIP_CLIENT, false);
+		for (i = 0; i < NET_Packets; ++i) {
+			NET_WRITEPACKET(NET_CHIP_CLIENT, i);
+		}
 	}
 }
 
 void NET_CLIENT_Handler() {
-	uint n;
+	uint i;
 	byte Int = NET_GetInterrupt(NET_CHIP_CLIENT);
 	if (Int & NET_INT_RECV) {
 		NET_ClearInterrupt(NET_CHIP_CLIENT, NET_INT_RECV);
 		NET_READDATA(NET_CHIP_CLIENT);
-		n = NET_WRITEDATA(NET_CHIP_SERVER, (bool)enable);
-		if (n > 0) { reportBlock(n); }
+		for (i = 0; i < NET_Packets; ++i) {
+			if (enable && Filter_IP(i)) {
+				reportBlock();
+			} else {
+				NET_WRITEPACKET(NET_CHIP_SERVER, i);
+			}
+		}
 	}
-}
-
-byte debug_data[30];
-NET_Frame debug_frame;
-void debug_init() {
-	debug_frame.Control.mode = NET_MODE_VAR;
-	debug_frame.Control.reg = NET_REG_COMMON;
-	debug_frame.Control.socket = 0;
-	debug_frame.Control.write = false;
-	
-	debug_frame.Address = NET_COMMON_IR;
-	debug_frame.Data = debug_data;
-	debug_frame.N = 2;
-}
-void debug() {
-	NET_SPI(NET_CHIP_SERVER, &debug_frame);
-//	NET_READDATA(NET_CHIP_CLIENT);
-//	NET_WRITEDATA(NET_CHIP_SERVER);
-//	NET_READDATA(NET_CHIP_CLIENT);
 }
 
 // Forward declarations used in main
@@ -164,11 +150,9 @@ int main() {
 	m4config();
 	LCD_Init();
 	disp_init();
-	debug_init();
 	NET_Init();
 	
 	while (1) {
-		debug();
 		if (!INT_TOUCH) {
 			Touch_Handler();
 		}
@@ -306,17 +290,7 @@ void m4config() {
 //---------------------------------------------------------------------------------------+
 // Genereic Hard Fault Handler                                                           |
 //---------------------------------------------------------------------------------------+
-#include <stdio.h>
-void printErrorMsg(const char* err) {
-	while(*err != '\0'){
-		ITM_SendChar(*err);
-		++err;
-	}
-}
 void HardFault_Handler() {
-	static char msg[80];
-	sprintf(msg, "SCB->HFSR = 0x%08x\n", SCB->HFSR);
-	printErrorMsg(msg);
 	__ASM volatile("BKPT #01");
 	while(1);
 }
