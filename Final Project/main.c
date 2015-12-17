@@ -127,10 +127,10 @@ void NET_CLIENT_Handler() {
 		NET_ClearInterrupt(NET_CHIP_CLIENT, NET_INT_RECV);
 		NET_READDATA(NET_CHIP_CLIENT);
 		for (i = 0; i < NET_Packets; ++i) {
-			if (enable && Filter_IP(i)) {
+			if (enable && Filter_IP(i)) { // Can switch out filter method here
 				reportBlock();
-				Filter_Reset(i);
-				NET_WRITEPACKET(NET_CHIP_SERVER, i);
+				//Filter_Reset(i);
+				//NET_WRITEPACKET(NET_CHIP_SERVER, i);
 			} else {
 				NET_WRITEPACKET(NET_CHIP_SERVER, i);
 			}
