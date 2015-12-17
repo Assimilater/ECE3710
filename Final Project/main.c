@@ -195,16 +195,20 @@ void disp_init() {
 	LCD_FillRegion(button_r);
 	
 	// Write the static text
-	blocked_r.y = 95;
-	blocked_r.x = ROW_OUTER_YF + 5;
+	blocked_r.y = 105;
+	blocked_r.x = ROW_OUTER_YF + 52;
 	blocked_r.Font = &fonts()->Big;
-	blocked_r.Text = "Pages Blocked";
+	blocked_r.Text = "Packets";
 	blocked_r.BackColor = LCD_COLOR_BLACK;
 	blocked_r.Color = LCD_COLOR_YELLOW;
 	LCD_WriteText(blocked_r);
 	
+	blocked_r.Text = "Blocked";
+	blocked_r.y -= 20;
+	LCD_WriteText(blocked_r);
+	
 	// Setup for the dynamic text
-	blocked_r.y = 120;
+	blocked_r.y = 125;
 	blocked_r.x = ROW_OUTER_YF + 25;
 	blocked_r.Font = &fonts()->Ubuntu;
 	blocked_r.Text = blocked_s;
