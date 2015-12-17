@@ -130,11 +130,11 @@ byte debug_data[30];
 NET_Frame debug_frame;
 void debug_init() {
 	debug_frame.Control.mode = NET_MODE_VAR;
-	debug_frame.Control.reg = NET_REG_SOCKET;
+	debug_frame.Control.reg = NET_REG_COMMON;
 	debug_frame.Control.socket = 0;
 	debug_frame.Control.write = false;
 	
-	debug_frame.Address = NET_SOCKET_IR;
+	debug_frame.Address = NET_COMMON_IR;
 	debug_frame.Data = debug_data;
 	debug_frame.N = 2;
 }

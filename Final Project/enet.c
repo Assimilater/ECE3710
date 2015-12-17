@@ -20,7 +20,8 @@ typedef enum {
 	ADDR_GATEWAY,
 } addresses;
 typedef enum {
-	MAC_GHOST,
+	MAC_GHOST_CLIENT,
+	MAC_GHOST_SERVER,
 	MAC_CLIENT,
 	MAC_SERVER,
 } macs;
@@ -30,10 +31,11 @@ byte address[4][4] = {
 	{255, 255, 254, 0}, // subnet mask, for seriously every network
 	{129, 123, 5, 254}, // default gateway seen by client before disconnecting
 };
-byte mac[3][6] = {
-	{0x00, 0x90, 0xF5, 0xE9, 0xAA, 0x21},
-	{0x00, 0x08, 0xDC, 0x1E, 0xB8, 0x73},
-	{0x00, 0x08, 0xDC, 0x1E, 0xB8, 0x7D},
+byte mac[4][6] = {
+	{0x00, 0x90, 0xF5, 0xE9, 0xAA, 0x21}, // Obtained via ipconfig
+	{0x00, 0x12, 0xF2, 0xC2, 0x4D, 0x00}, // Obtained via wireshark
+	{0x00, 0x08, 0xDC, 0x1E, 0xB8, 0x73}, // On the sticker
+	{0x00, 0x08, 0xDC, 0x1E, 0xB8, 0x7D}, // On the sticker
 };
 
 //---------------------------------------------------------------------------------------+
@@ -55,14 +57,6 @@ void NET_ParsePackets() {
 		NET_Packet[NET_Packets].Payload = NET_Buffer + i + 14;
 		NET_Packet[NET_Packets].PayloadSize = NET_Packet[NET_Packets].Size - 14;
 		i += NET_Packet[NET_Packets].Size;
-		
-//		// Get the CRC
-//		NET_Packet[NET_Packets].CRC =
-//			(NET_Buffer[i] << (3*8)) |
-//			(NET_Buffer[i + 1] << (2*8)) |
-//			(NET_Buffer[i + 2] << (1*8)) |
-//			NET_Buffer[i + 3];
-//		i += 4;
 		
 		// Move onto the next packet
 		++NET_Packets;
@@ -155,7 +149,7 @@ void NET_WRITEDATA(NET_CHIP chip){
 //		}
 		
 		//find the TX write pointer
-		frame.Address = NET_SOCKET_RX_WR;
+		frame.Address = NET_SOCKET_TX_WR;
 		NET_SPI(chip, &frame);
 		
 		//write the data to the buffer
@@ -349,8 +343,11 @@ void NET_Init() {
 	//---------------------------------------------------------------------------------------+
 	// MAC (physical address)
 	frame.N = 6;
-	frame.Data = mac[MAC_GHOST];
+	frame.Data = mac[MAC_GHOST_CLIENT];
 	NET_SPI(NET_CHIP_SERVER, &frame);
+	
+	frame.Data = mac[MAC_GHOST_SERVER];
+	NET_SPI(NET_CHIP_CLIENT, &frame);
 	frame.N = 4; // Following transmissions are 4-bytes
 	
 	// Subnet Mask
@@ -398,7 +395,7 @@ void NET_Init() {
 	byteframe.Address = NET_SOCKET_MR;
 	byteframe.Data = 0x04; // MacRaw mode
 	NET_SPI_BYTE(NET_CHIP_CLIENT, &byteframe);
-	byteframe.Data = 0x84; // MacRaw mode w/MAC Filtering
+	byteframe.Data = 0x04; //0x84; // MacRaw mode w/MAC Filtering
 	NET_SPI_BYTE(NET_CHIP_SERVER, &byteframe);
 	
 	byteframe.Address = NET_SOCKET_CR;
