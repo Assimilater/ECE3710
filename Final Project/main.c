@@ -5,7 +5,7 @@
 #include "filter.h"
 
 //---------------------------------------------------------------------------------------+
-// Precalculated constants for the dimensions of our boxes                               |
+// Pre-calculated constants for the dimensions of our boxes                              |
 //---------------------------------------------------------------------------------------+
 const short LENGTH_OUTER = 80;
 const short LENGTH_INNER = 70;
@@ -144,7 +144,7 @@ void disp_init(void);
 
 //---------------------------------------------------------------------------------------+
 // void main() - Our Program Logic:                                                      |
-// Real interrups create the need for atomic use of SPI. To avoid the complications      |
+// Real interrupts create the need for atomic use of SPI. To avoid the complications     |
 // associated with doing this, our program is a busy wait on those interrupt pins.       |
 // All interrupts are active low for our application                                     |
 //---------------------------------------------------------------------------------------+
@@ -226,14 +226,9 @@ void m4config() {
 	// PA[2:5] => SPI
 	GPIO.PortA->DEN.byte[0] = 0xFC;
 	GPIO.PortA->AFSEL.byte[0] = 0x3C;
+	GPIO.PortA->PDR.bit5 = 1; // Tx
 	GPIO.PortA->DIR.bit6 = 1; // External NET Reset (Shared)
 	GPIO.PortA->DIR.bit7 = 1; // External LCD Reset
-	
-	// Pull up configuration necessary to avoid electromagnetic interference between SSI pins
-	//GPIO.PortA->PDR.bit2 = 1; // Clk
-	//GPIO.PortA->PDR.bit4 = 1; // Rx
-	GPIO.PortA->PDR.bit5 = 1; // Tx
-	//GPIO.PortA->ODR.bit5 = 1; // Tx
 	
 	// PB[0:7] => LCD Data Bus
 	GPIO.PortB->DEN.byte[0] = 0xFF;
@@ -271,18 +266,18 @@ void m4config() {
 	GPIO.PortF->PCTL.half[0] = 0x2222;
 	GPIO.PortF->PDR.bit1 = 1; // Tx
 	
-	// Configure SSI Freescale (SPH = 0, SPO = 0)
+	// Configure SSI0 Freescale (CR0: SPH = 0, SPO = 0, FRF = 0)
 	SSI0->CR1 = 0; // Disable
 	SSI0->CC = 0x5; // Use PIOsc for the clock
-	SSI0->CPSR = 0x2; // Clock divisor = 2 (the minimum, or fastest we can make this divisor)
-	SSI0->CR0 = 0x307; // SCR = 3 (divisor), SPH = 0, SPO = 0, FRF = 0 (freescale), DSS = 7 (8-bit data)
+	SSI0->CPSR = 0x2; // Clock divisor = 2 (the minimum/fastest)
+	SSI0->CR0 = 0x307; // SCR = 3 (divisor), DSS = 7 (8-bit data)
 	SSI0->CR1 |= 0x2; // Enable
 	
-	// Configure SSI Freescale (SPH = 0, SPO = 0)
+	// Configure SSI1 Freescale (CR0: SPH = 0, SPO = 0, FRF = 0)
 	SSI1->CR1 = 0; // Disable
-	SSI1->CC = 0x5; // Use PIOsc for the clock
-	SSI1->CPSR = 0x2; // Clock divisor = 2 (the minimum, or fastest we can make this divisor)
-	SSI1->CR0 = 0x307; // SCR = 3 (divisor), SPH = 0, SPO = 0, FRF = 0 (freescale), DSS = 7 (8-bit data)
+	SSI1->CC = 0x5; // Use PIOSC for the clock
+	SSI1->CPSR = 0x2; // Clock divisor = 2 (the minimum/fastest)
+	SSI1->CR0 = 0x307; // SCR = 3 (divisor), DSS = 7 (8-bit data)
 	SSI1->CR1 |= 0x2; // Enable
 	
 	// Configure Systick
