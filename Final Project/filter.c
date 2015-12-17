@@ -4,8 +4,14 @@
 const byte IP_BING[4] = {204, 79, 197, 200};
 
 void Filter_Reset(uint packet) {
-	if (NET_Packet[packet].Payload[9] == 0x6) {
-		NET_Packet[packet].Payload[33] |= 0x4;
+	uint checksum;
+	if (NET_Packet[packet].Payload[9] == 0x6) { // 0x6 signifies TCP
+		NET_Packet[packet].Payload[33] |= 0x4; // Flag byte. 0x4 is the reset bit
+		checksum = (NET_Packet[packet].Payload[36] << 8)|(NET_Packet[packet].Payload[37]);
+		checksum += 0x4;
+		checksum += checksum >> 4;
+		NET_Packet[packet].Payload[36] = (checksum >> 2) & 0xFF;
+		NET_Packet[packet].Payload[37] = checksum & 0xFF;
 	}
 }
 
