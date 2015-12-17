@@ -218,24 +218,24 @@ void LCD_WriteText(const TextRegion r) {
 //---------------------------------------------------------------------------------------+
 // Command Codes For The LCD                                                             |
 //---------------------------------------------------------------------------------------+
-#define SIZE_CODE_PWRA          6
-#define SIZE_CODE_PWRB          4
-#define SIZE_CODE_DTCA          4
-#define SIZE_CODE_DTCB          3
-#define SIZE_CODE_PSQC          5
-#define SIZE_CODE_PMRC          2
-#define SIZE_CODE_PCL1          2
-#define SIZE_CODE_PCL2          2
-#define SIZE_CODE_VCM1          3
-#define SIZE_CODE_VCM2          2
-#define SIZE_CODE_MACL          2
-#define SIZE_CODE_PXFS          2
-#define SIZE_CODE_FMCL          3
-#define SIZE_CODE_DFCL          4
-#define SIZE_CODE_3GFD          2
-#define SIZE_CODE_GCSL          2
-#define SIZE_CODE_SGM0          16
-#define SIZE_CODE_SGM1          16
+#define SIZE_CODE_PWRA 6
+#define SIZE_CODE_PWRB 4
+#define SIZE_CODE_DTCA 4
+#define SIZE_CODE_DTCB 3
+#define SIZE_CODE_PSQC 5
+#define SIZE_CODE_PMRC 2
+#define SIZE_CODE_PCL1 2
+#define SIZE_CODE_PCL2 2
+#define SIZE_CODE_VCM1 3
+#define SIZE_CODE_VCM2 2
+#define SIZE_CODE_MACL 2
+#define SIZE_CODE_PXFS 2
+#define SIZE_CODE_FMCL 3
+#define SIZE_CODE_DFCL 4
+#define SIZE_CODE_3GFD 2
+#define SIZE_CODE_GCSL 2
+#define SIZE_CODE_SGM0 16
+#define SIZE_CODE_SGM1 16
 const byte LCD_CODE_PWRA[SIZE_CODE_PWRA] = {0xCB, 0x39, 0x2C, 0x00, 0x34, 0x02};
 const byte LCD_CODE_PWRB[SIZE_CODE_PWRB] = {0xCF, 0x00, 0xC1, 0x30}; //Driver spec. has 0x81 (not 0xC1)
 const byte LCD_CODE_DTCA[SIZE_CODE_DTCA] = {0xE8, 0x85, 0x00, 0x78};
@@ -257,7 +257,7 @@ const byte LCD_CODE_SGM0[SIZE_CODE_SGM0] = {0xE0, 0x0F, 0x31, 0x2B, 0x0C, 0x0E, 
 const byte LCD_CODE_SGM1[SIZE_CODE_SGM1] = {0xE1, 0x00, 0x0E, 0x14, 0x03, 0x11, 0x07, 0x31, 0xC1, 0x48, 0x08, 0x0F, 0x0C, 0x31, 0x36, 0x0F};
 
 //---------------------------------------------------------------------------------------+
-// Initialization codes provided by lecture notes, then start the screen all black       |
+// Initialization codes provided by class wiki, then start the screen all black          |
 //---------------------------------------------------------------------------------------+
 void LCD_Init() {
 	Region r = {

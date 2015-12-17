@@ -5,7 +5,7 @@
 //---------------------------------------------------------------------------------------+
 // Color Codes For The LCD                                                               |
 //---------------------------------------------------------------------------------------+
-#define SIZE_COLOR              2
+#define SIZE_COLOR 2
 extern const byte LCD_COLOR_WHITE[SIZE_COLOR];
 extern const byte LCD_COLOR_BLACK[SIZE_COLOR];
 extern const byte LCD_COLOR_GREY[SIZE_COLOR];
