@@ -44,7 +44,7 @@ byte mac[4][6] = {
 void NET_ParsePackets() {
 	uint i = 0;
 	NET_Packets = 0;
-	while (i < NET_Size) {
+	while (i < NET_Size && NET_Packets < NET_PACKET_BUFFER_SIZE) {
 		// Get the packet size
 		NET_Packet[NET_Packets].Size = ((NET_Buffer[i] << 8) | NET_Buffer[i + 1]) - 2;
 		i += 2;

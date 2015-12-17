@@ -79,7 +79,7 @@ static const uint NET_BUFFER_SIZE = 2000;
 extern byte NET_Buffer[NET_BUFFER_SIZE];
 extern uint NET_Size;
 
-static const uint NET_PACKET_BUFFER_SIZE = 25;
+static const uint NET_PACKET_BUFFER_SIZE = 50;
 extern NET_MACRAW NET_Packet[NET_PACKET_BUFFER_SIZE];
 extern uint NET_Packets;
 
