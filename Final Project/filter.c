@@ -31,9 +31,8 @@ bool Filter_IP(uint packet) {
 //---------------------------------------------------------------------------------------+
 bool Filter_DNS(uint packet) {
 	uint i;
-	
 	if (NET_Packet[packet].Type == 0x0800) { // IPv4
-		if (NET_Packet[packet].Payload[9] == 0x11) { // UDP flag in IPv4 header
+		if (NET_Packet[packet].Payload[9] == 0x11) { // UDP protocol byte in IPv4 header
 			i = 28; // Skip the IPv4 Header and the UDP header
 			// no need to check for 'b' in 'bing.com' in last 7 bytes.
 			// Also, DNS Query: the last 4 bytes signify the class and type
@@ -49,6 +48,21 @@ bool Filter_DNS(uint packet) {
 				}
 			};
 		}
+	}
+	
+	return false;
+}
+
+bool Filter_HTTP(uint packet) {
+	uint i = 0; uint16 port_src, port_dst;
+	if (NET_Packet[packet].Type == 0x0800) { // IPv4
+		if (NET_Packet[packet].Payload[9] == 0x06) { // TCP protocol byte in IPv4 header
+			port_src = (NET_Packet[packet].Payload[20] << 8) | NET_Packet[packet].Payload[21];
+			port_dst = (NET_Packet[packet].Payload[22] << 8) | NET_Packet[packet].Payload[23];
+			// Could check for port 80 or port 443
+			// Could check for NET_Packet[packet].Payload[40] == "GET/ HTTP/1.1\0x0d0a"
+		}
+		
 	}
 	
 	return false;
