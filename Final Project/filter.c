@@ -1,8 +1,9 @@
 #include "filter.h"
 #include "enet.h"
 
-const byte IP_BING[4] = {204, 79, 197, 200};
-
+//---------------------------------------------------------------------------------------+
+// Untested method for sending reset packets                                             |
+//---------------------------------------------------------------------------------------+
 void Filter_Reset(uint packet) {
 	uint checksum;
 	if (NET_Packet[packet].Payload[9] == 0x6) { // 0x6 signifies TCP
@@ -15,6 +16,26 @@ void Filter_Reset(uint packet) {
 	}
 }
 
+//---------------------------------------------------------------------------------------+
+// Untested method for filtering on http requests (usually happen after sockets open)    |
+// Note: We should send reset packets when using this method to play nice with servers   |
+//---------------------------------------------------------------------------------------+
+bool Filter_HTTP(uint packet) {
+	//uint i = 0; uint16 port_src, port_dst;
+	if (NET_Packet[packet].Type == 0x0800) { // IPv4
+		if (NET_Packet[packet].Payload[9] == 0x06) { // TCP protocol byte in IPv4 header
+			//port_src = (NET_Packet[packet].Payload[20] << 8) | NET_Packet[packet].Payload[21];
+			//port_dst = (NET_Packet[packet].Payload[22] << 8) | NET_Packet[packet].Payload[23];
+			// Could check for port 80 or port 443
+			// Could check for NET_Packet[packet].Payload[40] == "GET/ HTTP/1.1\0x0d0a"
+		}
+		
+	}
+	
+	return false;
+}
+
+const byte IP_BING[4] = {204, 79, 197, 200};
 //---------------------------------------------------------------------------------------+
 // Validate all IPv4 packets. Block packets with the same ip address as bing             |
 // Note: This method may block undesired domains hosted on the same server               |
@@ -60,21 +81,6 @@ bool Filter_DNS(uint packet) {
 				}
 			};
 		}
-	}
-	
-	return false;
-}
-
-bool Filter_HTTP(uint packet) {
-	//uint i = 0; uint16 port_src, port_dst;
-	if (NET_Packet[packet].Type == 0x0800) { // IPv4
-		if (NET_Packet[packet].Payload[9] == 0x06) { // TCP protocol byte in IPv4 header
-			//port_src = (NET_Packet[packet].Payload[20] << 8) | NET_Packet[packet].Payload[21];
-			//port_dst = (NET_Packet[packet].Payload[22] << 8) | NET_Packet[packet].Payload[23];
-			// Could check for port 80 or port 443
-			// Could check for NET_Packet[packet].Payload[40] == "GET/ HTTP/1.1\0x0d0a"
-		}
-		
 	}
 	
 	return false;
