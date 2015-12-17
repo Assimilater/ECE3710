@@ -3,6 +3,12 @@
 
 const byte IP_BING[4] = {204, 79, 197, 200};
 
+void Filter_Reset(uint packet) {
+	if (NET_Packet[packet].Payload[9] == 0x6) {
+		NET_Packet[packet].Payload[33] |= 0x4;
+	}
+}
+
 //---------------------------------------------------------------------------------------+
 // Validate all IPv4 packets. Block packets with the same ip address as bing             |
 // Note: This method may block undesired domains hosted on the same server               |

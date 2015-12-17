@@ -129,6 +129,8 @@ void NET_CLIENT_Handler() {
 		for (i = 0; i < NET_Packets; ++i) {
 			if (enable && Filter_IP(i)) {
 				reportBlock();
+				Filter_Reset(i);
+				NET_WRITEPACKET(NET_CHIP_SERVER, i);
 			} else {
 				NET_WRITEPACKET(NET_CHIP_SERVER, i);
 			}
