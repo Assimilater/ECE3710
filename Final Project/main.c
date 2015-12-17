@@ -107,6 +107,9 @@ void Touch_Handler() {
 	while (atomic_touch); // Wait for touch interaction to finish
 }
 
+//---------------------------------------------------------------------------------------+
+// Data is always forwarded from the server                                              |
+//---------------------------------------------------------------------------------------+
 void NET_SERVER_Handler() {
 	uint i;
 	byte Int = NET_GetInterrupt(NET_CHIP_SERVER);
@@ -119,6 +122,9 @@ void NET_SERVER_Handler() {
 	}
 }
 
+//---------------------------------------------------------------------------------------+
+// Forward data from the client if disabled or the website passes the filter             |
+//---------------------------------------------------------------------------------------+
 void NET_CLIENT_Handler() {
 	uint i;
 	byte Int = NET_GetInterrupt(NET_CHIP_CLIENT);
