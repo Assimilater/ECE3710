@@ -59,9 +59,10 @@ text font_get(const font* font, const char* val) {
 	char c;
 	text d;
 	
-	d.n = strlen(val);
-	if (d.n > 25) { d.n = 25; } // Rather than use dynamic memory, max out the size to 50
+	// Rather than use dynamic memory, max out the size to 25
 	//d.s = malloc(sizeof(byte*) * d.n);
+	d.n = strlen(val);
+	if (d.n > 25) { d.n = 25; }
 	for (i = 0; i < d.n; ++i) {
 		c = val[i];
 		c = (c < ' ' || c > '~')

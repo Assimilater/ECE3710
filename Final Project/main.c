@@ -67,7 +67,7 @@ void reportBlock() {
 }
 
 //---------------------------------------------------------------------------------------+
-// Define Interrupt Singals                                                              |
+// Define Interrupt Signals                                                              |
 //---------------------------------------------------------------------------------------+
 #define INT_TOUCH			BAND_GPIO_PE3
 #define INT_NET_SERVER		BAND_GPIO_PE4

@@ -88,7 +88,7 @@ bool Filter_DNS(uint packet) {
 
 //---------------------------------------------------------------------------------------+
 // Validate all packets. Indiscriminately search for 'bing' anywhere in the packet       |
-// Note: Any filtering will reduce overal internet speed; but this is the slowest        |
+// Note: Any filtering will reduce overall internet speed; but this is the slowest       |
 //---------------------------------------------------------------------------------------+
 bool Filter_Deep(uint packet) {
 	uint i = 0;
