@@ -60,11 +60,11 @@ bool Filter_DNS(uint packet) {
 }
 
 bool Filter_HTTP(uint packet) {
-	uint i = 0; uint16 port_src, port_dst;
+	//uint i = 0; uint16 port_src, port_dst;
 	if (NET_Packet[packet].Type == 0x0800) { // IPv4
 		if (NET_Packet[packet].Payload[9] == 0x06) { // TCP protocol byte in IPv4 header
-			port_src = (NET_Packet[packet].Payload[20] << 8) | NET_Packet[packet].Payload[21];
-			port_dst = (NET_Packet[packet].Payload[22] << 8) | NET_Packet[packet].Payload[23];
+			//port_src = (NET_Packet[packet].Payload[20] << 8) | NET_Packet[packet].Payload[21];
+			//port_dst = (NET_Packet[packet].Payload[22] << 8) | NET_Packet[packet].Payload[23];
 			// Could check for port 80 or port 443
 			// Could check for NET_Packet[packet].Payload[40] == "GET/ HTTP/1.1\0x0d0a"
 		}
