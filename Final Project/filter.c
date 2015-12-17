@@ -8,7 +8,7 @@ void Filter_Reset(uint packet) {
 	uint checksum;
 	if (NET_Packet[packet].Payload[9] == 0x6) { // 0x6 signifies TCP
 		NET_Packet[packet].Payload[33] |= 0x4; // Flag byte. 0x4 is the reset bit
-		checksum = (NET_Packet[packet].Payload[36] << 8)|(NET_Packet[packet].Payload[37]);
+		checksum = (NET_Packet[packet].Payload[36] << 8) | NET_Packet[packet].Payload[37];
 		checksum += 0x4;
 		checksum += checksum >> 4;
 		NET_Packet[packet].Payload[36] = (checksum >> 2) & 0xFF;
