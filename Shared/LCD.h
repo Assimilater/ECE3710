@@ -4,14 +4,13 @@
 //---------------------------------------------------------------------------------------+
 // Inlucded dependencies                                                                 |
 //---------------------------------------------------------------------------------------+
-#include "LCD_Codes.h"
 #include "embedded_t.h"
 #include "fonts.h"
-#include "SPI.h"
 
 //---------------------------------------------------------------------------------------+
 // Color Codes For The LCD                                                               |
 //---------------------------------------------------------------------------------------+
+#define SIZE_COLOR              2
 extern const byte LCD_COLOR_WHITE[SIZE_COLOR];
 extern const byte LCD_COLOR_BLACK[SIZE_COLOR];
 extern const byte LCD_COLOR_GREY[SIZE_COLOR];
@@ -21,28 +20,6 @@ extern const byte LCD_COLOR_MAGENTA[SIZE_COLOR];
 extern const byte LCD_COLOR_GREEN[SIZE_COLOR];
 extern const byte LCD_COLOR_CYAN[SIZE_COLOR];
 extern const byte LCD_COLOR_YELLOW[SIZE_COLOR];
-
-//---------------------------------------------------------------------------------------+
-// Command Codes For The LCD                                                             |
-//---------------------------------------------------------------------------------------+
-extern const byte LCD_CODE_PWRA[SIZE_CODE_PWRA];
-extern const byte LCD_CODE_PWRB[SIZE_CODE_PWRB];
-extern const byte LCD_CODE_DTCA[SIZE_CODE_DTCA];
-extern const byte LCD_CODE_DTCB[SIZE_CODE_DTCB];
-extern const byte LCD_CODE_PSQC[SIZE_CODE_PSQC];
-extern const byte LCD_CODE_PMRC[SIZE_CODE_PMRC];
-extern const byte LCD_CODE_PCL1[SIZE_CODE_PCL1];
-extern const byte LCD_CODE_PCL2[SIZE_CODE_PCL2];
-extern const byte LCD_CODE_VCM1[SIZE_CODE_VCM1];
-extern const byte LCD_CODE_VCM2[SIZE_CODE_VCM2];
-extern const byte LCD_CODE_MACL[SIZE_CODE_MACL];
-extern const byte LCD_CODE_PXFS[SIZE_CODE_PXFS];
-extern const byte LCD_CODE_FMCL[SIZE_CODE_FMCL];
-extern const byte LCD_CODE_DFCL[SIZE_CODE_DFCL];
-extern const byte LCD_CODE_3GFD[SIZE_CODE_3GFD];
-extern const byte LCD_CODE_GCSL[SIZE_CODE_GCSL];
-extern const byte LCD_CODE_SGM0[SIZE_CODE_SGM0];
-extern const byte LCD_CODE_SGM1[SIZE_CODE_SGM1];
 
 //---------------------------------------------------------------------------------------+
 // Communication Signals for the LCD                                                     |
