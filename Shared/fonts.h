@@ -1,7 +1,7 @@
 #ifndef __FONTS_H__
 #define __FONTS_H__
-
 #include "embedded_t.h"
+
 typedef struct {
 	byte* root;
 	byte width, height;

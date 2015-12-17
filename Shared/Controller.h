@@ -382,49 +382,49 @@ typedef volatile unsigned int* M4_DMA;
 // GPIO Bit-Banded Addresses                                                             |
 //---------------------------------------------------------------------------------------+
 // PA: 0x42000000 + 32*0x43FC = 0x42087F80
-#define BAND_GPIO_PA2           (*((volatile unsigned int *)0x42087F88))
-#define BAND_GPIO_PA3           (*((volatile unsigned int *)0x42087F8C))
-#define BAND_GPIO_PA4           (*((volatile unsigned int *)0x42087F90))
-#define BAND_GPIO_PA5           (*((volatile unsigned int *)0x42087F94))
-#define BAND_GPIO_PA6           (*((volatile unsigned int *)0x42087F98))
-#define BAND_GPIO_PA7           (*((volatile unsigned int *)0x42087F9C))
+#define BAND_GPIO_PA2           (*((M4_DMA)0x42087F88))
+#define BAND_GPIO_PA3           (*((M4_DMA)0x42087F8C))
+#define BAND_GPIO_PA4           (*((M4_DMA)0x42087F90))
+#define BAND_GPIO_PA5           (*((M4_DMA)0x42087F94))
+#define BAND_GPIO_PA6           (*((M4_DMA)0x42087F98))
+#define BAND_GPIO_PA7           (*((M4_DMA)0x42087F9C))
 
 // PB: 0x42000000 + 32*0x53FC = 0x420A7F80
-#define BAND_GPIO_PB0           (*((volatile unsigned int *)0x420A7F80))
-#define BAND_GPIO_PB1           (*((volatile unsigned int *)0x420A7F84))
-#define BAND_GPIO_PB2           (*((volatile unsigned int *)0x420A7F88))
-#define BAND_GPIO_PB3           (*((volatile unsigned int *)0x420A7F8C))
-#define BAND_GPIO_PB4           (*((volatile unsigned int *)0x420A7F90))
-#define BAND_GPIO_PB5           (*((volatile unsigned int *)0x420A7F94))
-#define BAND_GPIO_PB6           (*((volatile unsigned int *)0x420A7F98))
-#define BAND_GPIO_PB7           (*((volatile unsigned int *)0x420A7F9C))
+#define BAND_GPIO_PB0           (*((M4_DMA)0x420A7F80))
+#define BAND_GPIO_PB1           (*((M4_DMA)0x420A7F84))
+#define BAND_GPIO_PB2           (*((M4_DMA)0x420A7F88))
+#define BAND_GPIO_PB3           (*((M4_DMA)0x420A7F8C))
+#define BAND_GPIO_PB4           (*((M4_DMA)0x420A7F90))
+#define BAND_GPIO_PB5           (*((M4_DMA)0x420A7F94))
+#define BAND_GPIO_PB6           (*((M4_DMA)0x420A7F98))
+#define BAND_GPIO_PB7           (*((M4_DMA)0x420A7F9C))
 
 // PC: 0x42000000 + 32*0x63FC = 0x420C7F80
-#define BAND_GPIO_PC4           (*((volatile unsigned int *)0x420C7F90))
-#define BAND_GPIO_PC5           (*((volatile unsigned int *)0x420C7F94))
-#define BAND_GPIO_PC6           (*((volatile unsigned int *)0x420C7F98))
-#define BAND_GPIO_PC7           (*((volatile unsigned int *)0x420C7F9C))
+#define BAND_GPIO_PC4           (*((M4_DMA)0x420C7F90))
+#define BAND_GPIO_PC5           (*((M4_DMA)0x420C7F94))
+#define BAND_GPIO_PC6           (*((M4_DMA)0x420C7F98))
+#define BAND_GPIO_PC7           (*((M4_DMA)0x420C7F9C))
 
 // PD: 0x42000000 + 32*0x73FC = 0x420E7F80
-#define BAND_GPIO_PD2           (*((volatile unsigned int *)0x420E7F88))
-#define BAND_GPIO_PD3           (*((volatile unsigned int *)0x420E7F8C))
-#define BAND_GPIO_PD6           (*((volatile unsigned int *)0x420E7F98))
-#define BAND_GPIO_PD7           (*((volatile unsigned int *)0x420E7F9C))
+#define BAND_GPIO_PD2           (*((M4_DMA)0x420E7F88))
+#define BAND_GPIO_PD3           (*((M4_DMA)0x420E7F8C))
+#define BAND_GPIO_PD6           (*((M4_DMA)0x420E7F98))
+#define BAND_GPIO_PD7           (*((M4_DMA)0x420E7F9C))
 
 // PE: 0x42000000 + 32*0x243FC = 0x42487F80
-#define BAND_GPIO_PE0           (*((volatile unsigned int *)0x42487F80))
-#define BAND_GPIO_PE1           (*((volatile unsigned int *)0x42487F84))
-#define BAND_GPIO_PE2           (*((volatile unsigned int *)0x42487F88))
-#define BAND_GPIO_PE3           (*((volatile unsigned int *)0x42487F8C))
-#define BAND_GPIO_PE4           (*((volatile unsigned int *)0x42487F90))
-#define BAND_GPIO_PE5           (*((volatile unsigned int *)0x42487F94))
+#define BAND_GPIO_PE0           (*((M4_DMA)0x42487F80))
+#define BAND_GPIO_PE1           (*((M4_DMA)0x42487F84))
+#define BAND_GPIO_PE2           (*((M4_DMA)0x42487F88))
+#define BAND_GPIO_PE3           (*((M4_DMA)0x42487F8C))
+#define BAND_GPIO_PE4           (*((M4_DMA)0x42487F90))
+#define BAND_GPIO_PE5           (*((M4_DMA)0x42487F94))
 
 // PF: 0x42000000 + 32*0x253FC = 0x424A7F80
-#define BAND_GPIO_PF0           (*((volatile unsigned int *)0x424A7F80))
-#define BAND_GPIO_PF1           (*((volatile unsigned int *)0x424A7F84))
-#define BAND_GPIO_PF2           (*((volatile unsigned int *)0x424A7F88))
-#define BAND_GPIO_PF3           (*((volatile unsigned int *)0x424A7F8C))
-#define BAND_GPIO_PF4           (*((volatile unsigned int *)0x424A7F90))
+#define BAND_GPIO_PF0           (*((M4_DMA)0x424A7F80))
+#define BAND_GPIO_PF1           (*((M4_DMA)0x424A7F84))
+#define BAND_GPIO_PF2           (*((M4_DMA)0x424A7F88))
+#define BAND_GPIO_PF3           (*((M4_DMA)0x424A7F8C))
+#define BAND_GPIO_PF4           (*((M4_DMA)0x424A7F90))
 
 //---------------------------------------------------------------------------------------+
 //---------------------------------------------------------------------------------------+
@@ -438,5 +438,7 @@ typedef volatile unsigned int* M4_DMA;
 #define BOARD_LED_RED           BAND_GPIO_PF1
 #define BOARD_LED_BLUE          BAND_GPIO_PF2
 #define BOARD_LED_GREEN         BAND_GPIO_PF3
+#define BOARD_BTN_SW1           BAND_GPIO_PF4 // Left button
+#define BOARD_BTN_SW2           BAND_GPIO_PF0 // Right button
 
 #endif
