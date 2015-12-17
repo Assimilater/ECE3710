@@ -59,7 +59,7 @@ void NET_ParsePackets() {
 		i += NET_Packet[NET_Packets].Size;
 		
 		// Move onto the next packet
-		++NET_Packets;
+		if (i <= NET_Size) { ++NET_Packets; }
 	}
 }
 
