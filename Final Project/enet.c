@@ -240,7 +240,7 @@ bool NET_SPI(NET_CHIP chip, NET_Frame* frame) {
 	byte mosi[3] = {0},
 		miso[3] = {0};
 	
-	// Safety percautions
+	// Safety precautions
 	if (frame->Control.mode == NET_MODE_F1B) {
 		if (frame->N > 1) { frame->N = 1; }
 		else if (frame->N < 1) { return false; }
