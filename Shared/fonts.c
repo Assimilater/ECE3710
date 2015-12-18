@@ -1,10 +1,10 @@
-#include "../fonts.h"
-#include "Ubuntu.h"
-#include "TerminusFont.h"
-#include "SmallFont.h"
-#include "font8x8_basic.h"
-#include "font8x8.h"
-#include "BigFont.h"
+#include "fonts.h"
+#include "fonts/Ubuntu.h"
+#include "fonts/TerminusFont.h"
+#include "fonts/SmallFont.h"
+#include "fonts/font8x8_basic.h"
+#include "fonts/font8x8.h"
+#include "fonts/BigFont.h"
 #include <string.h> // strlen
 //#include <stdlib.h> // malloc
 
